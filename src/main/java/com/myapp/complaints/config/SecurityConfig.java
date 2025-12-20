@@ -1,5 +1,6 @@
 package com.myapp.complaints.config;
 
+import com.myapp.complaints.eventHandler.AccountEventHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -28,6 +29,13 @@ public class SecurityConfig {
         return http.build();
     }
 
+//    @Configuration
+//    public class RestConfig {
+//        @Bean
+//        public AccountEventHandler accountEventHandler() {
+//            return new AccountEventHandler();
+//        }
+//    }
 
 
 

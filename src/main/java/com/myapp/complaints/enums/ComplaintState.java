@@ -1,9 +1,14 @@
-package com.myapp.complaints;
+package com.myapp.complaints.enums;
 
 public enum ComplaintState {
     NEW,
     IN_PROGRESS,
     RESOLVED,
     REJECTED,
-    CLOSED
+    CLOSED,
+    ASSIGNED,
+    CANCELLED
 }
+
+
+// don't there are delete_state because 'delete' is not state

@@ -23,7 +23,7 @@ public class ServiceAvailable {
 
     private Boolean isActive = true;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "institution_id", nullable = false)
     private Institution institution;
 }

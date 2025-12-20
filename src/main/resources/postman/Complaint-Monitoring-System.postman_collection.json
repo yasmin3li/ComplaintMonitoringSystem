@@ -1,0 +1,177 @@
+{
+  "info": {
+    "_postman_id": "c2a1b0d3-complaint-monitoring",
+    "name": "Complaint Monitoring System API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Spring Data REST API for Complaint Monitoring System"
+  },
+  "item": [
+    {
+      "name": "Accounts",
+      "item": [
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"ali\",\n  \"email\": \"ali@test.com\",\n  \"password\": \"123456\",\n  \"phoneNumber\": 999999999,\n  \"nationalNumber\": \"123456789\",\n  \"role\": \"/roles/1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get All Accounts",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts"]
+            }
+          }
+        },
+        {
+          "name": "Get Accounts Full View",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/accounts?projection=accountFullView",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts"],
+              "query": [{ "key": "projection", "value": "accountFullView" }]
+            }
+          }
+        },
+        {
+          "name": "Delete Account (Soft)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/accounts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["accounts", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Citizen",
+      "item": [
+        {
+          "name": "Create Citizen",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/citizens",
+              "host": ["{{baseUrl}}"],
+              "path": ["citizens"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account\": \"/accounts/1\",\n  \"birthDate\": \"1990-01-01\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Employee",
+      "item": [
+        {
+          "name": "Create Employee",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/employees",
+              "host": ["{{baseUrl}}"],
+              "path": ["employees"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"account\": \"/accounts/3\",\n  \"institution\": \"/institutions/1\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Address",
+      "item": [
+        {
+          "name": "Create Address",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/addresses",
+              "host": ["{{baseUrl}}"],
+              "path": ["addresses"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"latitude\": 33.5,\n  \"longitude\": 36.3,\n  \"fullAddressText\": \"Damascus\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Complaint",
+      "item": [
+        {
+          "name": "Create Complaint",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/complaints",
+              "host": ["{{baseUrl}}"],
+              "path": ["complaints"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Power outage\",\n  \"description\": \"No electricity for two days\",\n  \"addedBy\": \"/accounts/1\",\n  \"service\": \"/serviceAvailables/1\",\n  \"institution\": \"/institutions/1\",\n  \"governorate\": \"/governorates/1\",\n  \"sector\": \"/sectors/1\",\n  \"address\": \"/addresses/1\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Complaints Summary",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/complaints?projection=complaintSummary",
+              "host": ["{{baseUrl}}"],
+              "path": ["complaints"],
+              "query": [{ "key": "projection", "value": "complaintSummary" }]
+            }
+          }
+        },
+        {
+          "name": "Update Complaint State",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": {
+              "raw": "{{baseUrl}}/complaints/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["complaints", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"state\": \"ASSIGNED\"\n}"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

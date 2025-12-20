@@ -16,7 +16,7 @@ public class Institution {
   @Column(nullable = false)
   private String name;
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(optional = false)
   @JoinColumn(name = "sector_id", nullable = false)
   private Sector sector;
 }

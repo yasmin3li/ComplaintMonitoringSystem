@@ -1,14 +1,13 @@
 package com.myapp.complaints.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.rest.core.annotation.RestResource;
 
 @Entity
 @Table(name = "citizen")
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Citizen {
@@ -18,7 +17,8 @@ public class Citizen {
     private String birthDate;
 
 //    @RestResource(exported = false)
-    @OneToOne
+//    (optional = false) to denied create employee without account
+    @OneToOne(optional = false)
     @MapsId
     @JoinColumn(name = "id")
     private Account account;

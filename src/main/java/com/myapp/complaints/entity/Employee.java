@@ -14,14 +14,22 @@ public class Employee {
     @Id
     private Long id;
 
-    private Boolean isManager = true;
+//    private Boolean isManager = true;
 
-    @OneToOne(fetch = FetchType.EAGER)
+//(optional = false) to denied create employee without account
+    @OneToOne(optional = false)
     @MapsId
     @JoinColumn(name = "id")
     private Account account;
 
-    @ManyToOne(optional = false,fetch = FetchType.EAGER)
+    @ManyToOne(optional = false)
+    @JoinColumn(name ="institution_id")
     private Institution institution;
+
+    // Soft delete
+//    public void softDelete() {
+//        this.account.softDelete();
+//    }
+
 }
 

@@ -18,7 +18,7 @@ public class ComplaintImage {
     private String description;
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complaint_id", nullable = false)
     private Complaint complaint;
 }

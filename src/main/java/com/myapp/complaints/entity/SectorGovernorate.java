@@ -15,11 +15,11 @@ public class SectorGovernorate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "sector_id", nullable = false)
     private Sector sector;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "governorate_id", nullable = false)
     private Governorate governorate;
 }

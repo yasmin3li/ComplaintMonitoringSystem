@@ -1,4 +1,4 @@
-package com.myapp.complaints;
+package com.myapp.complaints.enums;
 
 public enum ActionType {
     CREATED,
@@ -6,5 +6,6 @@ public enum ActionType {
     UPDATED,
     STATE_CHANGED,
     COMMENTED,
-    CLOSED
+    CLOSED,
+    DELETED
 }
