@@ -30,7 +30,9 @@ DROP TABLE IF EXISTS sector;
 DROP TABLE IF EXISTS account;
 DROP TABLE IF EXISTS governorate;
 DROP TABLE IF EXISTS role;
-
+DROP TABLE IF EXISTS refreshToken;
+DROP TABLE IF EXISTS password_reset_token;
+DROP TABLE IF EXISTS verification_code;
 -- ===============================================
 -- TABLE: Role
 CREATE TABLE role (
@@ -81,11 +83,14 @@ CREATE TABLE account (
     id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     user_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE,
-    password VARCHAR(255) NOT NULL,
+    password VARCHAR(500) NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'BANNED',
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    phone_number BIGINT NOT NULL,
+    phone_number varchar(10) NOT NULL,
     profile_image_url VARCHAR(500),
+    email_temporary boolean,
+    email_verified boolean,
+	must_change_password boolean,
     national_number VARCHAR(20) UNIQUE NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -107,6 +112,40 @@ CREATE TABLE employee (
     FOREIGN KEY (id) REFERENCES account(id),
     FOREIGN KEY (institution_id) REFERENCES institution(id)
 ) ENGINE=InnoDB;
+
+
+
+
+-- Table refreshToken  password_reset_token  refresh_token
+create Table verification_code (
+id bigint auto_increment primary key ,
+verification_code text ,
+verification_code_expire_time datetime ,
+is_used boolean,
+account_id bigint ,
+FOREIGN KEY ( account_id ) REFERENCES account ( id)
+-- ON UPDATE CASCADE
+--     ON DELETE CASCADE
+) ;
+
+create table password_reset_token(
+id bigint auto_increment primary key ,
+token varchar(10000),
+expiry_date datetime ,
+account_id bigint ,
+FOREIGN KEY ( account_id ) REFERENCES account ( id)
+);
+
+create table refresh_token(
+id bigint auto_increment primary key ,
+refresh_token varchar(10000),
+revoked boolean ,
+account_id bigint ,
+FOREIGN KEY ( account_id ) REFERENCES account ( id)
+);
+
+
+
 
 -- TABLE: Address
 CREATE TABLE address (
@@ -260,13 +299,25 @@ INSERT INTO institution_governorate (institution_id, sector_governorate_id) VALU
 (11,1),(11,12);
 
 -- Accounts
-INSERT INTO account (user_name,password,role_id,email,phone_number,national_number,status,deleted) VALUES
-('ahmad.khaled','hashed_pwd',1,'ahmad@example.com','0999999999','05010565489','BANNED',FALSE),
-('sara.mohamed','hashed_pwd',1,'sara@example.com','0999998888','05010565789','BANNED',FALSE),
-('reception1','hashed_pwd',2,'reception1@example.com','0999977777','05010585489','BANNED',FALSE),
-('manager1','hashed_pwd',3,'manager1@example.com','0999966666','05010556489','BANNED',FALSE),
-('admin1','hashed_pwd',4,'admin1@example.com','0999955555','05010563389','BANNED',FALSE);
+INSERT INTO account (user_name,password,role_id,email,phone_number,national_number,status,deleted,email_temporary,must_change_password,email_verified )
+ VALUES
+ -- YASMEN@bu3li1 ->5->  "NewPass@123"
+('ahmad.khaled','$2a$10$VXBtqM71drDqgxpQInQvIuRWSHO8NBeliEabr2OEH2duxTtb1eG9G',
+1,'ahmad@example.com','0999999999','05010565489','BANNED',FALSE,FALSE,FALSE,false),
 
+('sara.mohamed','$2a$10$I8p/LuzVrg0pMZ3j2D6TCegw2P8I3MhecJHMCYCe0PqF0NGUtCx6.',
+1,'sara@example.com','0999998888','05010565789','BANNED',FALSE,FALSE,true,false),
+
+('reception1','$2a$10$PvOjmBfjgArkJ4U2tdYFKOZiGDfJ.SSDsBAUw0sXRPbmUqtpFqSQG',
+2, 'reception1@example.com','0999977777','05010585489','BANNED',FALSE,FALSE,true,false),
+
+('manager1','$2a$10$IKb9sbyBDqO2LP2T.Uc1N.WStHROH.qiiNIxK8efRalbvGLanoneK',
+3,'manager1@example.com','0999966666','05010556489','BANNED',FALSE,FALSE,FALSE,false),
+
+('admin1','$2a$10$gEJImlffyEScVA9g0qOLEemEBmHCeWAhVHqCqEb1KAaRFw/cP6l.6',
+4,'admin1@example.com','0999955555','05010563389','ACTIVATED',FALSE,FALSE,FALSE,true);
+
+-- $2a$10$H.SkwzXI/5nCHLjGydB7XOXC9Fxlmtslr3Lauel5aWS/zTJI/WUIK    'reception1@example.com'
 -- Citizen (linked to account)
 INSERT INTO citizen (id,birth_date) VALUES
 (1,'1990-01-01'),
@@ -297,8 +348,8 @@ INSERT INTO address (latitude, longitude, full_address_text) VALUES
 (35.5500, 35.8000, 'اللاذقية - شارع الفردوس');
 
 -- Complaints
-INSERT INTO complaint
-(title, description, state, deleted, added_by_account_id, service_id, institution_id, governorate_id, sector_id, address_id)
+INSERT INTO complaint 
+(title, description, state, deleted, added_by_account_id, service_id, institution_id, governorate_id, sector_id, address_id) 
 VALUES
 ('انقطاع التيار الكهربائي','انقطاع الكهرباء في المنزل منذ يومين','NEW',FALSE,1,2,1,1,1,1),
 ('مشكلة في ضغط المياه','ضغط المياه منخفض في الحي','NEW',FALSE,2,4,3,2,2,2),
@@ -310,8 +361,8 @@ VALUES
 ('انقطاع الكهرباء المتكرر','انقطاع الكهرباء بشكل متكرر','NEW',FALSE,2,1,1,1,1,8);
 
 -- Complaint Tracking Log (action_type values reflect enum: ASSIGN, STATE_CHANGED, CHECK, SOLVE, etc.)
-INSERT INTO complaint_tracking_log
-(previous_status, new_status, action_type, comments, complaint_id, action_by_employee_id, assigned_to_employee_id)
+INSERT INTO complaint_tracking_log 
+(previous_status, new_status, action_type, comments, complaint_id, action_by_employee_id, assigned_to_employee_id) 
 VALUES
 ('NEW','IN_PROGRESS','ASSIGN','تم تعيين الشكوى للموظف المختص',1,4,3),
 ('NEW','IN_PROGRESS','ASSIGN','تم تعيين الشكوى للموظف المختص',2,4,5),
