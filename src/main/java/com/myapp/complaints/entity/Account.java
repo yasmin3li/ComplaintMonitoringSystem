@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "account")
@@ -40,15 +41,21 @@ public class Account {
     private boolean deleted = false;
 
     @Column(nullable = false)
-    private Long phoneNumber;
+    private String phoneNumber;
 
     private String profileImageUrl;
 
     @Column(nullable = false)
     private String nationalNumber;
 
+//TODO add to the db
+    private boolean emailVerified;
+
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    private boolean emailTemporary;
+    private boolean mustChangePassword;
 
     private LocalDateTime updatedAt;
 
@@ -56,8 +63,6 @@ public class Account {
     @ManyToOne(optional = false)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
-
-
 
 // Handling events
 // TODO add later : passwordUpdatedAt = createdAt;
@@ -68,6 +73,11 @@ public class Account {
         if (status == null) {
             status = AccountStatus.BANNED;//later for auth
         }
+//        if (email == null || email.isEmpty()) {
+//            String phone = phoneNumber != null ? phoneNumber : "user" + System.currentTimeMillis();
+//            this.email = phone + "@example.com";
+//            emailTemporary = true;
+//        }
     }
 
 // TODO later when we will process this state: update Account info
@@ -75,5 +85,8 @@ public class Account {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
+
+
+
 }
 

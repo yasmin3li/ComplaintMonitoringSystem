@@ -36,8 +36,8 @@ public class Complaint {
 // TODO: add this column to db
     private boolean deleted = false;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "added_by_account_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "added_by_account_id")
     private Account addedBy;
 
     @ManyToOne(optional = false)

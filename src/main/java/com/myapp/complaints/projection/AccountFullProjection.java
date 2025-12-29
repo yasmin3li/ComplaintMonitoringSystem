@@ -21,6 +21,7 @@ public interface AccountFullProjection {
     String getNationalNumber();
     String getProfileImageUrl();
 
+//    String getPassWord();
     @Value("#{target.role.name}")
     String getRoleName();
 

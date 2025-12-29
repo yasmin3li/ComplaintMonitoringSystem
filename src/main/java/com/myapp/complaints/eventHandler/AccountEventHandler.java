@@ -1,5 +1,7 @@
 package com.myapp.complaints.eventHandler;
 
+import com.myapp.complaints.DAO.*;
+import com.myapp.complaints.entity.Role;
 import com.myapp.complaints.enums.AccountStatus;
 import com.myapp.complaints.entity.Account;
 //import com.myapp.complaints.service.AccountService;
@@ -8,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
+import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Transactional
@@ -21,28 +25,91 @@ import org.springframework.stereotype.Component;
 public class AccountEventHandler {
 
 
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepo roleRepository;
+
+    /**
+     * Soft delete: mark the account as deleted and deactivate it
+     */
     @HandleBeforeDelete
     public void handleDelete(Account account) {
-
-        // بدل حذف الحساب، نعمل Soft Delete
         account.setDeleted(true);
         account.setStatus(AccountStatus.DEACTIVATED);
         throw new RuntimeException("Physical delete is not allowed. Account has been deactivated.");
     }
 
-    @HandleBeforeCreate
-    public void handleCreate(Account account) {
-        account.setStatus(AccountStatus.BANNED);
-        account.setDeleted(false);
+    /**
+     * Handle password update: re-encode if changed and reset mustChangePassword flag
+     */
+    @HandleBeforeSave
+    public void handleUpdate(Account account) {
+        if (!account.getPassword().startsWith("$2a$")) {
+            account.setPassword(validateAndEncodePassword(account.getPassword()));
+            account.setMustChangePassword(false);
+            account.setStatus(AccountStatus.ACTIVATED);
+        }
     }
 
-//    private final RoleRepo roleRepository;
-//    private final  CitizenRepo citizenRepo;
-//    private final  EmployeeRepo employeeRepo;
-//    private final  ComplaintRepo complaintRepo;
-//    private final AccountService accountService;
-//    private final RatingRepo ratingRepository;
-//    private final VotingRepo votingRepository;
+    /**
+     * Handle account creation: assign defaults
+     */
+    @HandleBeforeCreate
+    public void handleAccountCreate(Account account) {
+
+        if (account.getRole() == null) {
+            Role citizenRole = roleRepository.findByName("مواطن")
+                    .orElseThrow(() -> new IllegalStateException("Default role 'مواطن' not found"));
+            account.setRole(citizenRole);
+        }
+
+        // Temporary email if missing
+        if (account.getEmail() == null || account.getEmail().isBlank()) {
+            String phone = account.getPhoneNumber() != null ? account.getPhoneNumber() : "user" + System.currentTimeMillis();
+            account.setEmail(phone + "@example.com");
+            account.setEmailTemporary(true);
+        } else {
+            account.setEmailTemporary(false);
+        }
+
+        // Encode password
+        account.setPassword(validateAndEncodePassword(account.getPassword()));
+
+        //  Default status = BANNED
+        account.setStatus(AccountStatus.BANNED);
+        account.setDeleted(false);
+
+        // Must change password logic
+        String roleName = account.getRole().getName();
+        // Citizen or Admin does not need to
+        account.setMustChangePassword(roleName.equals("موظف الاستقبال") || roleName.equals("مدير")); // Employee and Manager must change password
+    }
+    private  String validateAndEncodePassword(String rawPassword) {
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
+        if (rawPassword.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters long");
+        }
+        if (!rawPassword.matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one uppercase letter");
+        }
+//        if (!rawPassword.matches(".*[a-z].*")) {
+//            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+//        }
+        if (!rawPassword.matches(".*\\d.*")) {
+            throw new IllegalArgumentException("Password must contain at least one digit");
+        }
+        if (!rawPassword.matches(".*[!@#$%^&*].*")) {
+            throw new IllegalArgumentException("Password must contain at least one special character");
+        }
+//        if (!rawPassword.matches(".*[]\\[!@#$%^&*()_+\\-={};':\"\\\\|,.<>/?].*")) {
+//            throw new IllegalArgumentException("Password must contain at least one special character");
+//        }
+        // تشفير كلمة المرور
+        return passwordEncoder.encode(rawPassword);
+    }
+
+}
 
 //    @HandleBeforeCreate
 //    public void handleAccountCreate(Account account) {
@@ -83,5 +150,4 @@ public class AccountEventHandler {
 //            complaintRepo.save(c);
 //        });
 
-    }
-
+//}

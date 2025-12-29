@@ -1,6 +1,8 @@
 package com.myapp.complaints.eventHandler;
 
+import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.ComplaintRepo;
+import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.enums.ActionType;
@@ -10,8 +12,13 @@ import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
@@ -20,15 +27,42 @@ import java.time.LocalDateTime;
 public class ComplaintEventHandler {
 
     private final ComplaintRepo complaintRepo;
+//    private final Account account;
+    private final AccountRepo accountRepo;
 
     @HandleBeforeCreate
-    public void beforeCreate(Complaint c) {
-        c.setState(ComplaintState.NEW);
-        c.setDeleted(false);
-        c.setDateTimeOfAdd(LocalDateTime.now());
+    public void beforeCreate(Complaint complaint) throws AccessDeniedException {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth instanceof AnonymousAuthenticationToken) {
+            throw new AccessDeniedException("You must be logged in to create a complaint");
+        }
+//
+////        @HandleBeforeCreate
+//        public void validateCreate(Complaint c) {
+
+        String username = auth.getName();
+        Account currentUser = accountRepo.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+            if (complaint.getAddedBy() == null) throw new RuntimeException("Complaint must have an owner");
+            if (complaint.getInstitution() == null) throw new RuntimeException("Complaint must belong to an institution");
+            if (complaint.getService() == null) throw new RuntimeException("Complaint must have a service");
+            if (complaint.getGovernorate() == null) throw new RuntimeException("Complaint must have a governorate");
+            if (complaint.getSector() == null) throw new RuntimeException("Complaint must have a sector");
+            if (complaint.getAddress() == null) throw new RuntimeException("Complaint must have an address");
+            if (complaint.getTitle() == null || complaint.getTitle().isEmpty()) throw new RuntimeException("Title is required");
+            if (complaint.getDescription() == null || complaint.getDescription().isEmpty()) throw new RuntimeException("Description is required");
+//        }
+
+
+        complaint.setAddedBy(currentUser);
+        complaint.setState(ComplaintState.NEW);
+        complaint.setDeleted(false);
+        complaint.setDateTimeOfAdd(LocalDateTime.now());
 
         ComplaintTrackingLog log = new ComplaintTrackingLog();
-        log.setComplaint(c);
+        log.setComplaint(complaint);
         log.setPreviousState(null);
         log.setNewState(ComplaintState.NEW);
         log.setActionType(ActionType.CREATED);
@@ -36,24 +70,15 @@ public class ComplaintEventHandler {
         log.setActionBy(null);
         log.setAssignedTo(null);
 
-        c.getLogs().add(log);
+        complaint.getLogs().add(log);
+
     }
 
-    @HandleBeforeCreate
-    public void validateCreate(Complaint c) {
-        if (c.getAddedBy() == null) throw new RuntimeException("Complaint must have an owner");
-        if (c.getInstitution() == null) throw new RuntimeException("Complaint must belong to an institution");
-        if (c.getService() == null) throw new RuntimeException("Complaint must have a service");
-        if (c.getGovernorate() == null) throw new RuntimeException("Complaint must have a governorate");
-        if (c.getSector() == null) throw new RuntimeException("Complaint must have a sector");
-        if (c.getAddress() == null) throw new RuntimeException("Complaint must have an address");
-        if (c.getTitle() == null || c.getTitle().isEmpty()) throw new RuntimeException("Title is required");
-        if (c.getDescription() == null || c.getDescription().isEmpty()) throw new RuntimeException("Description is required");
-    }
 
 
     @HandleBeforeSave
     public void beforeSave(Complaint c) {
+
         Complaint old = complaintRepo.findById(c.getId())
                 .orElseThrow(() -> new RuntimeException("Complaint not found"));
 
@@ -61,7 +86,6 @@ public class ComplaintEventHandler {
             if (c.getState() == ComplaintState.RESOLVED) {
                 c.setDateTimeOfSolve(LocalDateTime.now());
             }
-
 
             // if  state didn't change do not do anything
             if (old.getState() == c.getState()) {
