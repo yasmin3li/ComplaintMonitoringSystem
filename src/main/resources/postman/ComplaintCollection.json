@@ -1,0 +1,108 @@
+{
+  "info": {
+    "name": "Complaint Management API",
+    "_postman_id": "b1234567-abcd-1234-efgh-56789abcdef0",
+    "description": "Collection for testing sign-up, sign-in, creating and viewing complaints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api"
+    },
+    {
+      "key": "access_token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Sign-Up",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"123456\",\n  \"role\": \"USER\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/sign-up",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "sign-up"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Sign-In",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"123456\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/auth/sign-in",
+          "host": ["{{base_url}}"],
+          "path": ["auth", "sign-in"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Complaint",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Complaint title\",\n  \"description\": \"Complaint description\",\n  \"serviceId\": 1,\n  \"institutionId\": 1,\n  \"governorateId\": 1,\n  \"sectorId\": 1,\n  \"addressId\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/complaint",
+          "host": ["{{base_url}}"],
+          "path": ["complaint"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "View Complaint",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{access_token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/complaint/{{complaintId}}",
+          "host": ["{{base_url}}"],
+          "path": ["complaint", "{{complaintId}}"]
+        }
+      },
+      "response": []
+    }
+  ]
+}
