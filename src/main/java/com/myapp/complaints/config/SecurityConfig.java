@@ -37,6 +37,13 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
+import java.util.List;
+
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -101,7 +108,10 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 //                        .requestMatchers("/api/citizen/**").hasRole("مواطن")
 
                         .requestMatchers(HttpMethod.GET, "/api/latest/**").permitAll() // public GET
+
+//                        TODO: make this strict
                                 .requestMatchers(HttpMethod.GET,"/api/accounts/**").permitAll()
+
                                 .requestMatchers(HttpMethod.GET,"/api/governorates/**").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/sectors/**").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/services/**").permitAll()
@@ -192,20 +202,20 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
         return new BearerTokenAuthenticationEntryPoint();
     }
 
-//    @Bean // This bean defines your CORS rules for Spring Security
-//    CorsConfigurationSource corsConfigurationSource() { // TODO do this for all beans !!
-//        CorsConfiguration configuration = new CorsConfiguration();
-//        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Your frontend URL
-//        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-//        configuration.setAllowedHeaders(List.of("*")); // Allow all headers
-//        configuration.setAllowCredentials(true); // Allow credentials (cookies, auth headers)
-//        configuration.setMaxAge(3600L); // Max age for preflight cache
-//
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        source.registerCorsConfiguration("/**", configuration); // Apply this CORS config to all paths
-//        return source;
-//    }
-//
+    @Bean // This bean defines  CORS rules for Spring Security
+    CorsConfigurationSource corsConfigurationSource() { // TODO do this for all beans !!
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Your frontend URL
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*")); // Allow all headers
+        configuration.setAllowCredentials(true); // Allow credentials (cookies, auth headers)
+        configuration.setMaxAge(3600L); // Max age for preflight cache
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // Apply this CORS config to all paths
+        return source;
+    }
+
 
 ////
 ////    @Bean
