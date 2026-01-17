@@ -1,9 +1,10 @@
 {
   "info": {
-    "name": "Complaint Monitoring System",
-    "_postman_id": "12345678-abcd-efgh-ijkl-1234567890ab",
-    "description": "Postman Collection for CMS API",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "_postman_id": "30c7b997-0cb5-47ea-9aee-5ef73fdccb62",
+    "name": "ComplaintMonSysCollection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50950100",
+    "_collection_link": "https://go.postman.co/collection/50950100-30c7b997-0cb5-47ea-9aee-5ef73fdccb62?source=collection_link"
   },
   "item": [
     {
@@ -12,93 +13,440 @@
         {
           "name": "Sign Up Citizen",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
             "method": "POST",
-            "header": [
-              {"key": "Content-Type", "value": "application/json"}
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userName\": \"arab\",\n  \"email\": \"0986950778@example.com\",\n  \"phoneNumber\": \"0986950478\",\n  \"password\": \"ArabAbu3li!\",\n  \"nationalNumber\": \"977655311\"\n}"
+              "raw": "{\r\n    \"userName\":\"mohammed\",\r\n    \"phoneNumber\":\"0998767547\",\r\n    \"nationalNumber\":\"050584102658\",\r\n    \"password\":\"Mohammed3li77!\",\r\n    \"birthDate\":\"5-10-1988\",\r\n    \"email\":null\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": {"raw": "http://localhost:8080/auth/sign-up/citizen", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["auth", "sign-up", "citizen"]}
-          }
+            "url": {
+              "raw": "{{base_url}}/auth/sign-up/citizen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "sign-up",
+                "citizen"
+              ]
+            }
+          },
+          "response": []
         },
         {
-          "name": "Login",
+          "name": "Sign Up Employee",
           "request": {
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userName\": \"arab\",\n  \"password\": \"ArabAbu3li!\"\n}"
+              "raw": "{\r\n  \"userName\": \"allam\",\r\n  \"email\": \"allam963@gmail.com\",\r\n  \"password\": \"AllamAbu3li!\",\r\n  \"phoneNumber\": \"0949228787\",\r\n  \"nationalNumber\": \"05050462987\",\r\n  \"roleId\": 2,\r\n  \"institutionId\":2,\r\n  \"governorateId\":1,\r\n  \"sectorId\":1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": {"raw": "http://localhost:8080/auth/login", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["auth", "login"]}
-          }
+            "url": {
+              "raw": "{{base_url}}/auth/sign-up/employee",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "sign-up",
+                "employee"
+              ]
+            }
+          },
+          "response": []
         },
         {
-          "name": "Change Password",
+          "name": "Verify",
           "request": {
             "method": "POST",
-            "header": [
-              {"key": "Content-Type", "value": "application/json"},
-              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
-            ],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"oldPassword\": \"ArabAbu3li!\",\n  \"newPassword\": \"NewPass123\"\n}"
+              "raw": "{\r\n    \"identifier\":\"mohammed76754@example.com\",\r\n    \"code\":773757\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": {"raw": "http://localhost:8080/auth/change-password", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["auth", "change-password"]}
-          }
+            "url": {
+              "raw": "{{base_url}}/auth/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Codes",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/verificationCodes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "verificationCodes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sign In",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "Mohmoh1234!",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "mohammed76754@example.com",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/sign-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "sign-in"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forget pw",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"emailOrPhone\": \"mohammed76754@example.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"emailOrPhone\": \"mohammed76754@example.com\",\r\n  \"token\":\"d3b55921-c9be-43e1-b9fd-786d2d1edd1d\",\r\n  \"newPassword\":\"Mohmoh123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change pw",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsImV4cCI6MTc2ODU5NTE4MCwiaWF0IjoxNzY4NTk0MjgwLCJzY29wZSI6IlJFQUQifQ.aXMqIZngt41W-PFnF_IRBW4ypTRu58wDOU4CFW8rHYUzhjSYViOJpRKkJZWPJi8pYwOKKWB1MZoJ3f0yNpl3VAvmKeEV-YDlb2j7RtNPndZU1b7XKt3iCCnyT48wG3O-Qc8hPF6zfKeSTNzjdMQUhzGwQMHBWH4HIEUaU42I6J982DFShaL4uoI-JOLO9cLNGuM7HtCj5NJZDOQt_VIzAaaHP3kglZFD3A5ZMF7OQwd-ii92nJfGX9aB3io4_BzCbAzuYOZ_NtZB0X7SiDT0Z-YrrjGjupvyOriRQLkYpRHkdqLNqYF7mD_sLY0jsXIDsB9hE9pq4AltAzQpOLt0ng",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"currentPassword\":\"Mohmoh123!\",\r\n    \"newPassword\":\"Mohmoh1234!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "password Reset Tokens",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/passwordResetTokens",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "passwordResetTokens"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsImV4cCI6MTc2OTg5NDQ5NywiaWF0IjoxNzY4NTk4NDk3LCJzY29wZSI6IlJFRlJFU0hfVE9LRU4ifQ.QU7oD75dUUWISqD77pUpcLjM8XQ1LsyisPFRvzYrcqbV_Amc44yicIE_Od6K60hxXA7lkbamE3eTI10jkYozxLoIlBJSiWb6F59BFHf0do2bkunO--8diXcm0-6HkGoviUxEZ7eKH9uZc43n30uPTbxF3YOGpZIeG70RyZmoLcKWD9DkGpTOtXuXnHa73QVG_8fwAVEVayNDcX_N866dCv-4yHEYMh8OTCXQCSibTy_Fv-WPIxbhQEOPO-v7qvaaMAEA6spJFMxZA3dQL5zMjSt1lOtFgVn2MO5lywY3Y-LiHdm7g6RL93R-hfQDfEk2QLIQ-mZg8g2zbT2OU1UgHw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
     {
-      "name": "Verification",
+      "name": "Complaints-Statistics-Filters-...",
       "item": [
         {
-          "name": "Generate Code",
+          "name": "Statistics of Home Page",
           "request": {
-            "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"accountId\": 6,\n  \"type\": \"SMS\"\n}"
+            "auth": {
+              "type": "noauth"
             },
-            "url": {"raw": "http://localhost:8080/verification/code", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["verification", "code"]}
-          }
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/statistics/homePage",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "statistics",
+                "homePage"
+              ]
+            }
+          },
+          "response": []
         },
         {
-          "name": "Validate Code",
+          "name": "Latest Complaints",
           "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/latest",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "latest"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Complaint",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsImV4cCI6MTc2ODU5NTcwNiwiaWF0IjoxNzY4NTk0ODA2LCJzY29wZSI6IlJFQUQifQ.IUZubJUMnhudooi7OhFTl92zbl0k2bdIj1XwR5aZ_KwappZtgy-qyQL_4wFTVegHmcDJjFfTg__kiE5AxB322nkGHuRgXqoq0iQAtr38j9aNrpoLEN3vE8QcyofvbZ1bR1rxH5lg4Kst9H1z84I4G1yHXL0bsd6Funqj_VaIJVX6NPNxslArN69mDdq0Oos9Bjygf527sxw3z_C_KG086gP26NVQh4_STK_E92dXU4PZA0SRrO-T82AROkWtOBtt33DaNs-dUda-GzGThvtRIqEgQYq6LtfG_39nrLlu32dfnxHz36phRCOC_Om_I4A3Y3O7_rRCN7c0092T2L9wMA",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
-            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"accountId\": 6,\n  \"code\": \"587168\"\n}"
+              "raw": "{\r\n  \"title\": \"شكوى عن التلاعب بصنبور المياه\",\r\n  \"description\": \"يتم التلاعب بالسكر من قبل اشخاص غير معنين  بذلك وذلك بهدف تحويل المياه الى خطهم\",\r\n  \"serviceId\": 1,\r\n  \"institutionId\": 2,\r\n  \"governorateId\": 3,\r\n  \"sectorId\": 4,\r\n  \"latitude\": 33.5146,\r\n  \"longitude\": 36.2777,\r\n  \"fullAddressText\": \"حماه -  بسيرين\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
             },
-            "url": {"raw": "http://localhost:8080/verification/validate", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["verification", "validate"]}
-          }
-        }
-      ]
-    },
-    {
-      "name": "InstitutionSectorGovernorates",
-      "item": [
+            "url": {
+              "raw": "{{base_url}}/api/complaint",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint"
+              ]
+            }
+          },
+          "response": []
+        },
         {
-          "name": "All",
+          "name": "Governorates",
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "http://localhost:8080/institutionSectorGovernorates", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["institutionSectorGovernorates"]}
-          }
+            "url": {
+              "raw": "{{base_url}}/api/governorates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "governorates"
+              ]
+            }
+          },
+          "response": []
         },
         {
-          "name": "By SectorGovernorateId",
+          "name": "sector Governorates",
           "request": {
             "method": "GET",
             "header": [],
-            "url": {"raw": "http://localhost:8080/institutionSectorGovernorates/search/findBySectorGovernorateId?sectorGovernorateId=5", "protocol": "http", "host": ["localhost"], "port": "8080", "path": ["institutionSectorGovernorates", "search", "findBySectorGovernorateId"], "query": [{"key": "sectorGovernorateId", "value": "5"}]}
-          }
+            "url": {
+              "raw": "{{base_url}}/api/sectorGovernorates/search/findByGovernorateId?governorateId=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "sectorGovernorates",
+                "search",
+                "findByGovernorateId"
+              ],
+              "query": [
+                {
+                  "key": "governorateId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Institution Sector Governorates",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutionSectorGovernorates/search/findBySectorGovernorateIdAndIsActiveTrue?sectorGovernorateId=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutionSectorGovernorates",
+                "search",
+                "findBySectorGovernorateIdAndIsActiveTrue"
+              ],
+              "query": [
+                {
+                  "key": "sectorGovernorateId",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
         }
       ]
     }
