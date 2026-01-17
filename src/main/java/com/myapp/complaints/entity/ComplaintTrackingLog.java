@@ -1,5 +1,6 @@
 package com.myapp.complaints.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import jakarta.persistence.*;
@@ -35,6 +36,7 @@ public class ComplaintTrackingLog {
     private LocalDateTime actionDate;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "complaint_id", nullable = false)
     private Complaint complaint;
 
