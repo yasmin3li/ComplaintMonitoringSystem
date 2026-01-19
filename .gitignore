@@ -35,6 +35,7 @@ build/
 ####
 src/main/resources/keys/private.pem
 .env
+*.env
 application-local.properties
 
 # Database dump
