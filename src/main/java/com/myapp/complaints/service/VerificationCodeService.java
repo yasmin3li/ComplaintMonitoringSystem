@@ -5,6 +5,7 @@ import com.myapp.complaints.DAO.VerificationCodeRepo;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.VerificationCode;
 import com.myapp.complaints.enums.VerificationChannel;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class VerificationCodeService {
     private final AccountRepo accountRepo;
     private final VerificationCodeRepo verificationCodeRepo;
     private final Random random = new Random();
+    private final EmailService emailService;
 
     public String generateCode(Account account, String type) {
 
@@ -46,7 +48,8 @@ public class VerificationCodeService {
     }
 
     private void sendCodeToEmail(String email, String code) {
-        System.out.println("Send OTP " + code + " to email " + email);
+//        System.out.println("Send OTP " + code + " to email " + email);
+        emailService.sendVerificationCode(email,code);
 //TODO: add email provider
     }
 
