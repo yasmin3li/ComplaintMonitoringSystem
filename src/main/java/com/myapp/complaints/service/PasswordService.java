@@ -25,7 +25,7 @@ public class PasswordService {
     private final AccountRepo accountRepo;
     private final PasswordResetTokenRepo passwordResetTokenRepo;
     private final PasswordEncoder passwordEncoder;
-//    private final EmailService emailService;
+    private final EmailService emailService;
 
     /**
      * Send reset password link
@@ -53,13 +53,15 @@ public class PasswordService {
 
         passwordResetTokenRepo.save(resetToken);
 
-        // إرسال الإيميل (لاحقًا)
-//        emailService.send(
-//                account.getEmail(),
-//                "Reset your password",
-//                "Click the link:\n" +
-//                        "https://frontend/reset-password?token=" + token
-//        );
+//        emailService.sendVerificationCode(account.getEmail(),token);
+//TODO after link with front
+        emailService.sendResetLink(
+                account.getEmail(),
+                "Reset your password",
+                "Click the link:\n" +
+                        "http://localhost:5173/reset-password?token=" + token
+        );
+
     }
 
     /**

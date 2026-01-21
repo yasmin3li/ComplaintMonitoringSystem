@@ -19,5 +19,18 @@ public class EmailService {
 
         mailSender.send(message);
     }
+
+    public void sendResetLink(String toEmail, String subject, String body) {
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setSubject(subject);
+            message.setText(body);
+            mailSender.send(message);
+            System.out.println("Reset password email sent to: " + toEmail);
+        } catch (Exception e) {
+            System.err.println("Failed to send reset password email: " + e.getMessage());
+        }
+    }
 }
 
