@@ -58,11 +58,13 @@ public class SecurityConfig {
     private final UserInfoManagerConfig userInfoManagerConfig;
     private final RefreshTokenRepo refreshTokenRepo;
     private final LogoutHandlerService logoutHandlerService;
+//    private final FrontendFilter frontendFilter;
 
     @Order(1)
     @Bean
     public SecurityFilterChain publicAuthChain(HttpSecurity http) throws Exception {
         return http
+//                .addFilterBefore(frontendFilter, JwtAccessTokenFilter.class)
                 .securityMatcher("/auth/sign-in/**",
                         "/auth/sign-up/**",
                         "/auth/verify",
@@ -114,13 +116,13 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 
                                 .requestMatchers(HttpMethod.GET,"/api/governorates/**").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/sectors/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/services/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,"/api/services/**","api/roles/**").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/institutionSectorGovernorates/**").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/sectorGovernorates/**").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/verificationCodes/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/institutions/**","/api/statistics/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
-//                        .requestMatchers("/auth/change-password/**"
+//                        .requestMatchers("/auth/ change-password/**"
 //                                , "/auth/logout/**"
 //                        ).authenticated()
                         .anyRequest().authenticated()
