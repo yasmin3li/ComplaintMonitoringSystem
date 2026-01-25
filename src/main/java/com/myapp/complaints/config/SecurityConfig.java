@@ -65,6 +65,7 @@ public class SecurityConfig {
     public SecurityFilterChain publicAuthChain(HttpSecurity http) throws Exception {
         return http
 //                .addFilterBefore(frontendFilter, JwtAccessTokenFilter.class)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .securityMatcher("/auth/sign-in/**",
                         "/auth/sign-up/**",
                         "/auth/verify",
@@ -83,6 +84,7 @@ public class SecurityConfig {
 public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                                              JwtRefreshTokenFilter refreshFilter) throws Exception {
     return http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .securityMatcher("/auth/refresh-token/**")
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
@@ -102,6 +104,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                                         JwtAccessTokenFilter accessFilter) throws Exception {
 
         return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .securityMatcher("/api/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
@@ -138,6 +141,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
     public SecurityFilterChain logoutChain(HttpSecurity http,
                                            JwtRefreshTokenFilter refreshFilter) throws Exception {
         return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .securityMatcher("/auth/logout/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
@@ -161,6 +165,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                                         JwtAccessTokenFilter accessFilter) throws Exception {
 
         return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .securityMatcher("/auth/change-password/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
