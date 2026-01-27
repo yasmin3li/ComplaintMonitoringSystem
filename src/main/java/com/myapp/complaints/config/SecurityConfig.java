@@ -125,7 +125,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                                 .requestMatchers(HttpMethod.GET,"/api/verificationCodes/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/institutions/**","/api/statistics/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
-                                .requestMatchers(HttpMethod.GET,"/api/citizenAccount/**","api/employeeAccount/**").authenticated()
+                                .requestMatchers(HttpMethod.GET,"/api/citizen/profile/**","api/employee/profile/**").authenticated()
 //                        .requestMatchers("/auth/ change-password/**"
 //                                , "/auth/logout/**"
 //                        ).authenticated()

@@ -52,14 +52,14 @@ public class ApiController {
         }
 
 //        @GetMapping("citizenAccount/{accountId}")
-    @GetMapping("citizenAccount")
+    @GetMapping("citizen/profile")
     public ResponseEntity<?> citizenProfile(
 //                @PathVariable Long accountId
         ){
             return ResponseEntity.ok(apiService.getCitizenInfo());
         }
 
-    @GetMapping("employeeAccount")
+    @GetMapping("employee/profile")
     public ResponseEntity<?> employeeProfile(
     ){
         return ResponseEntity.ok(apiService.getEmployeeInfoInfo());
