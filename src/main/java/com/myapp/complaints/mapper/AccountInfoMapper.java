@@ -1,12 +1,20 @@
 package com.myapp.complaints.mapper;
 
 
+import com.myapp.complaints.DAO.AccountRepo;
+import com.myapp.complaints.DAO.CitizenRepo;
 import com.myapp.complaints.DAO.RoleRepo;
+import com.myapp.complaints.dto.CitizenProfileInfoDto;
 import com.myapp.complaints.dto.CitizenRegistrationDto;
+import com.myapp.complaints.dto.EmployeeProfileInfoDto;
 import com.myapp.complaints.dto.EmployeeRegistrationDto;
 import com.myapp.complaints.entity.Account;
+import com.myapp.complaints.entity.Citizen;
+import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.entity.Role;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -64,6 +72,35 @@ public class AccountInfoMapper {
 //        }
 
         return account;
+    }
+
+    public CitizenProfileInfoDto citizenInfoToDto(Citizen citizen){
+
+        return  new CitizenProfileInfoDto(
+                citizen.getAccount().getUserName(),
+                citizen.getAccount().getEmail(),
+                citizen.getAccount().getPhoneNumber(),
+                citizen.getAccount().isEmailTemporary(),
+                citizen.getAccount().getProfileImageUrl(),
+                citizen.getAccount().getCreatedAt(),
+                citizen.getAccount().getUpdatedAt(),
+                citizen.getBirthDate()
+        );
+    }
+
+    public EmployeeProfileInfoDto employeeInfoToDto(Employee employee) {
+        return new EmployeeProfileInfoDto(
+                employee.getAccount().getUserName(),
+                employee.getAccount().isEmailTemporary(),
+                employee.getAccount().getEmail(),
+                employee.getAccount().getPhoneNumber(),
+                employee.getAccount().getProfileImageUrl(),
+                employee.getAccount().getCreatedAt(),
+                employee.getAccount().getUpdatedAt(),
+                employee.getInstitution(),
+                employee.getGovernorate(),
+                employee.getSector()
+        );
     }
 
 //    private  String validateAndEncodePassword(String rawPassword) {

@@ -8,6 +8,7 @@ import com.myapp.complaints.service.StatisticsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -49,6 +50,20 @@ public class ApiController {
                     "institutionsCount", statisticsService.getDistinctInstitutionsCount()
             );
         }
+
+//        @GetMapping("citizenAccount/{accountId}")
+    @GetMapping("citizenAccount")
+    public ResponseEntity<?> citizenProfile(
+//                @PathVariable Long accountId
+        ){
+            return ResponseEntity.ok(apiService.getCitizenInfo());
+        }
+
+    @GetMapping("employeeAccount")
+    public ResponseEntity<?> employeeProfile(
+    ){
+        return ResponseEntity.ok(apiService.getEmployeeInfoInfo());
+    }
 
 //
 //    @PatchMapping("/{id}/state")

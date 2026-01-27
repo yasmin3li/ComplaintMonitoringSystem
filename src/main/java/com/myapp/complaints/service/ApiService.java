@@ -1,14 +1,14 @@
 package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.*;
+import com.myapp.complaints.dto.CitizenProfileInfoDto;
 import com.myapp.complaints.dto.ComplaintCreateDto;
 import com.myapp.complaints.dto.ComplaintResponseDto;
-import com.myapp.complaints.entity.Account;
-import com.myapp.complaints.entity.Address;
-import com.myapp.complaints.entity.Complaint;
-import com.myapp.complaints.entity.ComplaintTrackingLog;
+import com.myapp.complaints.dto.EmployeeProfileInfoDto;
+import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.mapper.AccountInfoMapper;
 import com.myapp.complaints.mapper.ComplaintMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ApiService {
+    private final EmployeeRepo employeeRepo;
 
     private final AccountRepo accountRepo;
     private final ServiceAvailableRepo serviceAvailableRepo;
@@ -33,6 +34,8 @@ public class ApiService {
     private final InstitutionRepo institutionRepo;
     private final ComplaintRepo complaintRepo;
     private final ComplaintMapper complaintMapper;
+    private final CitizenRepo citizenRepo;
+
 
     public Complaint createComplaint(@Valid ComplaintCreateDto dto) {
 
@@ -103,4 +106,28 @@ public class ApiService {
                 .toList();
     }
 
+
+    private final AccountInfoMapper accountInfoMapper;
+    public CitizenProfileInfoDto getCitizenInfo() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        Account account = accountRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Citizen citizen=citizenRepo.findByAccountId(account.getId())
+                .orElseThrow(()->new RuntimeException("no citizen found for account "+account.getEmail()));
+        return accountInfoMapper.citizenInfoToDto(citizen);
+    }
+
+    public EmployeeProfileInfoDto getEmployeeInfoInfo() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        Account account = accountRepo.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Employee employee=employeeRepo.findByAccountId(account.getId())
+                .orElseThrow(()->new RuntimeException("no employee found for account "+account.getEmail()));
+        return accountInfoMapper.employeeInfoToDto(employee);
+    }
 }
