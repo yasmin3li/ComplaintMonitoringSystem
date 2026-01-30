@@ -48,7 +48,7 @@ public class VerificationCodeService {
     }
 
     private void sendCodeToEmail(String email, String code) {
-//        System.out.println("Send OTP " + code + " to email " + email);
+        System.out.println("Send OTP " + code + " to email " + email);
         emailService.sendVerificationCode(email,code);
 //TODO: add email provider
     }

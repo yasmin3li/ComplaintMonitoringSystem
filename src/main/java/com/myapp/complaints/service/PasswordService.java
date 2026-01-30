@@ -25,44 +25,7 @@ public class PasswordService {
     private final AccountRepo accountRepo;
     private final PasswordResetTokenRepo passwordResetTokenRepo;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
 
-    /**
-     * Send reset password link
-     */
-    public void sendResetLink(ForgotPasswordRequestDTO dto) {
-
-        Account account = accountRepo.findByEmail(dto.emailOrPhone())
-                .orElseGet(() ->
-                        accountRepo.findByPhoneNumber(dto.emailOrPhone())
-                                .orElseThrow(() ->
-                                        new RuntimeException("Account not found")
-                                )
-                );
-
-        // حذف أي توكن قديم
-        passwordResetTokenRepo.deleteByAccount(account);
-
-        // إنشاء توكن جديد
-        String token = UUID.randomUUID().toString();
-
-        PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(token);
-        resetToken.setAccount(account);
-        resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
-
-        passwordResetTokenRepo.save(resetToken);
-
-//        emailService.sendVerificationCode(account.getEmail(),token);
-//TODO after link with front
-        emailService.sendResetLink(
-                account.getEmail(),
-                "Reset your password",
-                "Click the link:\n" +
-                        "http://localhost:5173/reset-password?token=" + token
-        );
-
-    }
 
     /**
      * Reset password using token
@@ -90,12 +53,11 @@ public class PasswordService {
         }
 
         account.setPassword(validateAndEncodePassword(dto.newPassword()));
-        account.setMustChangePassword(false);
-        account.setStatus(AccountStatus.ACTIVATED);
+        //account.setMustChangePassword(false);
+        //account.setStatus(AccountStatus.ACTIVATED);
 
         accountRepo.save(account);
 
-        // حذف التوكن بعد الاستخدام
         passwordResetTokenRepo.delete(resetToken);
     }
 
@@ -126,19 +88,15 @@ public class PasswordService {
         if (!rawPassword.matches(".*[A-Z].*")) {
             throw new IllegalArgumentException("Password must contain at least one uppercase letter");
         }
-//        if (!rawPassword.matches(".*[a-z].*")) {
-//            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
-//        }
+        if (!rawPassword.matches(".*[a-z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+        }
         if (!rawPassword.matches(".*\\d.*")) {
             throw new IllegalArgumentException("Password must contain at least one digit");
         }
         if (!rawPassword.matches(".*[!@#$%^&*].*")) {
             throw new IllegalArgumentException("Password must contain at least one special character");
         }
-//        if (!rawPassword.matches(".*[]\\[!@#$%^&*()_+\\-={};':\"\\\\|,.<>/?].*")) {
-//            throw new IllegalArgumentException("Password must contain at least one special character");
-//        }
-        // تشفير كلمة المرور
         return passwordEncoder.encode(rawPassword);
     }
 

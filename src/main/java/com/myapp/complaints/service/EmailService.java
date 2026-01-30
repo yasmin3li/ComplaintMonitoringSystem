@@ -14,15 +14,13 @@ public class EmailService {
     public void sendVerificationCode(String to, String code) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("Verification Code For Email Service");
+        message.setSubject("Verification Code ");
         message.setText("Your verification code is: " + code);
         try {
             mailSender.send(message);
         } catch (Exception e) {
             System.err.println("Failed to send verification password email: " + e.getMessage());
-            // لا تجعلي التطبيق ينهار إذا فشل الإيميل، أكملي عملية التسجيل
         }
-//        mailSender.send(message);
     }
 
     public void sendResetLink(String toEmail, String subject, String body) {
@@ -36,7 +34,6 @@ public class EmailService {
                 mailSender.send(message);
             } catch (Exception e) {
                 System.err.println("Failed to send reset password email: " + e.getMessage());
-                // لا تجعلي التطبيق ينهار إذا فشل الإيميل، أكملي عملية التسجيل
             }
             System.out.println("Reset password email sent to: " + toEmail);
         } catch (Exception e) {

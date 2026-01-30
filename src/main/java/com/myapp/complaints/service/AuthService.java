@@ -47,6 +47,10 @@ public class AuthService {
     private final JwtTokenGenerator jwtTokenGenerator;
     private final RefreshTokenRepo refreshTokenRepo;
     private final AccountInfoMapper accountInfoMapper;
+    private final InstitutionRepo institutionRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepo roleRepo;
+    private  final  VerificationCodeService verificationCodeService;
 
 
     //        private final PasswordResetTokenRepo passwordResetTokenRepo;
@@ -158,12 +162,6 @@ public class AuthService {
 
         return new UsernamePasswordAuthenticationToken(username, password, authorities);
     }
-    
-    private final InstitutionRepo institutionRepo;
-    private final PasswordEncoder passwordEncoder;
-    private final RoleRepo roleRepo;
-    private  final  VerificationCodeService verificationCodeService;
-//    private final
 
 
     @Transactional
@@ -220,13 +218,13 @@ public class AuthService {
 
         if (dto.email() == null || dto.email().isBlank()) {
             account.setEmail(dto.userName()+dto.phoneNumber().substring(4,9) + "@example.com");
-            verificationCodeService.generateCode(account,"SMS");
+            //verificationCodeService.generateCode(account,"SMS");
             account.setEmailTemporary(true);
 
         } else {
             account.setEmail(dto.email());
             account.setEmailTemporary(false);
-            verificationCodeService.generateCode(account,"EMAIL");
+           // verificationCodeService.generateCode(account,"EMAIL");
         }
 
         account.setMustChangePassword(true);
@@ -280,7 +278,9 @@ public class AuthService {
         if (res){
 
             account.setStatus(AccountStatus.ACTIVATED);
-            account.setEmailVerified(true);
+
+            if (dto.identifier().contains("@"))
+                account.setEmailVerified(true);
 
              accountRepo.save(account);}
         else
@@ -297,19 +297,15 @@ public class AuthService {
         if (!rawPassword.matches(".*[A-Z].*")) {
             throw new IllegalArgumentException("Password must contain at least one uppercase letter");
         }
-//        if (!rawPassword.matches(".*[a-z].*")) {
-//            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
-//        }
+        if (!rawPassword.matches(".*[a-z].*")) {
+            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+        }
         if (!rawPassword.matches(".*\\d.*")) {
             throw new IllegalArgumentException("Password must contain at least one digit");
         }
         if (!rawPassword.matches(".*[!@#$%^&*].*")) {
             throw new IllegalArgumentException("Password must contain at least one special character");
         }
-//        if (!rawPassword.matches(".*[]\\[!@#$%^&*()_+\\-={};':\"\\\\|,.<>/?].*")) {
-//            throw new IllegalArgumentException("Password must contain at least one special character");
-//        }
-        // تشفير كلمة المرور
         return passwordEncoder.encode(rawPassword);
     }
 

@@ -4,6 +4,7 @@ import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.service.AuthService;
 import com.myapp.complaints.service.PasswordService;
+import com.myapp.complaints.service.RestLinkService;
 import com.myapp.complaints.service.VerificationCodeService;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ public class AuthController {
     private final VerificationCodeService verificationCodeService;
     private final PasswordEncoder passwordEncoder;
     private final PasswordService passwordService;
+    private final RestLinkService restLinkService;
 
 
 //auth/sign-in
@@ -61,7 +63,7 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequestDTO request) {
 
-        passwordService.sendResetLink(request);
+        restLinkService.sendResetLink(request);
 
         return ResponseEntity.ok("reset link has been sent");
     }
