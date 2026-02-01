@@ -71,7 +71,7 @@ public class Account {
         createdAt = LocalDateTime.now();
         updatedAt = createdAt;
         if (status == null) {
-            status = AccountStatus.BANNED;//later for auth
+            status = AccountStatus.PENDING;//later for auth
         }
 //        if (email == null || email.isEmpty()) {
 //            String phone = phoneNumber != null ? phoneNumber : "user" + System.currentTimeMillis();
