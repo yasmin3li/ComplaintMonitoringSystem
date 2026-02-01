@@ -6,6 +6,9 @@ import com.myapp.complaints.enums.ComplaintState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class StatisticsService {
@@ -31,5 +34,24 @@ public class StatisticsService {
 
     public long getDistinctInstitutionsCount() {
         return institutionRepo.count();
+    }
+
+//    public long getComplaintForThisDay() {
+//        LocalDate localDateTime=LocalDate.now();
+//        return complaintRepo.countTodayComplaints(localDateTime);
+//    }
+
+    public long countTodayComplaints() {
+
+        LocalDateTime startOfToday =
+                LocalDate.now().atStartOfDay();//00:00
+
+        LocalDateTime endOfToday =
+                startOfToday.plusDays(1);//tomorrow
+
+        return complaintRepo.countByDateTimeOfAddBetween(
+                startOfToday,
+                endOfToday
+        );
     }
 }

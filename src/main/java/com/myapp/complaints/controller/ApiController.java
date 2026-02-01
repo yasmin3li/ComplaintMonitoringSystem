@@ -8,7 +8,6 @@ import com.myapp.complaints.service.StatisticsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -47,19 +46,20 @@ public class ApiController {
                     "newComplaints", statisticsService.getNewComplaints(),
                     "inProgressComplaints", statisticsService.getInProgressComplaints(),
                     "solvedComplaints", statisticsService.getSolvedComplaints(),
-                    "institutionsCount", statisticsService.getDistinctInstitutionsCount()
+                    "institutionsCount", statisticsService.getDistinctInstitutionsCount(),
+                    "todayComplaints",statisticsService.countTodayComplaints()
             );
         }
 
 //        @GetMapping("citizenAccount/{accountId}")
-    @GetMapping("citizen/profile")
+    @GetMapping("/citizen/profile")
     public ResponseEntity<?> citizenProfile(
 //                @PathVariable Long accountId
         ){
             return ResponseEntity.ok(apiService.getCitizenInfo());
         }
 
-    @GetMapping("employee/profile")
+    @GetMapping("/employee/profile")
     public ResponseEntity<?> employeeProfile(
     ){
         return ResponseEntity.ok(apiService.getEmployeeInfoInfo());
