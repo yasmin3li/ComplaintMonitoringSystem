@@ -1,6 +1,7 @@
 package com.myapp.complaints.entity;
 
 
+import com.myapp.complaints.enums.CodeAndLinkState;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -29,4 +30,10 @@ public class PasswordResetToken {
 
     @Column(nullable = false)
     private LocalDateTime expiryDate;
+
+    private String type;
+   // private boolean isUsed;
+
+    @Enumerated(EnumType.STRING)
+    private CodeAndLinkState state;
 }

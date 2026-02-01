@@ -2,17 +2,16 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.VerificationCodeRepo;
+import com.myapp.complaints.dto.ForgotPasswordRequestDTO;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.VerificationCode;
-import com.myapp.complaints.enums.VerificationChannel;
-import jakarta.validation.constraints.Email;
+import com.myapp.complaints.enums.AccountStatus;
+import com.myapp.complaints.enums.CodeAndLinkState;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 import java.util.Random;
 
 @Service
@@ -26,6 +25,22 @@ public class VerificationCodeService {
 
     public String generateCode(Account account, String type) {
 
+        if (account.getId() == null)
+        {
+            // do nothing, because the account not saved yet
+        }
+        else {
+
+            int attemptsLastHour =
+                    verificationCodeRepo.countByAccountAndVerificationCodeExpireTimeAfter(
+                            account,
+                            LocalDateTime.now().minusHours(1)
+                    );
+
+            if (attemptsLastHour >= 2) {
+                throw new RuntimeException("You have exceeded the limit. Try again after 1 hour");
+            }
+        }
         // generate random code with length : 6
         String code = String.format("%06d", random.nextInt(1000000));
 
@@ -34,11 +49,10 @@ public class VerificationCodeService {
                 .verificationCode(code)
                 .type(type)
                 .verificationCodeExpireTime(LocalDateTime.now().plusMinutes(10))
-                .isUsed(false)
+                .state(CodeAndLinkState.UNUSED)
                 .build();
 
         verificationCodeRepo.save(verificationCode);
-
         if("EMAIL".equals(type)) {
             sendCodeToEmail(account.getEmail(), code);
         } else if("SMS".equals(type)) {
@@ -55,7 +69,7 @@ public class VerificationCodeService {
 
     private void sendCodeToPhone(String phoneNumber, String code) {
 //TODO: add SMS provider
-        System.out.println("Send OTP " + code + " to mobile " + phoneNumber);
+        System.out.println("\n Send OTP " + code + " to mobile " + phoneNumber);
 //        Twilio.init(accountSid, authToken);
 //
 //        Message.creator(
@@ -93,8 +107,10 @@ public class VerificationCodeService {
 
         return verificationCodeRepo.findByAccountAndVerificationCode(account, code)
                 .map(verificationCode -> {
-                    if(verificationCode.getVerificationCodeExpireTime().isAfter(LocalDateTime.now()) & !verificationCode.isUsed()) {
-                        verificationCode.setUsed(true);
+                    if(verificationCode.getVerificationCodeExpireTime().isAfter(
+                            LocalDateTime.now()) &
+                            verificationCode.getState().equals(CodeAndLinkState.UNUSED)) {
+                        verificationCode.setState(CodeAndLinkState.USED);
 //                        verificationCodeRepo.delete(verificationCode); //the code is valid only once
                         verificationCodeRepo.save(verificationCode);
                         return true;
@@ -104,6 +120,34 @@ public class VerificationCodeService {
                 .orElse(false);
     }
 
+    public void resendVerificationCode(ForgotPasswordRequestDTO emailOrPhone) {
+        Account account = accountRepo.findByEmailAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
+                .orElseGet(() ->
+                        accountRepo.findByPhoneNumberAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
+                                .orElseThrow(() ->
+                                        new RuntimeException("Account not found")
+                                )
+                );
+        String type;
+        if(emailOrPhone.emailOrPhone().contains("@"))
+            type="EMAIL";
+        else
+            type="SMS";
 
+        List<VerificationCode> activeCodes =
+                verificationCodeRepo.findByAccountAndState(
+                        account,
+                        CodeAndLinkState.UNUSED
+                );
+
+        for (VerificationCode code : activeCodes) {
+            code.setState(CodeAndLinkState.INVALID);
+        }
+
+        verificationCodeRepo.saveAll(activeCodes);
+
+        generateCode(account,type);
+
+    }
 }
 

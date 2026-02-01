@@ -1,6 +1,6 @@
 package com.myapp.complaints.entity;
 
-import com.myapp.complaints.enums.VerificationChannel;
+import com.myapp.complaints.enums.CodeAndLinkState;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,12 +22,13 @@ public class VerificationCode {
     private String verificationCode;
 
     private String type;
-    private boolean isUsed;
+//    private boolean isUsed;
 
+    @Enumerated(EnumType.STRING)
+    private CodeAndLinkState state;
     private LocalDateTime verificationCodeExpireTime;
 
     @OneToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "account_id")
     private Account account;
-
 }

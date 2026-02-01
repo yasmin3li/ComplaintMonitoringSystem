@@ -6,7 +6,6 @@ import com.myapp.complaints.dto.ChangePasswordRequest;
 import com.myapp.complaints.dto.ForgotPasswordRequestDTO;
 import com.myapp.complaints.dto.ResetPasswordRequestDTO;
 import com.myapp.complaints.entity.Account;
-import com.myapp.complaints.entity.PasswordResetToken;
 import com.myapp.complaints.enums.AccountStatus;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +24,7 @@ public class PasswordService {
     private final AccountRepo accountRepo;
     private final PasswordResetTokenRepo passwordResetTokenRepo;
     private final PasswordEncoder passwordEncoder;
+    private final RestLinkService restLinkService;
 
 
     /**
@@ -42,15 +42,8 @@ public class PasswordService {
                                                 "Account not found"
                                         ))
                 );
-        PasswordResetToken resetToken =
-                passwordResetTokenRepo.findByTokenAndAccount(dto.token(),account)
-                        .orElseThrow(() ->
-                                new RuntimeException("Invalid reset token")
-                        );
 
-        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Token expired");
-        }
+        restLinkService.validLink(account,dto.token());
 
         account.setPassword(validateAndEncodePassword(dto.newPassword()));
         //account.setMustChangePassword(false);
@@ -58,7 +51,7 @@ public class PasswordService {
 
         accountRepo.save(account);
 
-        passwordResetTokenRepo.delete(resetToken);
+//        passwordResetTokenRepo.delete(resetToken);
     }
 
     @Transactional

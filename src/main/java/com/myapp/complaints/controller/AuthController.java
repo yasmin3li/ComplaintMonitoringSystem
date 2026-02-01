@@ -6,6 +6,7 @@ import com.myapp.complaints.service.AuthService;
 import com.myapp.complaints.service.PasswordService;
 import com.myapp.complaints.service.RestLinkService;
 import com.myapp.complaints.service.VerificationCodeService;
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -95,12 +96,18 @@ public class AuthController {
     }
 
 
-//    @PostMapping("/resend")
-//    public ResponseEntity<?> resendVerificationCode( @RequestParam String email) throws MessagingException {
-//        authService.resendVerificationCode(email);
-//        return ResponseEntity.ok("Verification code sent");
-//    }
-//
+    @PostMapping("/resend/code")
+    public ResponseEntity<?> resendVerificationCode( @RequestBody ForgotPasswordRequestDTO emailOrPhone) throws MessagingException {
+        verificationCodeService.resendVerificationCode(emailOrPhone);
+        return ResponseEntity.ok("Verification code sent");
+    }
+
+    @PostMapping("/resend/link")
+    public ResponseEntity<?> resendResetLink( @RequestBody ForgotPasswordRequestDTO emailOrPhone) throws MessagingException {
+        restLinkService.resendRestLink(emailOrPhone);
+        return ResponseEntity.ok("Reset link  sent");
+    }
+
 
 
 }
