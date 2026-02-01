@@ -70,7 +70,10 @@ public class SecurityConfig {
                         "/auth/sign-up/**",
                         "/auth/verify",
                         "/auth/forgot-password/**",
-                        "/auth/reset-password/**")
+                        "/auth/reset-password/**",
+                        "/auth/resend/code/**",
+                        "/auth/resend/link/**"
+                        )
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .userDetailsService(userInfoManagerConfig)
@@ -115,7 +118,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                         .requestMatchers(HttpMethod.GET, "/api/latest/**").permitAll() // public GET
 
 //TODO role add roles &&&&&&&&&&&&&& dealing with "owned complaint"
-                                .requestMatchers(HttpMethod.GET,"/api/accounts/**","api/complaints/**").hasAnyRole("أدمن")
+                                .requestMatchers(HttpMethod.GET,"/api/accounts/**","/api/complaints/**").hasAnyRole("أدمن")
 
                                 .requestMatchers(HttpMethod.GET,"/api/governorates/**").permitAll()
                                 .requestMatchers(HttpMethod.GET,"/api/sectors/**").permitAll()
@@ -125,7 +128,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                                 .requestMatchers(HttpMethod.GET,"/api/verificationCodes/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/institutions/**","/api/statistics/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
-                                .requestMatchers(HttpMethod.GET,"/api/citizen/profile/**","api/employee/profile/**").authenticated()
+                                .requestMatchers(HttpMethod.GET,"/api/citizen/profile/**","/api/employee/profile/**").authenticated()
 //                        .requestMatchers("/auth/ change-password/**"
 //                                , "/auth/logout/**"
 //                        ).authenticated()

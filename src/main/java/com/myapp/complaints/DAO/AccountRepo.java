@@ -1,7 +1,9 @@
 package com.myapp.complaints.DAO;
 
 import com.myapp.complaints.entity.Account;
+import com.myapp.complaints.enums.AccountStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 
@@ -22,4 +24,27 @@ public interface AccountRepo extends JpaRepository<Account,Long> {
     Optional<Account> findByUserName(String userName);
 
     Optional<Account> findByPhoneNumber(String phoneNumber);
+
+
+    @Query("""
+        SELECT a
+        FROM Account a
+        WHERE a.status = :status
+        AND a.email = :email
+    """)
+    Optional<Account> findByEmailAndStatus(
+            String email,
+            AccountStatus status
+    );
+
+    @Query("""
+        SELECT a
+        FROM Account a
+        WHERE a.status = :status
+        AND a.phoneNumber = :phoneNumber
+    """)
+    Optional<Account> findByPhoneNumberAndStatus(
+            String phoneNumber,
+            AccountStatus status
+    );
 }
