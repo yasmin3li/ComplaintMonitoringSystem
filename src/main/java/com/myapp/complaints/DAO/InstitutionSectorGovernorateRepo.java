@@ -11,5 +11,12 @@ import java.util.List;
 public interface InstitutionSectorGovernorateRepo extends JpaRepository<InstitutionSectorGovernorate,Long> {
     List<InstitutionSectorGovernorate>
     findBySectorGovernorateIdAndIsActiveTrue(@Param("sectorGovernorateId") Long sectorGovernorateId);
+
+    boolean existsByInstitutionIdAndSectorGovernorateSectorIdAndSectorGovernorateGovernorateId(
+            Long institutionId,
+            Long sectorId,
+            Long governorateId
+    );
+
 }
 //GET /institutionSectorGovernorates/search/findBySectorGovernorateId?sectorGovernorateId=5

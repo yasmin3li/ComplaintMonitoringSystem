@@ -19,6 +19,8 @@ public class ComplaintMapper {
     private final InstitutionRepo institutionRepo;
     private final GovernorateRepo governorateRepo;
     private final SectorRepo sectorRepo;
+    private final InstitutionSectorGovernorateRepo institutionSectorGovernorateRepo;
+    private final SectorGovernorateRepo sectorGovernorateRepo;
 
     public ComplaintResponseDto toDto(Complaint complaint) {
 
@@ -51,6 +53,51 @@ public class ComplaintMapper {
 
     public Complaint fromdto(@Valid ComplaintCreateDto dto) {
 
+    // ------------------------------------------------------------------
+    // VALIDATION SECTION
+    // ------------------------------------------------------------------
+    // The frontend sends governorateId, sectorId, institutionId and serviceId.
+    // Although the UI restricts the selection order, the backend must still
+    // validate the relationships to prevent inconsistent data (e.g. via Postman).
+    // These validations guarantee that the selected location hierarchy is valid.
+    // ------------------------------------------------------------------
+
+    // Validate that the selected sector actually exists in the selected governorate.
+    // This prevents creating complaints with mismatched sector/governorate pairs.
+        boolean sectorExists =
+                sectorGovernorateRepo.existsBySectorIdAndGovernorateId(
+                        dto.sectorId(),
+                        dto.governorateId()
+                );
+
+        if (!sectorExists) {
+            throw new RuntimeException("Sector does not belong to the selected governorate");
+        }
+
+        // Validate that the selected institution is active in the given sector/governorate.
+        // This ensures that the institution truly operates within that location.
+        boolean institutionValid =
+                institutionSectorGovernorateRepo
+                        .existsByInstitutionIdAndSectorGovernorateSectorIdAndSectorGovernorateGovernorateId(
+                                dto.institutionId(),
+                                dto.sectorId(),
+                                dto.governorateId()
+                        );
+
+        var service = serviceAvailableRepo.findById(dto.serviceId())
+                .orElseThrow(() -> new RuntimeException("Service not found"));
+
+        // Validate that the selected service belongs to the chosen institution.
+        // This prevents assigning a service from a different institution.
+        if (!service.getInstitution().getId().equals(dto.institutionId())) {
+            throw new RuntimeException("Service does not belong to the selected institution");
+        }
+
+        if (!institutionValid) {
+            throw new RuntimeException("Institution not valid for this sector/governorate");
+        }
+
+
         // create:  Address
         Address address = new Address();
         address.setLatitude(dto.latitude());
@@ -59,14 +106,12 @@ public class ComplaintMapper {
 
         address = addressRepo.save(address);
 
-
         Complaint complaint = new Complaint();
         complaint.setTitle(dto.title());
         complaint.setDescription(dto.description());
 
 //TODO: replace found with Is-Soft-delete? and add this field to db, or only edit the repo to return only isDeletedFalse #done
-        complaint.setService(serviceAvailableRepo.findById(dto.serviceId())
-                .orElseThrow(() -> new RuntimeException("Service not found")));
+        complaint.setService(service);
 
         complaint.setInstitution(institutionRepo.findById(dto.institutionId())
                 .orElseThrow(() -> new RuntimeException("Institution not found")));

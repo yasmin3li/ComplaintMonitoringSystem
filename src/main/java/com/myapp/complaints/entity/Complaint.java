@@ -62,5 +62,8 @@ public class Complaint {
 
     @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ComplaintTrackingLog> logs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL)
+    private List<ComplaintImage> images = new ArrayList<>();
 }
 

@@ -1,5 +1,7 @@
 package com.myapp.complaints.entity;
 
+import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.enums.ImageType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,8 +17,14 @@ public class ComplaintImage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String description;
+//    private String description;
     private String imageUrl;
+
+    private ImageType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "added_by", nullable = false)
+    private Account addedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complaint_id", nullable = false)
