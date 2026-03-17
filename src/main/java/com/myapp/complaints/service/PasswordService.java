@@ -2,6 +2,7 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.PasswordResetTokenRepo;
+import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.ChangePasswordRequest;
 import com.myapp.complaints.dto.ForgotPasswordRequestDTO;
 import com.myapp.complaints.dto.ResetPasswordRequestDTO;
@@ -31,44 +32,67 @@ public class PasswordService {
      * Reset password using token
      */
     @Transactional
-    public void resetPassword(ResetPasswordRequestDTO dto) {
+    public ApiResponseDto<Object> resetPassword(ResetPasswordRequestDTO dto) {
 
         Account account = accountRepo.findByEmail(dto.emailOrPhone())
                 .orElseGet(() ->
                         accountRepo.findByPhoneNumber(dto.emailOrPhone())
-                                .orElseThrow(() ->
-                                        new ResponseStatusException(
-                                                HttpStatus.NOT_FOUND,
-                                                "Account not found"
-                                        ))
+                                .orElse(null)
+//                                .orElseThrow(() ->
+//                                        new ResponseStatusException(
+//                                                HttpStatus.NOT_FOUND,
+//                                                "Account not found"
+//                                        ))
                 );
+        if (account == null) {
+            return new ApiResponseDto<Object>(
+                    false,
+                    "Account not found",
+                    null);
+        }
 
-        restLinkService.validLink(account,dto.token());
+        boolean validLink = restLinkService.validLink(account, dto.token());
+        if (!validLink) {
+            return new ApiResponseDto<>(
+                    false,
+                    "Invalid reset link",
+                    null
+            );
+        }
 
         account.setPassword(validateAndEncodePassword(dto.newPassword()));
         //account.setMustChangePassword(false);
         //account.setStatus(AccountStatus.ACTIVATED);
-
         accountRepo.save(account);
-
+        return new ApiResponseDto<>(
+                true,
+                "Password reset successfully",
+                null
+        );
 //        passwordResetTokenRepo.delete(resetToken);
     }
 
     @Transactional
-    public void changePassword(Authentication auth, ChangePasswordRequest req) {
+    public ApiResponseDto<Object> changePassword(Authentication auth, ChangePasswordRequest req) {
 
-        Account account = accountRepo.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+        Account account = accountRepo.findByEmail(auth.getName()).orElse(null);
+//                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        if (account == null) {
+            return new ApiResponseDto<>(false, "Account not found", null);
+        }
 
         if (!passwordEncoder.matches(req.currentPassword(), account.getPassword())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "Current password incorrect");
+//            throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Current password incorrect");
+            return new ApiResponseDto<>(false, "Current password is incorrect", null);
         }
 
         account.setPassword(validateAndEncodePassword(req.newPassword()));
         account.setStatus(AccountStatus.ACTIVATED);
         account.setMustChangePassword(false);
         accountRepo.save(account);
+
+        return new ApiResponseDto<>(true, "Password changed successfully", null);
     }
 
     private  String validateAndEncodePassword(String rawPassword) {

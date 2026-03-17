@@ -2,10 +2,7 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.config.jwtAuth.JwtTokenGenerator;
-import com.myapp.complaints.dto.AuthResponseDto;
-import com.myapp.complaints.dto.CitizenRegistrationDto;
-import com.myapp.complaints.dto.EmployeeRegistrationDto;
-import com.myapp.complaints.dto.VerifyUserDto;
+import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.AccountStatus;
 import com.myapp.complaints.enums.TokenType;
@@ -39,7 +36,6 @@ import java.util.Optional;
 public class AuthService {
     private final GovernorateRepo governorateRepo;
     private final SectorRepo sectorRepo;
-
     private final JwtEncoder jwtEncoder;
     private final AccountRepo accountRepo;
     private final CitizenRepo citizenRepo;
@@ -51,7 +47,8 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepo roleRepo;
     private  final  VerificationCodeService verificationCodeService;
-
+    private  final SectorGovernorateRepo sectorGovernorateRepo;
+    private final InstitutionSectorGovernorateRepo institutionSectorGovernorateRepo;
 
     //        private final PasswordResetTokenRepo passwordResetTokenRepo;
 //    private final UserInfoMapper userInfoMapper;
@@ -165,21 +162,32 @@ public class AuthService {
 
 
     @Transactional
-    public Account registerCitizen(CitizenRegistrationDto dto) {
+    public ApiResponseDto<Object> registerCitizen(CitizenRegistrationDto dto) {
 
 
         Account account = accountInfoMapper.fromCitizenDto(dto);
+        ApiResponseDto<Object> codeResponse;
+        String type;
 
         if (dto.email() == null || dto.email().isBlank()) {
 
             account.setEmail(dto.userName()+dto.phoneNumber().substring(4,9) + "@example.com");
             account.setEmailTemporary(true);
-            verificationCodeService.generateCode(account,"SMS");
+            type="SMS";
+ /*
+ Account is created even if email sending fails.
+ SMTP may accept the message even if the email address does not exist,
+ so we cannot always detect invalid emails at this stage.
+ If the user does not receive the verification code,
+ they can request a new one using the resendVerificationCode() endpoint.
+  */
+//            codeResponse = verificationCodeService.generateCode(account,"SMS");
 
         } else {
             account.setEmail(dto.email());
             account.setEmailTemporary(false);
-            verificationCodeService.generateCode(account,"EMAIL");
+            type="EMAIL";
+           // codeResponse = verificationCodeService.generateCode(account,"EMAIL");
         }
 
 ////        if account.getRole()==
@@ -197,27 +205,58 @@ public class AuthService {
 //        account.setStatus(AccountStatus.BANNED);
         account = accountRepo.save(account);
 
-
         Citizen citizen = new Citizen();
         citizen.setAccount(account);
         citizen.setBirthDate(dto.birthDate());
         citizenRepo.save(citizen);
+        codeResponse = verificationCodeService.generateCode(account,type);
 
-        return account;
+//        return account;
+        return new ApiResponseDto<>(
+                codeResponse.success(),
+                "account for user " + account.getUserName() +
+                        " created successfully. " + codeResponse.message(),
+                null
+        );
     }
 
 
     @Transactional
-    public Account registerEmployee(@Valid EmployeeRegistrationDto dto) {
+    public ApiResponseDto<Object> registerEmployee(@Valid EmployeeRegistrationDto dto) {
 
         Account account = accountInfoMapper.fromEmployeeDto(dto);
+
+// VALIDATION: prevent inconsistent employee assignment
+// Validate that sector belongs to governorate
+        boolean sectorExists =
+                sectorGovernorateRepo.existsBySectorIdAndGovernorateId(
+                        dto.sectorId(),
+                        dto.governorateId()
+                );
+
+        if (!sectorExists) {
+            throw new RuntimeException("Sector does not belong to the selected governorate");
+        }
+
+// Validate that institution operates in this sector/governorate
+        boolean institutionValid =
+                institutionSectorGovernorateRepo
+                        .existsByInstitutionIdAndSectorGovernorateSectorIdAndSectorGovernorateGovernorateId(
+                                dto.institutionId(),
+                                dto.sectorId(),
+                                dto.governorateId()
+                        );
+
+        if (!institutionValid) {
+            throw new RuntimeException("Institution not valid for this sector/governorate");
+        }
 
 //        Role role = roleRepo.findById(dto.roleId())
 //                .orElseThrow(() -> new RuntimeException("Role not found"));
 //        account.setRole(role);
 
         if (dto.email() == null || dto.email().isBlank()) {
-            account.setEmail(dto.userName()+dto.phoneNumber().substring(4,9) + "@example.com");
+            account.setEmail(dto.userName()+dto.phoneNumber().substring(4,9) + "@temporary.com");
             //verificationCodeService.generateCode(account,"SMS");
             account.setEmailTemporary(true);
 
@@ -255,13 +294,18 @@ public class AuthService {
 
         employeeRepo.save(employee);
 
-        return account;
+//        return account;
+        return new ApiResponseDto<>(
+                true,
+                "account for user "+account.getUserName()+" created successfully",
+                null
+        );
     }
 
     private final VerificationCodeRepo verificationCodeRepo;
 
     @Transactional
-    public void verifyUser(VerifyUserDto dto) {
+    public ApiResponseDto<Object> verifyUser(VerifyUserDto dto) {
 
         Account account;
 
@@ -284,7 +328,17 @@ public class AuthService {
 
              accountRepo.save(account);}
         else
-            throw new RuntimeException("invalid code");
+//            throw new RuntimeException("invalid code");
+            return new ApiResponseDto<>(
+                    false,
+                    "invalid code",
+                    null
+            );
+        return new ApiResponseDto<>(
+                true,
+                "account verified successfully",
+                null
+        );
     }
 
     private  String validateAndEncodePassword(String rawPassword) {

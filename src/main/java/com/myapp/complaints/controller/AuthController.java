@@ -65,6 +65,7 @@ public class AuthController {
             @Valid @RequestBody ForgotPasswordRequestDTO request) {
 
         restLinkService.sendResetLink(request);
+//        verificationCodeService.generateCode(request.emailOrPhone(),);
 
         return ResponseEntity.ok("reset link has been sent");
     }
@@ -72,11 +73,8 @@ public class AuthController {
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(
             @Valid @RequestBody ResetPasswordRequestDTO request) {
-
-
-        passwordService.resetPassword(request);
-
-        return ResponseEntity.ok("Password reset successfully");
+//        passwordService.resetPassword(request);
+        return ResponseEntity.ok( passwordService.resetPassword(request));
     }
 
     @PostMapping("/change-password")
@@ -84,28 +82,30 @@ public class AuthController {
            Authentication authentication,
             @Valid @RequestBody ChangePasswordRequest request) {
 
-        passwordService.changePassword(authentication,request);
-        return ResponseEntity.ok("Password changed successfully");
+//        passwordService.changePassword(authentication,request);
+        return ResponseEntity.ok(passwordService.changePassword(authentication,request));
     }
 
 
     @PostMapping("/verify")
     public ResponseEntity<?> verifyUser( @Valid @RequestBody VerifyUserDto verifyUserDto) {
-        authService.verifyUser(verifyUserDto);
-        return ResponseEntity.ok("Account verified successfully");
+//        authService.verifyUser(verifyUserDto);
+//        return ResponseEntity.ok("Account verified successfully");
+        return ResponseEntity.ok(authService.verifyUser(verifyUserDto));
     }
 
 
     @PostMapping("/resend/code")
     public ResponseEntity<?> resendVerificationCode( @RequestBody ForgotPasswordRequestDTO emailOrPhone) throws MessagingException {
-        verificationCodeService.resendVerificationCode(emailOrPhone);
-        return ResponseEntity.ok("Verification code sent");
+//        verificationCodeService.resendVerificationCode(emailOrPhone);
+//        return ResponseEntity.ok("Verification code sent");
+        return ResponseEntity.ok(verificationCodeService.resendVerificationCode(emailOrPhone));
     }
 
     @PostMapping("/resend/link")
     public ResponseEntity<?> resendResetLink( @RequestBody ForgotPasswordRequestDTO emailOrPhone) throws MessagingException {
-        restLinkService.resendRestLink(emailOrPhone);
-        return ResponseEntity.ok("Reset link  sent");
+//        restLinkService.resendRestLink(emailOrPhone);
+        return ResponseEntity.ok(restLinkService.resendRestLink(emailOrPhone));
     }
 
 

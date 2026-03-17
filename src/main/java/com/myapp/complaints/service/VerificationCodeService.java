@@ -2,6 +2,7 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.VerificationCodeRepo;
+import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.ForgotPasswordRequestDTO;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.VerificationCode;
@@ -23,10 +24,9 @@ public class VerificationCodeService {
     private final Random random = new Random();
     private final EmailService emailService;
 
-    public String generateCode(Account account, String type) {
+    public ApiResponseDto<Object> generateCode(Account account, String type) {
 
-        if (account.getId() == null)
-        {
+        if (account.getId() == null){
             // do nothing, because the account not saved yet
         }
         else {
@@ -38,7 +38,12 @@ public class VerificationCodeService {
                     );
 
             if (attemptsLastHour >= 2) {
-                throw new RuntimeException("You have exceeded the limit. Try again after 1 hour");
+//                throw new RuntimeException("You have exceeded the limit. Try again after 1 hour");
+                return new ApiResponseDto<>(
+                        false,
+                        "You have exceeded the limit. Try again after 1 hour",
+                        null
+                );
             }
         }
         // generate random code with length : 6
@@ -53,23 +58,39 @@ public class VerificationCodeService {
                 .build();
 
         verificationCodeRepo.save(verificationCode);
+
+        boolean sent = true;
         if("EMAIL".equals(type)) {
-            sendCodeToEmail(account.getEmail(), code);
+            sent = sendCodeToEmail(account.getEmail(), code);
         } else if("SMS".equals(type)) {
-            sendCodeToPhone(account.getPhoneNumber(), code);
+            sent = sendCodeToPhone(account.getPhoneNumber(), code);
         }
-        return code;
+
+        if(!sent){
+            return new ApiResponseDto<>(
+                    true,
+                    "Account created but verification email could not be sent. Please request resend.",
+                    null
+            );
+        }
+        return new ApiResponseDto<>(
+                true,
+                "verification code sent successfully",
+                null
+        );
+//        return code;
     }
 
-    private void sendCodeToEmail(String email, String code) {
+    private boolean sendCodeToEmail(String email, String code) {
         System.out.println("Send OTP " + code + " to email " + email);
-        emailService.sendVerificationCode(email,code);
-//TODO: add email provider
+        return emailService.sendVerificationCode(email,code);
+//TODO: add email provider: done
     }
 
-    private void sendCodeToPhone(String phoneNumber, String code) {
+    private boolean sendCodeToPhone(String phoneNumber, String code) {
 //TODO: add SMS provider
         System.out.println("\n Send OTP " + code + " to mobile " + phoneNumber);
+        return true;
 //        Twilio.init(accountSid, authToken);
 //
 //        Message.creator(
@@ -108,7 +129,7 @@ public class VerificationCodeService {
         return verificationCodeRepo.findByAccountAndVerificationCode(account, code)
                 .map(verificationCode -> {
                     if(verificationCode.getVerificationCodeExpireTime().isAfter(
-                            LocalDateTime.now()) &
+                            LocalDateTime.now()) &&
                             verificationCode.getState().equals(CodeAndLinkState.UNUSED)) {
                         verificationCode.setState(CodeAndLinkState.USED);
 //                        verificationCodeRepo.delete(verificationCode); //the code is valid only once
@@ -120,7 +141,7 @@ public class VerificationCodeService {
                 .orElse(false);
     }
 
-    public void resendVerificationCode(ForgotPasswordRequestDTO emailOrPhone) {
+    public ApiResponseDto<Object> resendVerificationCode(ForgotPasswordRequestDTO emailOrPhone) {
         Account account = accountRepo.findByEmailAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
                 .orElseGet(() ->
                         accountRepo.findByPhoneNumberAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
@@ -146,7 +167,7 @@ public class VerificationCodeService {
 
         verificationCodeRepo.saveAll(activeCodes);
 
-        generateCode(account,type);
+        return generateCode(account,type);
 
     }
 }

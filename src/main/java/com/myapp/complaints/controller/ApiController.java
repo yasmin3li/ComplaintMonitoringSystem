@@ -20,6 +20,8 @@ public class ApiController {
 
 
     private  final ApiService apiService;
+
+// content-type: multipart/form-data not Json, before data+images
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
             @Valid @RequestBody ComplaintCreateDto dto) {
@@ -28,6 +30,20 @@ public class ApiController {
                 apiService.createComplaint(dto)
         );
     }
+//    @PostMapping(value="/complaint", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<?> createComplaint(
+//
+//            @Valid @RequestPart("data") ComplaintCreateDto dto,
+//
+//            @RequestPart(value="images", required=false)
+//            List<MultipartFile> images
+//    ) {
+//
+//        return ResponseEntity.ok(
+//                apiService.createComplaint(dto, images)
+//        );
+//    }
+
 
     @GetMapping("/latest")
     public ResponseEntity<List<ComplaintResponseDto>> getLastComplaints() {
