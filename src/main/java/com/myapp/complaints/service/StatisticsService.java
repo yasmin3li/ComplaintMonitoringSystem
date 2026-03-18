@@ -2,12 +2,17 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.ComplaintRepo;
 import com.myapp.complaints.DAO.InstitutionRepo;
+import com.myapp.complaints.dto.CitizenDashBoardStatisticsDto;
+//import com.myapp.complaints.dto.CitizenDashboardResponseDto;
+import com.myapp.complaints.dto.ComplaintResponseDto;
 import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.mapper.ComplaintMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +20,7 @@ public class StatisticsService {
 
     private final ComplaintRepo complaintRepo;
     private final InstitutionRepo institutionRepo;
+    private final ComplaintMapper complaintMapper;
 
     public long getTotalComplaints() {
         return complaintRepo.countByDeletedFalse();
@@ -54,4 +60,58 @@ public class StatisticsService {
                 endOfToday
         );
     }
+
+//Citizen Info
+    public long getTotalCitizenComplaint(String email){
+        return complaintRepo.countByAddedBy_EmailAndDeletedFalse(email);
+    }
+//    countByStateAndDeleteFalseAndAddedBy_Id
+
+    public long getCitizenInProgressComplaints(String email){
+        return complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.IN_PROGRESS,email);
+    }
+
+    public long getCitizenSolvedComplaints(String email){
+        return complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.RESOLVED,email);
+    }
+
+    public String completionRate(String email){
+        long completionSum = complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.RESOLVED, email);
+        long total = complaintRepo.countByAddedBy_EmailAndDeletedFalse(email);
+        if(total == 0) return 0+" %";
+        double rate = (double) completionSum / total * 100;
+        return  rate+" %";
+    }
+
+    public CitizenDashBoardStatisticsDto getCitizenDashboardStatistics(String email){
+
+        return new CitizenDashBoardStatisticsDto(
+                getTotalCitizenComplaint(email),
+                getCitizenInProgressComplaints(email),
+                getCitizenSolvedComplaints(email),
+                completionRate(email)
+        );
+    }
+
+    public List<ComplaintResponseDto> getAllComplaintsForCitizen(String email){
+        return complaintRepo.findByAddedBy_Email(email)
+                .stream()
+                .map(complaintMapper::toDto)
+                .toList();
+    }
+
+    public List<ComplaintResponseDto> getTop3ComplaintsForCitizen(String email){
+        return complaintRepo.findTop3ByAddedBy_EmailAndDeletedFalse(email)
+                .stream()
+                .map(complaintMapper::toDto)
+                .toList();
+    }
+//    public CitizenDashboardResponseDto buildCitizenDashboardResponse(String email){
+//        return new CitizenDashboardResponseDto(
+//                getCitizenDashboardStatistics(email),
+////                getAllComplaintsForCitizen(email)
+//                getTop3ComplaintsForCitizen(email)
+//        );
+//    }
+
 }

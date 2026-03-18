@@ -115,7 +115,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 // TODO                       .requestMatchers("/api/employee/**").hasAnyRole("موظف الاستقبال","مدير")
 //                        .requestMatchers("/api/citizen/**").hasRole("مواطن")
 
-                        .requestMatchers(HttpMethod.GET, "/api/latest/**").permitAll() // public GET
+                        .requestMatchers(HttpMethod.GET, "/api/dashboard/homepage/**").permitAll() // public GET
 
 //TODO role add roles &&&&&&&&&&&&&& dealing with "owned complaint"
                                 .requestMatchers(HttpMethod.GET,"/api/accounts/**","/api/complaints/**").hasAnyRole("أدمن")
@@ -129,7 +129,9 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                                 .requestMatchers(HttpMethod.GET,"/api/verificationCodes/**").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/institutions/**","/api/statistics/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
-                                .requestMatchers(HttpMethod.GET,"/api/citizen/profile/**","/api/employee/profile/**").authenticated()
+
+//                        TODO: later make others see profile for each other
+                                .requestMatchers(HttpMethod.GET,"/api/citizen/**","/api/employee/profile/**").authenticated()
 //                        .requestMatchers("/auth/ change-password/**"
 //                                , "/auth/logout/**"
 //                        ).authenticated()

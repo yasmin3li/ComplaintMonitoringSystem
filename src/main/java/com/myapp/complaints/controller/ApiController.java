@@ -8,6 +8,8 @@ import com.myapp.complaints.service.StatisticsService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +22,7 @@ public class ApiController {
 
 
     private  final ApiService apiService;
+    private final StatisticsService statisticsService;
 
 // content-type: multipart/form-data not Json, before data+images
     @PostMapping("/complaint")
@@ -45,7 +48,7 @@ public class ApiController {
 //    }
 
 
-    @GetMapping("/latest")
+    @GetMapping("/dashboard/homepage/top10complaints")
     public ResponseEntity<List<ComplaintResponseDto>> getLastComplaints() {
 
         return ResponseEntity.ok(
@@ -53,9 +56,8 @@ public class ApiController {
         );
     }
 
-        private final StatisticsService statisticsService;
-
-        @GetMapping("/statistics/homePage")
+//TODO: DTO
+        @GetMapping("/dashboard/homepage/statistics")
         public Map<String, Long> getHomeStatistics() {
             return Map.of(
                     "totalComplaints", statisticsService.getTotalComplaints(),
@@ -79,6 +81,34 @@ public class ApiController {
     public ResponseEntity<?> employeeProfile(
     ){
         return ResponseEntity.ok(apiService.getEmployeeInfoInfo());
+    }
+
+//    @GetMapping("/dashboard/citizen")
+//    public ResponseEntity<?> getCitizenDashboard() {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        String email = auth.getName();
+//        return ResponseEntity.ok(statisticsService.buildCitizenDashboardResponse(email));
+//    }
+
+    @GetMapping("/citizen/dashboard/statistics")
+    public ResponseEntity<?> getCitizenDashboardStatistics() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        return ResponseEntity.ok(statisticsService.getCitizenDashboardStatistics(email));
+    }
+
+    @GetMapping("/citizen/dashboard/top3Complaints")
+    public ResponseEntity<?> getTop3CitizenComplaints() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        return ResponseEntity.ok(statisticsService.getTop3ComplaintsForCitizen(email));
+    }
+
+    @GetMapping("/citizen/dashboard/allComplaints")
+    public ResponseEntity<?> getAllCitizenComplaints() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+        return ResponseEntity.ok(statisticsService.getAllComplaintsForCitizen(email));
     }
 
 //

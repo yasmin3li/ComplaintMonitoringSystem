@@ -35,4 +35,10 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> {
             LocalDateTime end
     );
 
+    long countByAddedBy_EmailAndDeletedFalse(String email);
+    long countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState state, String email);
+
+//    List<Complaint> findByAddedBy_EmailAndDeletedFalse(String email);
+    List<Complaint> findByAddedBy_Email(String email);
+    List<Complaint> findTop3ByAddedBy_EmailAndDeletedFalse(String email);
 }
