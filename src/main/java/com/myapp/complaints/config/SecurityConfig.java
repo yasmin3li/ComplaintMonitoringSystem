@@ -115,7 +115,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 // TODO                       .requestMatchers("/api/employee/**").hasAnyRole("موظف الاستقبال","مدير")
 //                        .requestMatchers("/api/citizen/**").hasRole("مواطن")
 
-                        .requestMatchers(HttpMethod.GET, "/api/dashboard/homepage/**").permitAll() // public GET
+                        .requestMatchers(HttpMethod.GET, "/api/homepage/**").permitAll() // public GET
 
 //TODO role add roles &&&&&&&&&&&&&& dealing with "owned complaint"
                                 .requestMatchers(HttpMethod.GET,"/api/accounts/**","/api/complaints/**").hasAnyRole("أدمن")

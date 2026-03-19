@@ -48,7 +48,7 @@ public class ApiController {
 //    }
 
 
-    @GetMapping("/dashboard/homepage/top10complaints")
+    @GetMapping("/homepage/dashboard/top10complaints")
     public ResponseEntity<List<ComplaintResponseDto>> getLastComplaints() {
 
         return ResponseEntity.ok(
@@ -57,7 +57,7 @@ public class ApiController {
     }
 
 //TODO: DTO
-        @GetMapping("/dashboard/homepage/statistics")
+        @GetMapping("/homepage/dashboard/statistics")
         public Map<String, Long> getHomeStatistics() {
             return Map.of(
                     "totalComplaints", statisticsService.getTotalComplaints(),
