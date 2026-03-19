@@ -92,8 +92,8 @@ public class RestLinkService {
 //TODO after link with front
                 value = emailService.sendResetLink(
                         account.getEmail(),
-                        "Reset your password - Your Voice",
-                        "Click the link:\n" +
+                        "Reset your password for Balligh _ بَلِّغْ ",
+                        "Hello "+account.getUserName()+" \nClick the link bellow to reset your password :\n" +
                                 "http://localhost:5173/reset-password?token=" + token
                 );
 
