@@ -2,9 +2,11 @@ package com.myapp.complaints.DAO;
 
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.enums.ComplaintState;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 //@RepositoryRestResource(
@@ -12,9 +14,12 @@ import java.util.List;
 //)
 public interface ComplaintRepo extends JpaRepository<Complaint,Long> {
 
-    @Query("select c from Complaint c where c.deleted = false")
+//    @Query("select c from Complaint c where c.deleted = false")
+//    List<Complaint> findTop10ByDeletedFalseOrderByDateTimeOfAddDesc();
 
-    List<Complaint> findTop10ByDeletedFalseOrderByDateTimeOfAddDesc();
+    @Query("select c from Complaint c where c.deleted = false")
+    List<Complaint> findByDeletedFalseOrderByDateTimeOfAddDesc(PageRequest pageable);
+
     long countByDeletedFalse(); // All Complaints
     List<Complaint> findBySectorIdAndDeletedFalse(Long sectorId);
     List<Complaint> findByInstitutionIdAndDeletedFalse(Long institutionId);

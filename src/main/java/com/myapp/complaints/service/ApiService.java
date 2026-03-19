@@ -11,6 +11,7 @@ import com.myapp.complaints.mapper.ComplaintMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -128,7 +129,7 @@ public class ApiService {
     public List<ComplaintResponseDto> getLast10Complaints() {
 
         return complaintRepo
-                .findTop10ByDeletedFalseOrderByDateTimeOfAddDesc()
+                .findByDeletedFalseOrderByDateTimeOfAddDesc(PageRequest.of(0,10))
                 .stream()
                 .map(complaintMapper::toDto)
                 .toList();
