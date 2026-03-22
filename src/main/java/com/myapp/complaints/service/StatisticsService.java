@@ -93,19 +93,19 @@ public class StatisticsService {
         );
     }
 
-    public List<ComplaintResponseDto> getAllComplaintsForCitizen(String email){
-        return complaintRepo.findByAddedBy_Email(email)
-                .stream()
-                .map(complaintMapper::toDto)
-                .toList();
-    }
+//    public List<ComplaintResponseDto> getAllComplaintsForCitizen(String email){
+//        return complaintRepo.findByAddedBy_Email(email)
+//                .stream()
+//                .map(complaintMapper::toDto)
+//                .toList();
+//    }
 
-    public List<ComplaintResponseDto> getTop3ComplaintsForCitizen(String email){
-        return complaintRepo.findTop3ByAddedBy_EmailAndDeletedFalse(email)
-                .stream()
-                .map(complaintMapper::toDto)
-                .toList();
-    }
+//    public List<ComplaintResponseDto> getTop3ComplaintsForCitizen(String email){
+//        return complaintRepo.findTop3ByAddedBy_EmailAndDeletedFalse(email)
+//                .stream()
+//                .map(complaintMapper::toDto)
+//                .toList();
+//    }
 //    public CitizenDashboardResponseDto buildCitizenDashboardResponse(String email){
 //        return new CitizenDashboardResponseDto(
 //                getCitizenDashboardStatistics(email),
