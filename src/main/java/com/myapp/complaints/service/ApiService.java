@@ -8,16 +8,19 @@ import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.mapper.AccountInfoMapper;
 import com.myapp.complaints.mapper.ComplaintMapper;
+import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -126,14 +129,14 @@ public class ApiService {
 
 
 //Get data for homePage (last complaints)
-    public List<ComplaintResponseDto> getLast10Complaints() {
-
-        return complaintRepo
-                .findByDeletedFalseOrderByDateTimeOfAddDesc(PageRequest.of(0,10))
-                .stream()
-                .map(complaintMapper::toDto)
-                .toList();
-    }
+//    public List<ComplaintResponseDto> getLast10Complaints() {
+//
+//        return complaintRepo
+//                .findByDeletedFalseOrderByDateTimeOfAddDesc(PageRequest.of(0,10))
+//                .stream()
+//                .map(complaintMapper::toDto)
+//                .toList();
+//    }
 
 // Get profile info
     private final AccountInfoMapper accountInfoMapper;
@@ -159,4 +162,61 @@ public class ApiService {
                 .orElseThrow(()->new RuntimeException("no employee found for account "+account.getEmail()));
         return accountInfoMapper.employeeInfoToDto(employee);
     }
+
+
+//
+    public List<ComplaintResponseDto> getComplaints(ComplaintFilterRequestDto filter) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        Specification<Complaint> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // deleted = false
+            predicates.add(cb.equal(root.get("deleted"), false));
+
+            if (filter.governorateId() != null) {
+                predicates.add(cb.equal(root.get("governorate").get("id"), filter.governorateId()));
+            }
+
+            if (filter.sectorId() != null) {
+                predicates.add(cb.equal(root.get("sector").get("id"), filter.sectorId()));
+            }
+
+            if (filter.institutionId() != null) {
+                predicates.add(cb.equal(root.get("institution").get("id"), filter.institutionId()));
+            }
+
+            if (filter.state() != null) {
+                predicates.add(cb.equal(root.get("state"), filter.state()));
+            }
+
+            // citizen only
+            if (Boolean.TRUE.equals(filter.myComplaints())) {
+                predicates.add(cb.equal(root.get("addedBy").get("email"), email));
+            }
+
+            // Keyword search
+            if (filter.keyword() != null && !filter.keyword().isEmpty()) {
+                String pattern = "%" + filter.keyword().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("title")), pattern),
+                        cb.like(cb.lower(root.get("description")), pattern)
+                ));
+            }
+
+            query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return complaintRepo.findAll(
+                        spec,
+                        PageRequest.of(filter.page(), filter.size())
+                ).stream()
+                .map(complaintMapper::toDto)
+                .toList();
+    }
+
 }
