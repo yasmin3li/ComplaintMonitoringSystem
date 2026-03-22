@@ -2,6 +2,7 @@ package com.myapp.complaints.controller;
 
 
 import com.myapp.complaints.dto.ComplaintCreateDto;
+import com.myapp.complaints.dto.ComplaintFilterRequestDto;
 import com.myapp.complaints.dto.ComplaintResponseDto;
 import com.myapp.complaints.service.ApiService;
 import com.myapp.complaints.service.StatisticsService;
@@ -46,17 +47,15 @@ public class ApiController {
 //                apiService.createComplaint(dto, images)
 //        );
 //    }
+//    @GetMapping("/homepage/dashboard/top10complaints")
+//    public ResponseEntity<List<ComplaintResponseDto>> getLastComplaints() {
+//
+//        return ResponseEntity.ok(
+//                apiService.getLast10Complaints()
+//        );
+//    }
 
-
-    @GetMapping("/homepage/dashboard/top10complaints")
-    public ResponseEntity<List<ComplaintResponseDto>> getLastComplaints() {
-
-        return ResponseEntity.ok(
-                apiService.getLast10Complaints()
-        );
-    }
-
-//TODO: DTO
+//TODO: Replace with specification Query
         @GetMapping("/homepage/dashboard/statistics")
         public Map<String, Long> getHomeStatistics() {
             return Map.of(
@@ -89,7 +88,7 @@ public class ApiController {
 //        String email = auth.getName();
 //        return ResponseEntity.ok(statisticsService.buildCitizenDashboardResponse(email));
 //    }
-
+//TODO: Replace with specification Query
     @GetMapping("/citizen/dashboard/statistics")
     public ResponseEntity<?> getCitizenDashboardStatistics() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -97,18 +96,23 @@ public class ApiController {
         return ResponseEntity.ok(statisticsService.getCitizenDashboardStatistics(email));
     }
 
-    @GetMapping("/citizen/dashboard/top3Complaints")
-    public ResponseEntity<?> getTop3CitizenComplaints() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        return ResponseEntity.ok(statisticsService.getTop3ComplaintsForCitizen(email));
-    }
+//    @GetMapping("/citizen/dashboard/top3Complaints")
+//    public ResponseEntity<?> getTop3CitizenComplaints() {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        String email = auth.getName();
+//        return ResponseEntity.ok(statisticsService.getTop3ComplaintsForCitizen(email));
+//    }
 
-    @GetMapping("/citizen/dashboard/allComplaints")
-    public ResponseEntity<?> getAllCitizenComplaints() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String email = auth.getName();
-        return ResponseEntity.ok(statisticsService.getAllComplaintsForCitizen(email));
+//    @GetMapping("/citizen/dashboard/allComplaints")
+//    public ResponseEntity<?> getAllCitizenComplaints() {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//        String email = auth.getName();
+//        return ResponseEntity.ok(statisticsService.getAllComplaintsForCitizen(email));
+//    }
+
+    @GetMapping("/getComplaints")
+    public ResponseEntity<?> getComplaints(ComplaintFilterRequestDto filter) {
+        return ResponseEntity.ok(apiService.getComplaints(filter));
     }
 
 //
