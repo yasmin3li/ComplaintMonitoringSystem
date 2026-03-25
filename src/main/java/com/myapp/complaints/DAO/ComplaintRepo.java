@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 //Using Specification Query executor
 public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecificationExecutor<Complaint> {
 
@@ -38,6 +40,9 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
 
     long countByAddedBy_EmailAndDeletedFalse(String email);
     long countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState state, String email);
+
+
+    Optional<Complaint>  findByIdAndDeletedFalse(Long complaintId);
 
 //    List<Complaint> findByAddedBy_EmailAndDeletedFalse(String email);
 //    List<Complaint> findByAddedBy_Email(String email);
