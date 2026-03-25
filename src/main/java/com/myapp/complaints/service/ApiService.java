@@ -12,6 +12,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.Authentication;
@@ -19,9 +20,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +43,8 @@ public class ApiService {
     private final ComplaintMapper complaintMapper;
     private final CitizenRepo citizenRepo;
     private final ComplaintImageRepo complaintImageRepo;
+    private final AuthorizationService authorizationService;
+    private final VotingService votingService;
 
     @Transactional
     public ApiResponseDto<Object> createComplaint(@Valid ComplaintCreateDto dto) {
@@ -89,17 +94,16 @@ public class ApiService {
 
         complaint.setAddedBy(account);
 
+//Add this Complaint to ComplaintTrackingLog
         ComplaintTrackingLog log = new ComplaintTrackingLog();
         log.setComplaint(complaint);
         log.setPreviousState(null);
         log.setNewState(ComplaintState.NEW);
         log.setActionType(ActionType.CREATED);
-        log.setActionBy(null);
+        log.setActionBy(account);
         log.setComments("Citizen Added Complaint");
         complaint.getLogs().add(log);
 
-    Complaint savedComplaint= complaintRepo.save(complaint);
-        complaintTracingLogRepo.save(log);
 
 //TODO    dealing with images
         if(dto.images() != null) {
@@ -108,21 +112,23 @@ public class ApiService {
 
                 ComplaintImage img = new ComplaintImage();
 
-                img.setComplaint(savedComplaint);
+                img.setComplaint(complaint);
                 img.setImageUrl(url);
                 img.setAddedBy(account);
                 img.setType(ImageType.BEFORE_SOLVE);
 
                 //حتى تبقى البيانات متزامنة بحال طلبت الصور في نفس المناقلة
-                savedComplaint.getImages().add(img);
-                complaintImageRepo.save(img);
+                complaint.getImages().add(img);
+//                complaintImageRepo.save(img);
             }
         }
+        Complaint savedComplaint= complaintRepo.save(complaint);
+//        complaintTracingLogRepo.save(log);
 
 //        return savedComplaint;
         return new ApiResponseDto<Object>(
                 true,
-                "your complaint < "+savedComplaint.getTitle()+" > was added successfully",
+                String.format("تم حفظ شكواك: \"%s\" بنجاح",savedComplaint.getTitle()),
                 null
         );
     }
@@ -165,7 +171,7 @@ public class ApiService {
 
 
 //
-    public List<ComplaintResponseDto> getComplaints(ComplaintFilterRequestDto filter) {
+    public List<ComplaintResponseDto> getComplaints(ComplaintFilterRequestDto filter,boolean localUser) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
@@ -193,9 +199,11 @@ public class ApiService {
             }
 
             // citizen only
-            if (Boolean.TRUE.equals(filter.myComplaints())) {
+            if (localUser){
+//                if (Boolean.TRUE.equals(filter.myComplaints())) {
                 predicates.add(cb.equal(root.get("addedBy").get("email"), email));
             }
+
 
             // Keyword search
             if (filter.keyword() != null && !filter.keyword().isEmpty()) {
@@ -217,6 +225,28 @@ public class ApiService {
                 ).stream()
                 .map(complaintMapper::toDto)
                 .toList();
+    }
+
+    public List<ComplaintTrackingLogDto> getTimeLine(Long complaintId) throws AccessDeniedException, NotFoundException {
+
+// TODO: dealing with deleted / not found for all case like this
+        Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
+                .orElseThrow(() -> new NotFoundException("Complaint not found"));
+
+        if (authorizationService.checkAccess(complaint.getAddedBy().getEmail())){
+            return  complaintTracingLogRepo.findByComplaintId(complaintId);
+        }
+        else{
+            throw  new AccessDeniedException("You are not allowed to view this complaint");
+        }
+    }
+
+
+// chose complaint from the ui to interact with it
+    public ComplaintResponseDto getComplaint(Long complaintId) throws NotFoundException {
+        Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
+                .orElseThrow(() -> new NotFoundException("Complaint not found"));
+        return complaintMapper.toDto(complaint);
     }
 
 }

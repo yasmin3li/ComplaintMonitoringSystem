@@ -4,15 +4,19 @@ package com.myapp.complaints.controller;
 import com.myapp.complaints.dto.ComplaintCreateDto;
 import com.myapp.complaints.dto.ComplaintFilterRequestDto;
 import com.myapp.complaints.dto.ComplaintResponseDto;
+import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.service.ApiService;
 import com.myapp.complaints.service.StatisticsService;
+import com.myapp.complaints.service.VotingService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +28,7 @@ public class ApiController {
 
     private  final ApiService apiService;
     private final StatisticsService statisticsService;
+    private final VotingService votingService;
 
 // content-type: multipart/form-data not Json, before data+images
     @PostMapping("/complaint")
@@ -103,16 +108,39 @@ public class ApiController {
 //        return ResponseEntity.ok(statisticsService.getTop3ComplaintsForCitizen(email));
 //    }
 
-//    @GetMapping("/citizen/dashboard/allComplaints")
-//    public ResponseEntity<?> getAllCitizenComplaints() {
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        String email = auth.getName();
-//        return ResponseEntity.ok(statisticsService.getAllComplaintsForCitizen(email));
-//    }
+    @GetMapping("/citizen/myComplaints")
+    public ResponseEntity<?> getMyComplaints(ComplaintFilterRequestDto filter) {
 
-    @GetMapping("/getComplaints")
+        return ResponseEntity.ok(apiService.getComplaints(filter,true));
+    }
+
+    @GetMapping("/homepage/complaints")
     public ResponseEntity<?> getComplaints(ComplaintFilterRequestDto filter) {
-        return ResponseEntity.ok(apiService.getComplaints(filter));
+        return ResponseEntity.ok(apiService.getComplaints(filter,false));
+    }
+
+    @GetMapping("/citizen/complaints/{complaintId}/timeline")
+    public ResponseEntity<?> getTimeLine(@PathVariable Long complaintId) throws AccessDeniedException, NotFoundException {
+        return ResponseEntity.ok(apiService.getTimeLine(complaintId));
+    }
+
+    @GetMapping("/homepage/complaints/{complaintId}")
+    public ResponseEntity<?> getComplaint(@PathVariable Long complaintId) throws NotFoundException {
+        return ResponseEntity.ok(apiService.getComplaint(complaintId));
+    }
+
+    @GetMapping("/homepage/complaint/{complaintId}/votes")
+    public ResponseEntity<?> getVotes(@PathVariable Long complaintId) throws NotFoundException {
+        return ResponseEntity.ok(votingService.getVotes(complaintId));
+    }
+
+    @PostMapping("/homepage/complaint/{complaintId}/like")
+    public ResponseEntity<?> addLike(@PathVariable Long complaintId) throws NotFoundException {
+        return ResponseEntity.ok(votingService.Voting(complaintId, VotingType.LIKE));
+    }
+    @PostMapping("/homepage/complaint/{complaintId}/disLike")
+    public ResponseEntity<?> addDisLike(@PathVariable Long complaintId) throws NotFoundException {
+        return ResponseEntity.ok(votingService.Voting(complaintId, VotingType.DISLIKE));
     }
 
 //

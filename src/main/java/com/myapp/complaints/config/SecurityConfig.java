@@ -115,20 +115,27 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 // TODO                       .requestMatchers("/api/employee/**").hasAnyRole("موظف الاستقبال","مدير")
 //                        .requestMatchers("/api/citizen/**").hasRole("مواطن")
 
-                        .requestMatchers(HttpMethod.GET, "/api/homepage/**").permitAll() // public GET
+                        .requestMatchers(HttpMethod.GET, "/api/homepage/dashboard/statistics/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/homepage/complaint/*/votes").permitAll() //+vote
+                        .requestMatchers(HttpMethod.GET, "/api/homepage/complaint/*/disLike").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/homepage/complaint/*/Like").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/homepage/complaints/**").permitAll() //+vote
+
+
 
 //TODO role add roles &&&&&&&&&&&&&& dealing with "owned complaint"
-                                .requestMatchers(HttpMethod.GET,"/api/accounts/**","/api/complaints/**").hasAnyRole("أدمن")
-                                .requestMatchers(HttpMethod.GET,"/api/getComplaints/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/governorates/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/sectors/**").permitAll()
+//                                .requestMatchers(HttpMethod.GET,"/api/accounts/**","/api/complaints/**").hasAnyRole("أدمن")
+                        .requestMatchers(HttpMethod.GET,"/api/getComplaints/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/governorates/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/sectors/**").permitAll()
 //                                .requestMatchers(HttpMethod.GET,"/api/services/**","api/roles/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/serviceAvailables/**","/api/roles/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/institutionSectorGovernorates/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/sectorGovernorates/**").permitAll()
-                                .requestMatchers(HttpMethod.GET,"/api/verificationCodes/**").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/institutions/**","/api/statistics/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
+                        .requestMatchers(HttpMethod.GET,"/api/serviceAvailables/**","/api/roles/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/institutionSectorGovernorates/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/sectorGovernorates/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/verificationCodes/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/institutions/**","/api/statistics/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
+                        .requestMatchers(HttpMethod.GET,"api/complaints/**").authenticated()
 
 //                        TODO: later make others see profile for each other
                                 .requestMatchers(HttpMethod.GET,"/api/citizen/**","/api/employee/profile/**").authenticated()
