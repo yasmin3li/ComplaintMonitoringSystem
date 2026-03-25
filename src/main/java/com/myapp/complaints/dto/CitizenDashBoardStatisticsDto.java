@@ -4,6 +4,6 @@ public record CitizenDashBoardStatisticsDto(
     long totalComplaints,
     long inProgressComplaints,
      long solvedComplaints,
-     String completionRate
+     double completionRate
      )
     {}
