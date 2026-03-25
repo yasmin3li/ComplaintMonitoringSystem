@@ -31,6 +31,7 @@ public class ComplaintTrackingLog {
     @Enumerated(EnumType.STRING)
     private ActionType actionType;
 
+    //internal comment/by employee
     private String comments;
 
     private LocalDateTime actionDate;
@@ -41,8 +42,8 @@ public class ComplaintTrackingLog {
     private Complaint complaint;
 
     @ManyToOne
-    @JoinColumn(name = "action_by_employee_id")
-    private Employee actionBy;
+    @JoinColumn(name = "action_by_account_id")
+    private Account actionBy;
 
     @ManyToOne
     @JoinColumn(name = "assigned_to_employee_id")
