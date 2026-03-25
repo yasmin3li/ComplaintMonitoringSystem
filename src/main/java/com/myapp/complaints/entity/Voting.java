@@ -1,5 +1,6 @@
 package com.myapp.complaints.entity;
 
+import com.myapp.complaints.enums.VotingType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,7 +18,10 @@ public class Voting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VotingType type;
+
     private LocalDateTime dateTimeOfVoting = LocalDateTime.now();
 
     @ManyToOne

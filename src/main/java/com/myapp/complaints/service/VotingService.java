@@ -1,0 +1,110 @@
+package com.myapp.complaints.service;
+
+import com.myapp.complaints.DAO.AccountRepo;
+import com.myapp.complaints.DAO.ComplaintRepo;
+import com.myapp.complaints.DAO.VotingRepo;
+import com.myapp.complaints.dto.ApiResponseDto;
+import com.myapp.complaints.dto.VotingDto;
+import com.myapp.complaints.entity.Account;
+import com.myapp.complaints.entity.Complaint;
+import com.myapp.complaints.entity.Voting;
+import com.myapp.complaints.enums.VotingType;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.apache.ibatis.javassist.NotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+@AllArgsConstructor
+@Transactional
+public class VotingService {
+    private final AuthorizationService authorizationService;
+    private final VotingRepo votingRepo;
+    private final ComplaintRepo complaintRepo;
+    private final AccountRepo accountRepo;
+
+    public VotingDto getVotes(Long complaintId) {
+        Long likesNumber = likesCount(complaintId);
+        Long disLikesNumber = disLikesCount(complaintId);
+        return new VotingDto(likesNumber,
+                disLikesNumber
+        );
+    }
+
+    public Long likesCount(Long complaintId) {
+        return votingRepo.countByComplaintIdAndType(complaintId,VotingType.LIKE);
+    }
+
+    public Long disLikesCount(Long complaintId) {
+        return votingRepo.countByComplaintIdAndType(complaintId, VotingType.DISLIKE);
+    }
+
+    public ApiResponseDto<Object> Voting(Long complaintId, VotingType votingType) throws NotFoundException {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String currentUser = auth.getName();
+
+        Account account = accountRepo.findByEmail(currentUser).
+                orElseThrow(()-> new NotFoundException("account not found"));
+
+        Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
+                .orElseThrow(() -> new NotFoundException("Complaint not found"));
+        String addedBy = complaint.getAddedBy().getEmail();
+
+        if(authorizationService.checkAccess(addedBy)){
+            return new ApiResponseDto<>(
+                    false,
+                    "current user can't vote because is the owner for this complaint",
+                    null
+            );
+        }
+
+        Optional<Voting> voting = votingRepo.findByAccountIdAndComplaintId(account.getId(),complaintId);
+
+        if(voting.isPresent()){
+
+            Voting voting1 = voting.get();
+
+            if(voting1.getType().equals(votingType)){
+
+                votingRepo.deleteById(voting1.getId());
+
+                return new ApiResponseDto<>(
+                    true,
+                    "vote deleted",
+                    null
+            );
+            }
+
+            voting1.setType(votingType);
+            votingRepo.save(voting1);
+
+            return new ApiResponseDto<>(
+                    true,
+                    "vote updated",
+                    null
+            );
+        }
+
+        Voting newVote = new Voting();
+        newVote.setAccount(account);
+        newVote.setComplaint(complaint);
+        newVote.setDateTimeOfVoting(LocalDateTime.now());
+        newVote.setType(votingType);
+        votingRepo.save(newVote);
+
+        return new ApiResponseDto<>(
+                true,
+                "voting done successfully",
+                null
+        );
+
+    }
+
+}
