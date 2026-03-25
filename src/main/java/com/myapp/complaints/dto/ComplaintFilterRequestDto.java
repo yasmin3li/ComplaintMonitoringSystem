@@ -7,7 +7,7 @@ public record ComplaintFilterRequestDto(
         Long sectorId,
         Long institutionId,
         ComplaintState state,
-        Boolean myComplaints,
+//        Boolean myComplaints,
         int page,
         int size,
         String keyword

@@ -75,12 +75,11 @@ public class StatisticsService {
         return complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.RESOLVED,email);
     }
 
-    public String completionRate(String email){
+    public double completionRate(String email){
         long completionSum = complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.RESOLVED, email);
         long total = complaintRepo.countByAddedBy_EmailAndDeletedFalse(email);
-        if(total == 0) return 0+" %";
-        double rate = (double) completionSum / total * 100;
-        return  rate+" %";
+        if(total == 0) return 0;
+        return  (double) completionSum / total * 100;
     }
 
     public CitizenDashBoardStatisticsDto getCitizenDashboardStatistics(String email){
