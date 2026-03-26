@@ -1,9 +1,7 @@
 package com.myapp.complaints.controller;
 
 
-import com.myapp.complaints.dto.ComplaintCreateDto;
-import com.myapp.complaints.dto.ComplaintFilterRequestDto;
-import com.myapp.complaints.dto.ComplaintResponseDto;
+import com.myapp.complaints.dto.*;
 import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.service.ApiService;
 import com.myapp.complaints.service.StatisticsService;
@@ -17,7 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -143,46 +140,12 @@ public class ApiController {
         return ResponseEntity.ok(votingService.Voting(complaintId, VotingType.DISLIKE));
     }
 
-//
-//    @PatchMapping("/{id}/state")
-//    public ResponseEntity<?> changeState(
-//            @PathVariable Long id,
-//            @Valid @RequestBody ComplaintUpdateStateDto dto) {
-//
-//        complaintService.changeState(id, dto);
-//        return ResponseEntity.ok("State updated");
-//    }
-//    public void changeState(Long complaintId, ComplaintUpdateStateDto dto) {
-//
-//        Complaint complaint = complaintRepo.findById(complaintId)
-//                .orElseThrow(() -> new RuntimeException("Complaint not found"));
-//
-//        complaint.setState(dto.newState());
-//
-//        // EventHandler سي:
-//        // - يتحقق من صحة الانتقال
-//        // - ينشئ Tracking Log
-//        // - يضبط dateTimeOfSolve إذا لزم
-//        complaintRepo.save(complaint);
-//    }
-//    public void deleteComplaint(Long id) {
-//        Complaint complaint = complaintRepo.findById(id)
-//                .orElseThrow(() -> new RuntimeException("Complaint not found"));
-//
-//        complaintRepo.delete(complaint);
-//        // EventHandler يمنع الحذف الفيزيائي
-//    }
-//
-//    // حذف شكوى (soft delete)
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<?> deleteComplaint(@PathVariable Long id) {
-//        complaintService.deleteComplaint(id);
-//        return ResponseEntity.ok("Complaint deleted");
-//    }
-//    public record ComplaintUpdateStateDto(
-//            @NotNull
-//            ComplaintState newState
-//    ) {}
-
+//TODO: add logic change phone number / email / and dealing with employee's account
+    @PatchMapping("/citizen/profile")
+    public ResponseEntity<?> updateCitizenProfile(@RequestBody @Valid UpdateCitizenProfileInfoDto dto,
+                                           Authentication auth) {
+        String email = auth.getName();
+        return ResponseEntity.ok(apiService.updateCitizenProfile(email,dto));
+    }
 
 }

@@ -19,12 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -249,4 +249,17 @@ public class ApiService {
         return complaintMapper.toDto(complaint);
     }
 
+    @Transactional
+    public ApiResponseDto<Object> updateCitizenProfile(String email, UpdateCitizenProfileInfoDto dto ) {
+
+        Citizen citizen = citizenRepo.findByAccount_Email(email).
+                orElseThrow(() -> new ResourceAccessException("account not found"));
+
+         accountInfoMapper.updateAccountFromDto(dto,citizen);
+         return new ApiResponseDto<Object>(
+                 true,
+                 "your info was updated successfully",
+                 null
+         );
+    }
 }

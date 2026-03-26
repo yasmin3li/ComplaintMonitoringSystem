@@ -13,4 +13,6 @@ public interface CitizenRepo extends JpaRepository<Citizen,Long> {
 
     @RestResource(exported = false)
     Optional<Citizen> findByAccountId(Long accountId);
+
+    Optional<Citizen> findByAccount_Email(String email);
 }

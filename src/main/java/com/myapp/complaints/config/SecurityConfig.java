@@ -138,10 +138,8 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                         .requestMatchers(HttpMethod.GET,"api/complaints/**").authenticated()
 
 //                        TODO: later make others see profile for each other
-                                .requestMatchers(HttpMethod.GET,"/api/citizen/**","/api/employee/profile/**").authenticated()
-//                        .requestMatchers("/auth/ change-password/**"
-//                                , "/auth/logout/**"
-//                        ).authenticated()
+                        .requestMatchers(HttpMethod.GET,"/api/citizen/**","/api/employee/profile/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH,"/api/citizen/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
