@@ -173,4 +173,27 @@ public class ApiController {
         String email = auth.getName();
         return ResponseEntity.ok(notificationService.marksAsReadAllNotifications(email));
     }
+
+    @GetMapping("/governorates")
+    public ResponseEntity<?> governorates(){
+
+        return ResponseEntity.ok(apiService.governorates());
+    }
+
+    @GetMapping("/sectorGovernorates/findByGovernorateId/{governorateId}")
+    public ResponseEntity<?> sectorGovernorates( @PathVariable Long governorateId){
+
+        return ResponseEntity.ok(apiService.sectorGovernorates(governorateId));
+    }
+
+    @GetMapping("/institutionSectorGovernorates/findBySectorGovernorateIdAndIsActiveTrue/{sectorGovernorateId}")
+    public ResponseEntity<?> institutionSectorGovernorates( @PathVariable Long sectorGovernorateId){
+        return ResponseEntity.ok(apiService.institutionSectorGovernorates(sectorGovernorateId));
+    }
+
+    @GetMapping("/servicesAvailable/findByInstitutionId/{institutionId}")
+    public ResponseEntity<?> servicesAvailable( @PathVariable Long institutionId){
+        return ResponseEntity.ok(apiService.servicesAvailable(institutionId));
+    }
+
 }

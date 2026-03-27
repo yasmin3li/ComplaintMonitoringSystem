@@ -18,5 +18,6 @@ public interface InstitutionSectorGovernorateRepo extends JpaRepository<Institut
             Long governorateId
     );
 
+    List<InstitutionSectorGovernorate> findBySectorGovernorate_Id(Long sectorGovernorateId);
 }
 //GET /institutionSectorGovernorates/search/findBySectorGovernorateId?sectorGovernorateId=5

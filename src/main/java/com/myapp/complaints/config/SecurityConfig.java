@@ -126,8 +126,14 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 //TODO role add roles &&&&&&&&&&&&&& dealing with "owned complaint"
 //                                .requestMatchers(HttpMethod.GET,"/api/accounts/**","/api/complaints/**").hasAnyRole("أدمن")
                         .requestMatchers(HttpMethod.GET,"/api/getComplaints/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/governorates/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/sectors/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/governorates/**",
+                                "/api/sectorGovernorates/**",
+                                "/api/institutionSectorGovernorates/**",
+                                "/api/servicesAvailable/**"
+                        ).permitAll()
+
 //                                .requestMatchers(HttpMethod.GET,"/api/services/**","api/roles/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/serviceAvailables/**","/api/roles/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/institutionSectorGovernorates/**").permitAll()

@@ -30,6 +30,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ApiService {
+    private final InstitutionSectorGovernorateRepo institutionSectorGovernorateRepo;
+    private final SectorGovernorateRepo sectorGovernorateRepo;
     private final ComplaintTracingLogRepo complaintTracingLogRepo;
     private final EmployeeRepo employeeRepo;
 
@@ -265,5 +267,48 @@ public class ApiService {
                  "your info was updated successfully",
                  null
          );
+    }
+
+    public List<Governorate> governorates() {
+        List<Governorate> governorates = governorateRepo.findAll();
+        if(!governorates.isEmpty()){
+            return governorates;
+        }
+        else{
+            return new ArrayList<>();
+        }
+    }
+
+    public List<SectorGovernorate> sectorGovernorates(Long governorateId) {
+
+        List<SectorGovernorate> sectors = sectorGovernorateRepo.findByGovernorate_Id(governorateId);
+        if(!sectors.isEmpty()){
+            return sectors;
+        }
+        else{
+            return new ArrayList<>();
+        }
+    }
+
+    public List<InstitutionSectorGovernorate> institutionSectorGovernorates(Long sectorGovernorateId) {
+
+        List<InstitutionSectorGovernorate> institutions = institutionSectorGovernorateRepo.findBySectorGovernorate_Id(sectorGovernorateId);
+        if(!institutions.isEmpty()){
+            return institutions;
+        }
+        else{
+            return new ArrayList<>();
+        }
+    }
+
+    public List<ServiceAvailable> servicesAvailable(Long institutionId) {
+
+        List<ServiceAvailable> services = serviceAvailableRepo.findByInstitutionId(institutionId);
+        if(!services.isEmpty()){
+            return services;
+        }
+        else{
+            return new ArrayList<>();
+        }
     }
 }
