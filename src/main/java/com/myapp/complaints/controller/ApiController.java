@@ -4,6 +4,7 @@ package com.myapp.complaints.controller;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.service.ApiService;
+import com.myapp.complaints.service.NotificationService;
 import com.myapp.complaints.service.StatisticsService;
 import com.myapp.complaints.service.VotingService;
 import jakarta.validation.Valid;
@@ -26,6 +27,7 @@ public class ApiController {
     private  final ApiService apiService;
     private final StatisticsService statisticsService;
     private final VotingService votingService;
+    private final NotificationService notificationService;
 
 // content-type: multipart/form-data not Json, before data+images
     @PostMapping("/complaint")
@@ -148,4 +150,27 @@ public class ApiController {
         return ResponseEntity.ok(apiService.updateCitizenProfile(email,dto));
     }
 
+//    @PostMapping("/citizen/sendNotification")
+//    public ResponseEntity<?> sendNotifications(Authentication auth,@RequestBody String reason){
+//        String email = auth.getName();
+//        return ResponseEntity.ok(notificationService.buildNotification();
+//    }
+
+    @GetMapping("/citizen/notifications")
+    public ResponseEntity<?> displayNotifications(Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(notificationService.displayNotifications(email));
+    }
+
+    @GetMapping("/citizen/notifications/{notificationId}")
+    public ResponseEntity<?> openNotification(Authentication auth, @PathVariable Long notificationId){
+        String email = auth.getName();
+        return ResponseEntity.ok(notificationService.openNotification(email,notificationId));
+    }
+
+    @PostMapping("/citizen/notifications/mark")
+    public ResponseEntity<?> marksAsReadAllNotification(Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(notificationService.marksAsReadAllNotifications(email));
+    }
 }

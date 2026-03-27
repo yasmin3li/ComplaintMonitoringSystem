@@ -45,6 +45,7 @@ public class ApiService {
     private final ComplaintImageRepo complaintImageRepo;
     private final AuthorizationService authorizationService;
     private final VotingService votingService;
+    private final NotificationService notificationService;
 
     @Transactional
     public ApiResponseDto<Object> createComplaint(@Valid ComplaintCreateDto dto) {
@@ -122,10 +123,13 @@ public class ApiService {
 //                complaintImageRepo.save(img);
             }
         }
-        Complaint savedComplaint= complaintRepo.save(complaint);
-//        complaintTracingLogRepo.save(log);
 
-//        return savedComplaint;
+        Complaint savedComplaint= complaintRepo.save(complaint);
+
+        Notification notification = notificationService.buildNotification(complaint,ComplaintState.NEW,"");
+
+        notificationService.sendNotification(notification,account);
+
         return new ApiResponseDto<Object>(
                 true,
                 String.format("تم حفظ شكواك: \"%s\" بنجاح",savedComplaint.getTitle()),
