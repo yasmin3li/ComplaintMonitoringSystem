@@ -129,6 +129,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                         .requestMatchers(HttpMethod.GET,"/api/sectors/**").permitAll()
 
                         .requestMatchers(HttpMethod.GET, "/api/governorates/**",
+                                "/api/allGovernorates/**",
                                 "/api/sectorGovernorates/**",
                                 "/api/institutionSectorGovernorates/**",
                                 "/api/servicesAvailable/**",

@@ -180,7 +180,7 @@ public class ApiController {
         return ResponseEntity.ok(notificationService.marksAsReadAllNotifications(email));
     }
 
-    @GetMapping("/governorates")
+    @GetMapping("/allGovernorates")
     public ResponseEntity<?> governorates(){
 
         return ResponseEntity.ok(apiService.governorates());
