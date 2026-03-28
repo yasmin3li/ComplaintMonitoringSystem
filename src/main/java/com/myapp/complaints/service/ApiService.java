@@ -311,4 +311,9 @@ public class ApiService {
             return new ArrayList<>();
         }
     }
+
+    public List<ComplaintImageDto> complaintImages(Long complaintId) {
+
+        return complaintImageRepo.findByComplaint_Id(complaintId);
+    }
 }

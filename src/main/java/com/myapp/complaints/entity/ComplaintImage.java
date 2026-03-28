@@ -20,6 +20,7 @@ public class ComplaintImage {
 //    private String description;
     private String imageUrl;
 
+    @Enumerated(EnumType.STRING)
     private ImageType type;
 
     @ManyToOne(fetch = FetchType.LAZY)

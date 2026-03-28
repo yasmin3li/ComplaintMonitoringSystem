@@ -131,8 +131,10 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                         .requestMatchers(HttpMethod.GET, "/api/governorates/**",
                                 "/api/sectorGovernorates/**",
                                 "/api/institutionSectorGovernorates/**",
-                                "/api/servicesAvailable/**"
+                                "/api/servicesAvailable/**",
+                                "/api/images/**"
                         ).permitAll()
+
 
 //                                .requestMatchers(HttpMethod.GET,"/api/services/**","api/roles/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/serviceAvailables/**","/api/roles/**").permitAll()
