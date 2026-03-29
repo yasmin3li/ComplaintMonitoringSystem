@@ -69,11 +69,11 @@ public class VotingService {
 
         if(voting.isPresent()){
 
-            Voting voting1 = voting.get();
+            Voting updateVoting = voting.get();
 
-            if(voting1.getType().equals(votingType)){
+            if(updateVoting.getType().equals(votingType)){
 
-                votingRepo.deleteById(voting1.getId());
+                votingRepo.deleteById(updateVoting.getId());
 
                 return new ApiResponseDto<>(
                     true,
@@ -82,8 +82,9 @@ public class VotingService {
             );
             }
 
-            voting1.setType(votingType);
-            votingRepo.save(voting1);
+            updateVoting.setType(votingType);
+            updateVoting.setDateTimeOfVoting(LocalDateTime.now());
+            votingRepo.save(updateVoting);
 
             return new ApiResponseDto<>(
                     true,
