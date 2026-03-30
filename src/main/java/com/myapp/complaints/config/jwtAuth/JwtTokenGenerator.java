@@ -45,7 +45,7 @@ public class JwtTokenGenerator {
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("YOUR_VOICE")
                 .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plus(15, ChronoUnit.MINUTES))
+                .expiresAt(Instant.now().plus(15, ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("scope", permissions)
                 .claim("role",roles)

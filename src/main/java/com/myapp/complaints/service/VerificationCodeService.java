@@ -53,7 +53,7 @@ public class VerificationCodeService {
                 .account(account)
                 .verificationCode(code)
                 .type(type)
-                .verificationCodeExpireTime(LocalDateTime.now().plusMinutes(10))
+                .verificationCodeExpireTime(LocalDateTime.now().plusDays(15))
                 .state(CodeAndLinkState.UNUSED)
                 .build();
 

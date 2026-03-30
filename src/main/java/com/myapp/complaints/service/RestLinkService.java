@@ -81,7 +81,7 @@ public class RestLinkService {
             resetToken.setAccount(account);
             resetToken.setType(type);
             resetToken.setState(CodeAndLinkState.UNUSED);
-            resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+            resetToken.setExpiryDate(LocalDateTime.now().plusDays(15));
 
             passwordResetTokenRepo.save(resetToken);
 
