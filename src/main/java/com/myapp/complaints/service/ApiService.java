@@ -1,5 +1,6 @@
 package com.myapp.complaints.service;
 
+import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
@@ -197,11 +198,15 @@ public class ApiService {
             }
 
             if (filter.institutionId() != null) {
+
                 predicates.add(cb.equal(root.get("institution").get("id"), filter.institutionId()));
             }
 
-            if (filter.state() != null) {
-                predicates.add(cb.equal(root.get("state"), filter.state()));
+            if (filter.state() != null && !filter.state().isBlank()) {
+
+                ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
+
+                predicates.add(cb.equal(root.get("state"), complaintState));
             }
 
             // citizen only
@@ -232,6 +237,21 @@ public class ApiService {
                 .map(complaintMapper::toDto)
                 .toList();
     }
+
+//    private ComplaintState convertStateFromArToEng(String state) {
+//
+//        return switch (state) {
+//            case "جديدة" -> ComplaintState.NEW;
+//            case "قيد التقدم" -> ComplaintState.IN_PROGRESS;
+//            case "محلولة" -> ComplaintState.RESOLVED;
+//            case "مرفوضة" ->ComplaintState.REJECTED;
+//            case "مغلقة" -> ComplaintState.CLOSED;
+//            case "مسندة" -> ComplaintState.ASSIGNED;
+//            case "تم مقاطعة التقدم" -> ComplaintState.CANCELLED;
+//            default -> throw new IllegalArgumentException("Invalid Arabic state: " + state);
+//        };
+//
+//    }
 
     public List<ComplaintTrackingLogDto> getTimeLine(Long complaintId) throws AccessDeniedException, NotFoundException {
 
