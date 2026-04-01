@@ -26,4 +26,5 @@ public interface PasswordResetTokenRepo extends JpaRepository<PasswordResetToken
             CodeAndLinkState state
     );
 
+    Optional<PasswordResetToken> findByTokenAndAccount_Email(String token, String email);
 }

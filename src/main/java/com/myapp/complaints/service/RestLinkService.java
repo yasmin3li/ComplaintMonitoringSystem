@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 @Service
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class RestLinkService {
     private final EmailService emailService;
     private final AccountRepo accountRepo;
     private final PasswordResetTokenRepo passwordResetTokenRepo;
+    private final Random random = new Random();
 
     public ApiResponseDto<Object> sendResetLink(ForgotPasswordRequestDTO dto) {
 
@@ -74,7 +77,9 @@ public class RestLinkService {
 //Build the reset link
 //            passwordResetTokenRepo.deleteByAccount(account);
 
-            String token = UUID.randomUUID().toString();
+//            String token = UUID.randomUUID().toString();
+        String token = String.format("%06d", random.nextInt(1000000));
+
 
             PasswordResetToken resetToken = new PasswordResetToken();
             resetToken.setToken(token);
@@ -90,12 +95,14 @@ public class RestLinkService {
             boolean value;
 
 //TODO after link with front
-                value = emailService.sendResetLink(
-                        account.getEmail(),
-                        "Reset your password for Balligh _ بَلِّغْ ",
-                        "Hello "+account.getUserName()+" \nClick the link bellow to reset your password :\n" +
-                                "http://localhost:5173/reset-password?token=" + token
-                );
+                value = emailService.
+                        sendVerificationCode(account.getEmail(),token);
+//                        sendResetLink(
+//                        account.getEmail(),
+//                        "Reset your password for Balligh _ بَلِّغْ ",
+//                        "Hello "+account.getUserName()+" \nClick the link bellow to reset your password :\n" +
+//                                "http://localhost:5173/reset-password?token=" + token
+//                );
 
             if (value){
                 return new ApiResponseDto<>(
@@ -122,22 +129,47 @@ public class RestLinkService {
     }
     }
 
-    public boolean validLink(Account account, String token) {
+//    public boolean validLink(Account account, String token) {
+//
+//        return passwordResetTokenRepo.findByTokenAndAccount(token,account)
+//                .map(resetToken -> {
+//                    if(resetToken.getExpiryDate().isAfter(LocalDateTime.now()) && resetToken.getState().equals(CodeAndLinkState.UNUSED)) {
+//
+////TODO: move this logic from service to another place
+//                        resetToken.setState(CodeAndLinkState.USED);
+//                        passwordResetTokenRepo.save(resetToken);
+//                        return true;
+//                    }
+//                    return false;
+//                })
+//                .orElse(false);
+//    }
+    public ApiResponseDto<Object> validLink(String email, String token) {
 
-        return passwordResetTokenRepo.findByTokenAndAccount(token,account)
-                .map(resetToken -> {
-                    if(resetToken.getExpiryDate().isAfter(LocalDateTime.now()) && resetToken.getState().equals(CodeAndLinkState.UNUSED)) {
+        Optional<PasswordResetToken> passwordResetToken = passwordResetTokenRepo.findByTokenAndAccount_Email(token,email);
+        if (passwordResetToken.isPresent()){
+            if(passwordResetToken.get().getExpiryDate().isAfter(LocalDateTime.now()) && passwordResetToken.get().getState().equals(CodeAndLinkState.UNUSED)) {
 
-//TODO: move this logic from service to another place
-                        resetToken.setState(CodeAndLinkState.USED);
-                        passwordResetTokenRepo.save(resetToken);
-                        return true;
-                    }
-                    return false;
-                })
-                .orElse(false);
+                passwordResetToken.get().setState(CodeAndLinkState.USED);
+                passwordResetTokenRepo.save(passwordResetToken.get());
+                return new ApiResponseDto<>(
+                        true,
+                        "reset password verified successfully",
+                        null
+                );
+            }
+            else return new ApiResponseDto<>(
+                    false,
+                    "invalid code",
+                    null
+            );
+        }
+        else return new ApiResponseDto<>(
+                false,
+                "account with email "+email+" not found",
+                null
+        );
     }
-
 
 
     public ApiResponseDto<Object> resendRestLink(ForgotPasswordRequestDTO emailOrPhone) {

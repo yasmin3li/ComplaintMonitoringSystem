@@ -51,14 +51,14 @@ public class PasswordService {
                     null);
         }
 
-        boolean validLink = restLinkService.validLink(account, dto.token());
-        if (!validLink) {
-            return new ApiResponseDto<>(
-                    false,
-                    "Invalid reset link",
-                    null
-            );
-        }
+//        boolean validLink = restLinkService.validLink(account, dto.token());
+//        if (!validLink) {
+//            return new ApiResponseDto<>(
+//                    false,
+//                    "Invalid reset link",
+//                    null
+//            );
+//        }
 
         account.setPassword(validateAndEncodePassword(dto.newPassword()));
         //account.setMustChangePassword(false);

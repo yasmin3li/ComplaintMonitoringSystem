@@ -70,6 +70,12 @@ public class AuthController {
         return ResponseEntity.ok("reset link has been sent");
     }
 
+    @PostMapping("/verify/reset-password-link")
+    public ResponseEntity<?> verifyResetPassword(
+            @Valid @RequestBody VerifyUserDto verifyUserDto) {
+        return ResponseEntity.ok(restLinkService.validLink(verifyUserDto.identifier(),verifyUserDto.code()));
+    }
+
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(
             @Valid @RequestBody ResetPasswordRequestDTO request) {

@@ -149,6 +149,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 //                        TODO: later make others see profile for each other
                         .requestMatchers(HttpMethod.GET,"/api/citizen/**","/api/employee/profile/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH,"/api/citizen/**").authenticated()
+                        .requestMatchers(HttpMethod.POST,"/auth/verify/reset-password-code/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
