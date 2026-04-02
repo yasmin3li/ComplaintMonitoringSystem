@@ -21,4 +21,19 @@ public class CommonUtils {
         };
 
     }
+
+    public static String toArabicState(ComplaintState state) {
+
+        return switch (state) {
+            case ComplaintState.NEW -> "جديدة";
+            case ComplaintState.IN_PROGRESS -> "قيد التقدم";
+            case ComplaintState.RESOLVED -> "محلولة";
+            case ComplaintState.REJECTED ->"مرفوضة";
+            case ComplaintState.CLOSED -> "مغلقة";
+            case ComplaintState.ASSIGNED -> "مسندة";
+            case ComplaintState.CANCELLED -> "تم مقاطعة التقدم";
+            default -> throw new IllegalArgumentException("Invalid English state: " + state);
+        };
+
+    }
 }
