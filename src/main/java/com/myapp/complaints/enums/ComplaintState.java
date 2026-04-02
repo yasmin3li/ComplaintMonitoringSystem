@@ -7,6 +7,7 @@ public enum ComplaintState {
     REJECTED,
     CLOSED,
     ASSIGNED,
+    IN_VERIFY,
     CANCELLED
 }
 

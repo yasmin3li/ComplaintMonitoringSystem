@@ -13,6 +13,7 @@ public class NotificationFactory {
             case CLOSED -> "Complaint Closed";
             case ASSIGNED -> "Complaint Assigned";
             case CANCELLED -> "Complaint Cancelled";
+            case IN_VERIFY -> "شكواك قيد المراجعة";
         };
     }
 
@@ -25,6 +26,7 @@ public class NotificationFactory {
             case CLOSED -> "Your complaint \"" + complaintTitle + "\" has been closed.";
             case ASSIGNED -> "Your complaint \"" + complaintTitle + "\" has been assigned to an employee.";
             case CANCELLED -> "Your complaint \"" + complaintTitle + "\" has been cancelled.";
+            case IN_VERIFY -> "شكواك \"" + complaintTitle + "\" قيد المراجعة ";
         };
     }
 }
