@@ -1,5 +1,6 @@
 package com.myapp.complaints.mapper;
 
+import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.AddressDto;
 import com.myapp.complaints.dto.ComplaintCreateDto;
@@ -32,7 +33,7 @@ public class ComplaintMapper {
                 complaint.getService().getName(),
                 complaint.getInstitution().getName(),
 
-                complaint.getState().name(),
+                CommonUtils.toArabicState(complaint.getState()),
                 complaint.getDateTimeOfAdd(),
 
                 new LocationDto(
