@@ -9,8 +9,10 @@ import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Citizen;
 import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.entity.Role;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,7 +37,7 @@ public class AccountInfoMapper {
         account.setPassword(dto.password());
 
         Role citizenRole = roleRepo.findByName("مواطن")
-                .orElseThrow(() -> new RuntimeException("ROLE_CITIZEN not found"));
+                .orElseThrow(() -> new ApiException("ROLE_CITIZEN not found", HttpStatus.NOT_FOUND));
         account.setRole(citizenRole);
 
 
@@ -59,7 +61,7 @@ public class AccountInfoMapper {
         account.setPassword(dto.password());
 
         Role role = roleRepo.findById(dto.roleId())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new ApiException("Role not found",HttpStatus.NOT_FOUND));
         account.setRole(role);
 
 //        if (dto.email() == null || dto.email().isBlank()) {

@@ -8,8 +8,10 @@ import com.myapp.complaints.dto.ComplaintResponseDto;
 import com.myapp.complaints.dto.LocationDto;
 import com.myapp.complaints.entity.Address;
 import com.myapp.complaints.entity.Complaint;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @RequiredArgsConstructor
@@ -72,7 +74,7 @@ public class ComplaintMapper {
                 );
 
         if (!sectorExists) {
-            throw new RuntimeException("Sector does not belong to the selected governorate");
+            throw new ApiException("Sector does not belong to the selected governorate", HttpStatus.BAD_REQUEST);
         }
 
         // Validate that the selected institution is active in the given sector/governorate.
@@ -86,16 +88,16 @@ public class ComplaintMapper {
                         );
 
         var service = serviceAvailableRepo.findById(dto.serviceId())
-                .orElseThrow(() -> new RuntimeException("Service not found"));
+                .orElseThrow(() -> new ApiException("Service not found",HttpStatus.NOT_FOUND));
 
         // Validate that the selected service belongs to the chosen institution.
         // This prevents assigning a service from a different institution.
         if (!service.getInstitution().getId().equals(dto.institutionId())) {
-            throw new RuntimeException("Service does not belong to the selected institution");
+            throw new ApiException("Service does not belong to the selected institution",HttpStatus.BAD_REQUEST);
         }
 
         if (!institutionValid) {
-            throw new RuntimeException("Institution not valid for this sector/governorate");
+            throw new ApiException("Institution not valid for this sector/governorate",HttpStatus.BAD_REQUEST);
         }
 
 
@@ -115,13 +117,13 @@ public class ComplaintMapper {
         complaint.setService(service);
 
         complaint.setInstitution(institutionRepo.findById(dto.institutionId())
-                .orElseThrow(() -> new RuntimeException("Institution not found")));
+                .orElseThrow(() -> new ApiException("Institution not found",HttpStatus.NOT_FOUND)));
 
         complaint.setGovernorate(governorateRepo.findById(dto.governorateId())
-                .orElseThrow(() -> new RuntimeException("Governorate not found")));
+                .orElseThrow(() -> new ApiException("Governorate not found",HttpStatus.NOT_FOUND)));
 
         complaint.setSector(sectorRepo.findById(dto.sectorId())
-                .orElseThrow(() -> new RuntimeException("Sector not found")));
+                .orElseThrow(() -> new ApiException("Sector not found",HttpStatus.NOT_FOUND)));
 
         complaint.setAddress(address);
 

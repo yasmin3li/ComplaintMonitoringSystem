@@ -7,6 +7,7 @@ import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
 import com.myapp.complaints.mapper.ComplaintMapper;
 import jakarta.persistence.criteria.Predicate;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -51,13 +53,13 @@ public class ApiService {
     private final NotificationService notificationService;
 
     @Transactional
-    public ApiResponseDto<Object> createComplaint(@Valid ComplaintCreateDto dto) {
+    public ApiResponseDto<?> createComplaint(@Valid ComplaintCreateDto dto) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
         Account account = accountRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
 
         Complaint complaint = complaintMapper.fromdto(dto);
 
@@ -133,7 +135,7 @@ public class ApiService {
 
         notificationService.sendNotification(notification,account);
 
-        return new ApiResponseDto<Object>(
+        return new ApiResponseDto<>(
                 true,
                 String.format("تم حفظ شكواك: \"%s\" بنجاح",savedComplaint.getTitle()),
                 null
@@ -159,9 +161,9 @@ public class ApiService {
         String email = auth.getName();
 
         Account account = accountRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
         Citizen citizen=citizenRepo.findByAccountId(account.getId())
-                .orElseThrow(()->new RuntimeException("no citizen found for account "+account.getEmail()));
+                .orElseThrow(()->new ApiException("no citizen found for account "+account.getEmail(),HttpStatus.NOT_FOUND));
         return accountInfoMapper.citizenInfoToDto(citizen);
     }
 
@@ -170,9 +172,9 @@ public class ApiService {
         String email = auth.getName();
 
         Account account = accountRepo.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
         Employee employee=employeeRepo.findByAccountId(account.getId())
-                .orElseThrow(()->new RuntimeException("no employee found for account "+account.getEmail()));
+                .orElseThrow(()->new ApiException("no employee found for account "+account.getEmail(),HttpStatus.NOT_FOUND));
         return accountInfoMapper.employeeInfoToDto(employee);
     }
 
@@ -238,32 +240,17 @@ public class ApiService {
                 .toList();
     }
 
-//    private ComplaintState convertStateFromArToEng(String state) {
-//
-//        return switch (state) {
-//            case "جديدة" -> ComplaintState.NEW;
-//            case "قيد التقدم" -> ComplaintState.IN_PROGRESS;
-//            case "محلولة" -> ComplaintState.RESOLVED;
-//            case "مرفوضة" ->ComplaintState.REJECTED;
-//            case "مغلقة" -> ComplaintState.CLOSED;
-//            case "مسندة" -> ComplaintState.ASSIGNED;
-//            case "تم مقاطعة التقدم" -> ComplaintState.CANCELLED;
-//            default -> throw new IllegalArgumentException("Invalid Arabic state: " + state);
-//        };
-//
-//    }
-
-    public List<ComplaintTrackingLogDto> getTimeLine(Long complaintId) throws AccessDeniedException, NotFoundException {
+    public List<ComplaintTrackingLogDto> getTimeLine(Long complaintId){
 
 // TODO: dealing with deleted / not found for all case like this
         Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
-                .orElseThrow(() -> new NotFoundException("Complaint not found"));
+                .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
 
         if (authorizationService.checkAccess(complaint.getAddedBy().getEmail())){
             return  complaintTracingLogRepo.findByComplaintId(complaintId);
         }
         else{
-            throw  new AccessDeniedException("You are not allowed to view this complaint");
+            throw  new ApiException("You are not allowed to view this complaint", HttpStatus.FORBIDDEN);
         }
     }
 
@@ -271,18 +258,18 @@ public class ApiService {
 // chose complaint from the ui to interact with it
     public ComplaintResponseDto getComplaint(Long complaintId) throws NotFoundException {
         Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
-                .orElseThrow(() -> new NotFoundException("Complaint not found"));
+                .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
         return complaintMapper.toDto(complaint);
     }
 
     @Transactional
-    public ApiResponseDto<Object> updateCitizenProfile(String email, UpdateCitizenProfileInfoDto dto ) {
+    public ApiResponseDto<?> updateCitizenProfile(String email, UpdateCitizenProfileInfoDto dto ) {
 
         Citizen citizen = citizenRepo.findByAccount_Email(email).
-                orElseThrow(() -> new ResourceAccessException("account not found"));
+                orElseThrow(() -> new ApiException("account not found",HttpStatus.NOT_FOUND));
 
          accountInfoMapper.updateAccountFromDto(dto,citizen);
-         return new ApiResponseDto<Object>(
+         return new ApiResponseDto<>(
                  true,
                  "your info was updated successfully",
                  null

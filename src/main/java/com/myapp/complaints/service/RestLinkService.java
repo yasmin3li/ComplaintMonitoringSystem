@@ -8,7 +8,9 @@ import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.PasswordResetToken;
 import com.myapp.complaints.enums.AccountStatus;
 import com.myapp.complaints.enums.CodeAndLinkState;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,19 +26,14 @@ public class RestLinkService {
     private final PasswordResetTokenRepo passwordResetTokenRepo;
     private final Random random = new Random();
 
-    public ApiResponseDto<Object> sendResetLink(ForgotPasswordRequestDTO dto) {
+    public ApiResponseDto<?> sendResetLink(ForgotPasswordRequestDTO dto) {
 
         Account account = accountRepo.findByEmail(dto.emailOrPhone())
                 .orElseGet(() ->
                         accountRepo.findByPhoneNumber(dto.emailOrPhone())
-                                .orElse(null)
-//                                .orElseThrow(() ->
-//                                        new RuntimeException("Account not found")
-//                                )
+                                .orElseThrow(() ->
+                                        new ApiException( "Account not found", HttpStatus.NOT_FOUND))
                 );
-        if (account == null) {
-            return new ApiResponseDto<Object>(false,"Account not found",null);
-         }
 
 // limit trays
         int attemptsLastHour =
@@ -46,12 +43,7 @@ public class RestLinkService {
                 );
 
         if (attemptsLastHour >= 2) {
-//            throw new RuntimeException("You have exceeded the limit. Try again after 1 hour");
-            return new ApiResponseDto<>(
-                    false,
-                    "You have exceeded the limit. Try again after 1 hour",
-                    null
-            );
+            throw  new ApiException( "You have exceeded the limit. Try again after 1 hour",HttpStatus.FORBIDDEN );
             }
 
         //to make unused codes and invalid "INVALID" rather thn "UNUSED"
@@ -112,17 +104,13 @@ public class RestLinkService {
                 );
             }
             else {
-                return new ApiResponseDto<>(
-                        false,
-                        "failed to send rest link ",
-                        null
-                );
+                throw  new ApiException( "failed to send rest link ",HttpStatus.INTERNAL_SERVER_ERROR );
             }
         }
         else {
             System.out.print("reset link send to yor phone number and it is:  "+token);
             return new ApiResponseDto<>(
-                    false,
+                    true,
                     "reset link sent to yor phone number",
                     null
             );
@@ -144,7 +132,7 @@ public class RestLinkService {
 //                })
 //                .orElse(false);
 //    }
-    public ApiResponseDto<Object> validLink(String email, String token) {
+    public ApiResponseDto<?> validLink(String email, String token) {
 
         Optional<PasswordResetToken> passwordResetToken = passwordResetTokenRepo.findByTokenAndAccount_Email(token,email);
         if (passwordResetToken.isPresent()){
@@ -158,46 +146,25 @@ public class RestLinkService {
                         null
                 );
             }
-            else return new ApiResponseDto<>(
-                    false,
-                    "invalid code",
-                    null
-            );
+            else
+                throw   new ApiException(  "invalid code",HttpStatus.BAD_REQUEST );
         }
-        else return new ApiResponseDto<>(
-                false,
-                "account with email "+email+" not found",
-                null
-        );
+
+        else
+            throw  new ApiException("account with email "+email+" not found",HttpStatus.NOT_FOUND );
     }
 
 
-    public ApiResponseDto<Object> resendRestLink(ForgotPasswordRequestDTO emailOrPhone) {
-        Account account = accountRepo.findByEmailAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.ACTIVATED)
+    public ApiResponseDto<?> resendRestLink(ForgotPasswordRequestDTO emailOrPhone) {
+
+        accountRepo.findByEmailAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.ACTIVATED)
                 .orElseGet(() ->
 //                        TODO: ACTIVATED not PENDING
                         accountRepo.findByPhoneNumberAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.ACTIVATED)
-                                .orElse(null)
-//                                .orElseThrow(() ->
-//                                        new RuntimeException("Account not found")
-//                                )
+                                .orElseThrow(() ->
+                                        new ApiException( "Account not found", HttpStatus.NOT_FOUND))
                 );
-        if (account == null) {
-            return new ApiResponseDto<Object>(false,"Account not found",null);
-        }
-//moved up
-//        List<PasswordResetToken> activeCodes =
-//                passwordResetTokenRepo.findByAccountAndState(
-//                        account,
-//                        CodeAndLinkState.UNUSED
-//                );
-//
-//        for (PasswordResetToken code : activeCodes) {
-//            code.setState(CodeAndLinkState.INVALID);
-//        }
-//        passwordResetTokenRepo.saveAll(activeCodes);
 
-//        return  resendRestLink(emailOrPhone);
         return  sendResetLink(emailOrPhone);
     }
     }

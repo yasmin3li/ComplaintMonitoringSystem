@@ -5,9 +5,11 @@ import com.myapp.complaints.dto.NotificationDto;
 import com.myapp.complaints.dto.NotificationReceiverDto;
 import com.myapp.complaints.entity.Notification;
 import com.myapp.complaints.entity.NotificationReceiver;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.service.AuthorizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -40,7 +42,7 @@ public class NotificationMapper {
             );
         }
         else {
-            throw new ResourceNotFoundException("notification "+notification.getTitle()+" is not exist");
+            throw new ApiException("notification "+notification.getTitle()+" is not exist", HttpStatus.NOT_FOUND);
 
         }
     }

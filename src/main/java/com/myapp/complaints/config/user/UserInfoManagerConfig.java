@@ -22,11 +22,8 @@ public class UserInfoManagerConfig implements UserDetailsService {
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
         Optional<Account> userOpt = userInfoRepo.findByEmail(userName);
 
-        System.out.print("*************** email ******************  "+userName);
-
         if(userOpt.isEmpty()) {
             userOpt = userInfoRepo.findByPhoneNumber(userName);
-            System.out.print("*************** phone ******************  "+userName);
         }
 
         return userOpt

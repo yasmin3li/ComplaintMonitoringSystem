@@ -1,6 +1,7 @@
 package com.myapp.complaints.config.jwtAuth;
 
 import com.myapp.complaints.DAO.AccountRepo;
+import com.myapp.complaints.ResponseWriter;
 import com.myapp.complaints.config.RSAKeyRecord;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.enums.TokenType;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -45,6 +47,7 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
     private final RSAKeyRecord rsaKeyRecord;
     private final JwtTokenUtils jwtTokenUtils;
     private final AuthenticationEntryPoint authenticationEntryPoint;
+    private final ResponseWriter responseWriter;
     // private final Account account;
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -75,19 +78,22 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
 //TODO
             Optional<Account> account= accountRepo.findByEmail(userName);
             String uri = request.getRequestURI();
-            if (!account.get().isEmailVerified() && !uri.equals("/auth/verify")){
-//                response.sendError(HttpServletResponse.SC_FORBIDDEN,"your account not verified yet");
-                throw new RuntimeException("your account not verified yet");
-//                return;
-            }
 
-            else if (account.get().isMustChangePassword()
-                   && !uri.equals("/auth/change-password")
-                   && !uri.equals("/auth/logout"))
-                    {
-                        response.sendError(HttpServletResponse.SC_FORBIDDEN,  "You must change your password first");
-                    return;
-                    }
+             if (account.isPresent()){
+                 if (account.get().isMustChangePassword()
+                         && !uri.equals("/auth/change-password")
+                         && !uri.equals("/auth/logout"))
+                 {
+                     responseWriter.sendError(response,HttpServletResponse.SC_FORBIDDEN,"You must change your password first");
+                     return;
+                 }
+             }
+             else {
+                 {
+                     responseWriter.sendError(response, HttpServletResponse.SC_NOT_FOUND,"account not found");
+                     return;
+                 }
+             }
 
 
 //after we passed previous tow filter we are now know that is of course there are Authorisation that is Bearer token
@@ -107,7 +113,6 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
                 finalAuthorities.addAll(scopeAuthorities);             // SCOPEs
 
                 if(validFlag){
-                    System.out.println("im here ************************TokenValid*****************************************");
                     SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
 
                     UsernamePasswordAuthenticationToken createdToken = new UsernamePasswordAuthenticationToken(

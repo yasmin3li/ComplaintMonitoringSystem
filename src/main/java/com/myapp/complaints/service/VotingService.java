@@ -9,9 +9,11 @@ import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.Voting;
 import com.myapp.complaints.enums.VotingType;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -45,24 +47,21 @@ public class VotingService {
         return votingRepo.countByComplaintIdAndType(complaintId, VotingType.DISLIKE);
     }
 
-    public ApiResponseDto<Object> Voting(Long complaintId, VotingType votingType) throws NotFoundException {
+    public ApiResponseDto<?> Voting(Long complaintId, VotingType votingType) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = auth.getName();
 
         Account account = accountRepo.findByEmail(currentUser).
-                orElseThrow(()-> new NotFoundException("account not found"));
+                orElseThrow(()-> new ApiException("account not found", HttpStatus.NOT_FOUND));
 
         Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
-                .orElseThrow(() -> new NotFoundException("Complaint not found"));
+                .orElseThrow(() -> new ApiException("Complaint with id "+complaintId+" not found",HttpStatus.NOT_FOUND));
+
         String addedBy = complaint.getAddedBy().getEmail();
 
         if(authorizationService.checkAccess(addedBy)){
-            return new ApiResponseDto<>(
-                    false,
-                    "current user can't vote because is the owner for this complaint",
-                    null
-            );
+            throw new ApiException("current user can't vote because is the owner for this complaint",HttpStatus.FORBIDDEN );
         }
 
         Optional<Voting> voting = votingRepo.findByAccountIdAndComplaintId(account.getId(),complaintId);

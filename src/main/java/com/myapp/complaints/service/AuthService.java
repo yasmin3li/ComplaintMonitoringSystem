@@ -7,6 +7,7 @@ import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.AccountStatus;
 import com.myapp.complaints.enums.TokenType;
 import com.myapp.complaints.enums.VerificationChannel;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,14 +59,19 @@ public class AuthService {
 //        private final Random random ;
     @Transactional
     public AuthResponseDto getJwtTokensAfterAuthentication(Authentication authentication, HttpServletResponse response) {
-        try {
-            var userInfoEntity = accountRepo.findByEmail(authentication.getName())
-                    .orElseThrow(() -> {
-                        AuthService.log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
-                        return new ResponseStatusException(HttpStatus.NOT_FOUND, "USER NOT FOUND ");
-                    });
 
+        var userInfoEntity = accountRepo.findByEmail(authentication.getName())
+                .orElseThrow(() -> {
+                    AuthService.log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
+                    return new ApiException("USER NOT FOUND ", HttpStatus.NOT_FOUND);
+                });
 
+        if(userInfoEntity.getStatus().equals(AccountStatus.PENDING)){
+            log.warn("Login attempt for pending account: {}", userInfoEntity.getEmail());
+            throw new ApiException("your account not verified yet",HttpStatus.FORBIDDEN);
+        }
+
+//        try {
             String accessToken = jwtTokenGenerator.generateAccessToken(authentication);
             String refreshToken = jwtTokenGenerator.generateRefreshToken(authentication);
             //Let's save the refreshToken as well
@@ -81,10 +87,10 @@ public class AuthService {
                     .build();
 
 
-        } catch (Exception e) {
-            AuthService.log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :" + e.getMessage());
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Please Try Again");
-        }
+//        } catch (Exception e) {
+//            AuthService.log.error("[AuthService:userSignInAuth]Exception while authenticating the user due to :" + e.getMessage());
+//            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+//        }
     }
 
     @Transactional
@@ -123,7 +129,7 @@ public class AuthService {
         RefreshToken refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken)
                 .filter(tokens -> !tokens.isRevoked())
                 .orElseThrow(() ->
-                        new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Refresh token revoked"));
+                        new ApiException("Refresh token revoked",HttpStatus.INTERNAL_SERVER_ERROR));
 
         Account userInfoEntity = refreshTokenEntity.getAccount();
 
@@ -153,7 +159,7 @@ public class AuthService {
                             case "موظف الاستقبال" -> new SimpleGrantedAuthority("ROLE_RECEPTIONIST");
                             case "مدير" -> new SimpleGrantedAuthority("ROLE_MANAGER");
                             case "أدمن" -> new SimpleGrantedAuthority("ROLE_ADMIN");
-                            default -> throw new IllegalArgumentException("Unknown role: " + role);
+                            default -> throw new ApiException("Unknown role: " + role,HttpStatus.BAD_REQUEST);
                         })
                         .toList();
 
@@ -162,7 +168,7 @@ public class AuthService {
 
 
     @Transactional
-    public ApiResponseDto<Object> registerCitizen(CitizenRegistrationDto dto) {
+    public ApiResponseDto<?> registerCitizen(CitizenRegistrationDto dto) {
 
 
         Account account = accountInfoMapper.fromCitizenDto(dto);
@@ -222,7 +228,7 @@ public class AuthService {
 
 
     @Transactional
-    public ApiResponseDto<Object> registerEmployee(@Valid EmployeeRegistrationDto dto) {
+    public ApiResponseDto<?> registerEmployee(@Valid EmployeeRegistrationDto dto) {
 
         Account account = accountInfoMapper.fromEmployeeDto(dto);
 
@@ -235,7 +241,7 @@ public class AuthService {
                 );
 
         if (!sectorExists) {
-            throw new RuntimeException("Sector does not belong to the selected governorate");
+            throw new ApiException("Sector does not belong to the selected governorate",HttpStatus.BAD_REQUEST);
         }
 
 // Validate that institution operates in this sector/governorate
@@ -248,7 +254,7 @@ public class AuthService {
                         );
 
         if (!institutionValid) {
-            throw new RuntimeException("Institution not valid for this sector/governorate");
+            throw new ApiException("Institution not valid for this sector/governorate",HttpStatus.BAD_REQUEST);
         }
 
 //        Role role = roleRepo.findById(dto.roleId())
@@ -281,15 +287,15 @@ public class AuthService {
         employee.setAccount(account);
 
         Institution inst = institutionRepo.findById(dto.institutionId())
-                .orElseThrow(() -> new RuntimeException("Institution not found"));
+                .orElseThrow(() -> new ApiException("Institution with id "+dto.institutionId()+" not found",HttpStatus.NOT_FOUND));
         employee.setInstitution(inst);
 
         Sector sect = sectorRepo.findById(dto.sectorId())
-                .orElseThrow(() -> new RuntimeException("Sector not found"));
+                .orElseThrow(() -> new ApiException("Sector with id "+dto.sectorId()+" not found",HttpStatus.NOT_FOUND));
         employee.setSector(sect);
 
         Governorate gov = governorateRepo.findById(dto.governorateId())
-                .orElseThrow(() -> new RuntimeException("Governorate not found"));
+                .orElseThrow(() -> new ApiException("Governorate with id "+dto.governorateId()+" not found",HttpStatus.NOT_FOUND));
         employee.setGovernorate(gov);
 
         employeeRepo.save(employee);
@@ -305,35 +311,34 @@ public class AuthService {
     private final VerificationCodeRepo verificationCodeRepo;
 
     @Transactional
-    public ApiResponseDto<Object> verifyUser(VerifyUserDto dto) {
+    public ApiResponseDto<?> verifyUser(VerifyUserDto dto) {
 
         Account account;
 
         if (dto.identifier().contains("@")) {
             account = accountRepo.findByEmail(dto.identifier())
-                    .orElseThrow(() -> new RuntimeException("Account not found"));
+                    .orElseThrow(() -> new ApiException("Account with " + dto.identifier() + " not found", HttpStatus.NOT_FOUND));
         } else {
             account = accountRepo.findByPhoneNumber(dto.identifier())
-                    .orElseThrow(() -> new RuntimeException("Account not found"));
+                    .orElseThrow(() -> new ApiException("Account with " + dto.identifier() + " not found", HttpStatus.NOT_FOUND));
         }
 
-        boolean res=verificationCodeService.validateCode(account, dto.code());
+        boolean res = verificationCodeService.validateCode(account, dto.code());
 
-        if (res){
+        if (res) {
 
             account.setStatus(AccountStatus.ACTIVATED);
 
+//            TODO: dealing with this and phone number later
             if (dto.identifier().contains("@"))
                 account.setEmailVerified(true);
 
-             accountRepo.save(account);}
-        else
-//            throw new RuntimeException("invalid code");
-            return new ApiResponseDto<>(
-                    false,
-                    "invalid code",
-                    null
-            );
+            accountRepo.save(account);
+        } else
+        {
+            log.warn("Invalid verification code entered for account: {}", dto.identifier());
+             throw new ApiException("invalid code", HttpStatus.BAD_REQUEST);
+        }
         return new ApiResponseDto<>(
                 true,
                 "account verified successfully",
@@ -343,22 +348,22 @@ public class AuthService {
 
     private  String validateAndEncodePassword(String rawPassword) {
         if (rawPassword == null || rawPassword.isBlank()) {
-            throw new IllegalArgumentException("Password cannot be empty");
+            throw new ApiException("Password cannot be empty",HttpStatus.BAD_REQUEST);
         }
         if (rawPassword.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters long");
+            throw new ApiException("Password must be at least 8 characters long",HttpStatus.BAD_REQUEST);
         }
         if (!rawPassword.matches(".*[A-Z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one uppercase letter");
+            throw new ApiException("Password must contain at least one uppercase letter",HttpStatus.BAD_REQUEST);
         }
         if (!rawPassword.matches(".*[a-z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+            throw new ApiException("Password must contain at least one lowercase letter",HttpStatus.BAD_REQUEST);
         }
         if (!rawPassword.matches(".*\\d.*")) {
-            throw new IllegalArgumentException("Password must contain at least one digit");
+            throw new ApiException("Password must contain at least one digit",HttpStatus.BAD_REQUEST);
         }
         if (!rawPassword.matches(".*[!@#$%^&*].*")) {
-            throw new IllegalArgumentException("Password must contain at least one special character");
+            throw new ApiException("Password must contain at least one special character",HttpStatus.BAD_REQUEST);
         }
         return passwordEncoder.encode(rawPassword);
     }

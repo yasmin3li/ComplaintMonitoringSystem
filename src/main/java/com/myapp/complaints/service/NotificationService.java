@@ -11,10 +11,12 @@ import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.Notification;
 import com.myapp.complaints.entity.NotificationReceiver;
 import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.NotificationMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -36,9 +38,6 @@ public class NotificationService {
     @Transactional
     public Notification buildNotification(Complaint complaint, ComplaintState complaintState, String reason) {
 
-        Complaint complaintVerify = complaintRepo.findByIdAndDeletedFalse(complaint.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Complaint not found"));
-
         Notification notification = new Notification();
         notification.setTitle(NotificationFactory.getTitle(complaintState));
         notification.setMessage(NotificationFactory.getMessage(complaintState, complaint.getTitle(), reason));
@@ -50,9 +49,6 @@ public class NotificationService {
     @Transactional
     public void sendNotification(Notification notification, Account account) {
 
-        Account accountVerify = accountRepo.findByEmail(account.getEmail()).
-                orElseThrow(()-> new ResourceNotFoundException("account not found"));
-
         NotificationReceiver notificationReceiver = new NotificationReceiver();
         notificationReceiver.setNotification(notification);
         notificationReceiver.setAccount(account);
@@ -62,9 +58,6 @@ public class NotificationService {
     }
 
     public List<NotificationDto> displayNotifications(String email) {
-
-        Account accountVerify = accountRepo.findByEmail(email).
-                orElseThrow(()-> new ResourceNotFoundException("account not found"));
 
         List<Notification> notifications = new ArrayList<>();
 
@@ -81,9 +74,6 @@ public class NotificationService {
     @Transactional
     public NotificationDto openNotification(String email, Long notificationId) {
 
-        Account accountVerify = accountRepo.findByEmail(email).
-                orElseThrow(()-> new ResourceNotFoundException("account not found"));
-
         Optional<NotificationReceiver> notificationsReceiver =
                 notificationReceiverRepo.findByAccount_EmailAndNotification_Id(email, notificationId);
 //
@@ -95,14 +85,11 @@ public class NotificationService {
 
             return notificationMapper.toDto(notification);
         } else {
-            throw new RuntimeException("You don't have permission to access this notification");
+            throw new ApiException("You don't have permission to access this notification",HttpStatus.FORBIDDEN);
         }
     }
 
     public ApiResponseDto<Object> marksAsReadAllNotifications(String email) {
-
-        Account account = accountRepo.findByEmail(email).
-                orElseThrow(()-> new ResourceNotFoundException("account not found"));
 
         List<NotificationReceiver> notificationsReceiver = notificationReceiverRepo.findByAccount_Email(email);
 
@@ -118,10 +105,6 @@ public class NotificationService {
                     null
             );
         }
-        return new ApiResponseDto<>(
-                false,
-                "no notifications exist",
-                null
-        );
+        throw  new ApiException( "no notifications exist to mark it",HttpStatus.NOT_FOUND );
     }
 }

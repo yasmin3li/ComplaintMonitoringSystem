@@ -8,7 +8,9 @@ import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.VerificationCode;
 import com.myapp.complaints.enums.AccountStatus;
 import com.myapp.complaints.enums.CodeAndLinkState;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -38,12 +40,7 @@ public class VerificationCodeService {
                     );
 
             if (attemptsLastHour >= 2) {
-//                throw new RuntimeException("You have exceeded the limit. Try again after 1 hour");
-                return new ApiResponseDto<>(
-                        false,
-                        "You have exceeded the limit. Try again after 1 hour",
-                        null
-                );
+                throw  new ApiException("You have exceeded the limit. Try again after 1 hour", HttpStatus.FORBIDDEN);
             }
         }
         // generate random code with length : 6
@@ -67,11 +64,7 @@ public class VerificationCodeService {
         }
 
         if(!sent){
-            return new ApiResponseDto<>(
-                    true,
-                    "Account created but verification email could not be sent. Please request resend.",
-                    null
-            );
+            throw  new ApiException("Account created but verification email could not be sent. Please request resend.",HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ApiResponseDto<>(
                 true,
@@ -141,12 +134,12 @@ public class VerificationCodeService {
                 .orElse(false);
     }
 
-    public ApiResponseDto<Object> resendVerificationCode(ForgotPasswordRequestDTO emailOrPhone) {
+    public ApiResponseDto<?> resendVerificationCode(ForgotPasswordRequestDTO emailOrPhone) {
         Account account = accountRepo.findByEmailAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
                 .orElseGet(() ->
                         accountRepo.findByPhoneNumberAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
                                 .orElseThrow(() ->
-                                        new RuntimeException("Account not found")
+                                        new ApiException("Account with identifier "+emailOrPhone.emailOrPhone()+" not found",HttpStatus.NOT_FOUND)
                                 )
                 );
         String type;

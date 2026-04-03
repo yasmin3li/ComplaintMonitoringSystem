@@ -8,6 +8,7 @@ import com.myapp.complaints.dto.ForgotPasswordRequestDTO;
 import com.myapp.complaints.dto.ResetPasswordRequestDTO;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.enums.AccountStatus;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,19 +38,10 @@ public class PasswordService {
         Account account = accountRepo.findByEmail(dto.emailOrPhone())
                 .orElseGet(() ->
                         accountRepo.findByPhoneNumber(dto.emailOrPhone())
-                                .orElse(null)
-//                                .orElseThrow(() ->
-//                                        new ResponseStatusException(
-//                                                HttpStatus.NOT_FOUND,
-//                                                "Account not found"
-//                                        ))
+                                .orElseThrow(() ->
+                                        new ApiException( "Account not found",HttpStatus.NOT_FOUND))
                 );
-        if (account == null) {
-            return new ApiResponseDto<Object>(
-                    false,
-                    "Account not found",
-                    null);
-        }
+
 
 //        boolean validLink = restLinkService.validLink(account, dto.token());
 //        if (!validLink) {
@@ -73,18 +65,15 @@ public class PasswordService {
     }
 
     @Transactional
-    public ApiResponseDto<Object> changePassword(Authentication auth, ChangePasswordRequest req) {
+    public ApiResponseDto<?> changePassword(Authentication auth, ChangePasswordRequest req) {
 
-        Account account = accountRepo.findByEmail(auth.getName()).orElse(null);
-//                .orElseThrow(() -> new RuntimeException("Account not found"));
-
-        if (account == null) {
-            return new ApiResponseDto<>(false, "Account not found", null);
-        }
+        Account account = accountRepo.findByEmail(auth.getName())
+                .orElseThrow(() ->
+                        new ApiException( "Account not found",HttpStatus.NOT_FOUND));
 
         if (!passwordEncoder.matches(req.currentPassword(), account.getPassword())) {
-//            throw new ResponseStatusException( HttpStatus.BAD_REQUEST, "Current password incorrect");
-            return new ApiResponseDto<>(false, "Current password is incorrect", null);
+
+            throw new ApiException("Current password is incorrect", HttpStatus.BAD_REQUEST);
         }
 
         account.setPassword(validateAndEncodePassword(req.newPassword()));
@@ -97,22 +86,22 @@ public class PasswordService {
 
     private  String validateAndEncodePassword(String rawPassword) {
         if (rawPassword == null || rawPassword.isBlank()) {
-            throw new IllegalArgumentException("Password cannot be empty");
+            throw new ApiException("Password cannot be empty",HttpStatus.BAD_REQUEST);
         }
         if (rawPassword.length() < 8) {
-            throw new IllegalArgumentException("Password must be at least 8 characters long");
+            throw new ApiException("Password must be at least 8 characters long",HttpStatus.BAD_REQUEST);
         }
         if (!rawPassword.matches(".*[A-Z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one uppercase letter");
+            throw new ApiException("Password must contain at least one uppercase letter",HttpStatus.BAD_REQUEST);
         }
         if (!rawPassword.matches(".*[a-z].*")) {
-            throw new IllegalArgumentException("Password must contain at least one lowercase letter");
+            throw new ApiException("Password must contain at least one lowercase letter",HttpStatus.BAD_REQUEST);
         }
         if (!rawPassword.matches(".*\\d.*")) {
-            throw new IllegalArgumentException("Password must contain at least one digit");
+            throw new ApiException("Password must contain at least one digit",HttpStatus.BAD_REQUEST);
         }
         if (!rawPassword.matches(".*[!@#$%^&*].*")) {
-            throw new IllegalArgumentException("Password must contain at least one special character");
+            throw new ApiException("Password must contain at least one special character",HttpStatus.BAD_REQUEST);
         }
         return passwordEncoder.encode(rawPassword);
     }

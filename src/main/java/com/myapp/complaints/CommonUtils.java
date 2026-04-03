@@ -1,6 +1,8 @@
 package com.myapp.complaints;
 
 import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.exceptionHandller.ApiException;
+import org.springframework.http.HttpStatus;
 
 public class CommonUtils {
 
@@ -18,7 +20,7 @@ public class CommonUtils {
             case "مغلقة" -> ComplaintState.CLOSED;
             case "مسندة" -> ComplaintState.ASSIGNED;
             case "تم مقاطعة التقدم" -> ComplaintState.CANCELLED;
-            default -> throw new IllegalArgumentException("Invalid Arabic state: " + state);
+            default -> throw new ApiException("Invalid Arabic state: " + state, HttpStatus.BAD_REQUEST);
         };
 
     }
@@ -34,7 +36,7 @@ public class CommonUtils {
             case ComplaintState.CLOSED -> "مغلقة";
             case ComplaintState.ASSIGNED -> "مسندة";
             case ComplaintState.CANCELLED -> "تم مقاطعة التقدم";
-            default -> throw new IllegalArgumentException("Invalid English state: " + state);
+            default -> throw new ApiException("Invalid English state: " + state, HttpStatus.BAD_REQUEST);
         };
 
     }

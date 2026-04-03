@@ -3,7 +3,9 @@ package com.myapp.complaints.service;
 import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.entity.Account;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,7 +22,7 @@ public class EmailService {
 
         Account account = accountRepo.findByEmail(to)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Email " + to + " not found")
+                        new ApiException("Email " + to + " not found", HttpStatus.NOT_FOUND)
                 );
 
         SimpleMailMessage message = new SimpleMailMessage();
