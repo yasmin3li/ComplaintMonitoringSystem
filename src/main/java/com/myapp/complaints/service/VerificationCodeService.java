@@ -12,6 +12,7 @@ import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -64,7 +65,12 @@ public class VerificationCodeService {
         }
 
         if(!sent){
-            throw  new ApiException("Account created but verification email could not be sent. Please request resend.",HttpStatus.INTERNAL_SERVER_ERROR);
+
+            return new ApiResponseDto<>(
+                    false,
+                    "Account created but verification email could not be sent. Please request resend",
+                    null
+            );
         }
         return new ApiResponseDto<>(
                 true,
