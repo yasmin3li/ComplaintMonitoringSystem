@@ -38,6 +38,7 @@ public class NotificationMapper {
                     notification.getId(),
                     notification.getTitle(),
                     notification.getMessage(),
+                    notification.getCreatedAt(),
                     notificationReceiverMapper.toDto(notificationReceiver.get())
             );
         }
