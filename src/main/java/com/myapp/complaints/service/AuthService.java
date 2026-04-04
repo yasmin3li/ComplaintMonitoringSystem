@@ -333,6 +333,8 @@ public class AuthService {
 
             if (dto.identifier().contains("@"))
                 account.setEmailVerified(true);
+            else
+                account.setPhoneNumberVerified(true);
 
             accountRepo.save(account);
         } else

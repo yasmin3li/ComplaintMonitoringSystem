@@ -50,6 +50,7 @@ public class Account {
 
 //TODO add to the db
     private boolean emailVerified;
+    private boolean phoneNumberVerified;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
