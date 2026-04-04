@@ -38,6 +38,30 @@ public class CommonUtils {
             case ComplaintState.CANCELLED -> "تم مقاطعة التقدم";
             default -> throw new ApiException("Invalid English state: " + state, HttpStatus.BAD_REQUEST);
         };
+    }
 
+    public static boolean validateAndEncodePassword(String rawPassword) {
+        if (rawPassword == null || rawPassword.isBlank()) {
+            throw new ApiException("Password cannot be empty",HttpStatus.BAD_REQUEST);
+        }
+        if (rawPassword.length() < 8) {
+            throw new ApiException("Password must be at least 8 characters long",HttpStatus.BAD_REQUEST);
+        }
+        if (!rawPassword.matches(".*[A-Z].*")) {
+            throw new ApiException("Password must contain at least one uppercase letter",HttpStatus.BAD_REQUEST);
+        }
+        if (!rawPassword.matches(".*[a-z].*")) {
+            throw new ApiException("Password must contain at least one lowercase letter",HttpStatus.BAD_REQUEST);
+        }
+        if (!rawPassword.matches(".*\\d.*")) {
+            throw new ApiException("Password must contain at least one digit",HttpStatus.BAD_REQUEST);
+        }
+        if (!rawPassword.matches(".*[!@#%^&*].*")) {
+            throw new ApiException("Password must contain at least one special character",HttpStatus.BAD_REQUEST);
+        }
+        if (rawPassword.matches(".*[$].*")) {
+            throw new ApiException("Password must not contain this special character: $",HttpStatus.BAD_REQUEST);
+        }
+        return true;
     }
 }

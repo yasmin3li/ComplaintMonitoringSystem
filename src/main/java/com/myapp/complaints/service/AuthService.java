@@ -1,5 +1,6 @@
 package com.myapp.complaints.service;
 
+import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.config.jwtAuth.JwtTokenGenerator;
 import com.myapp.complaints.dto.*;
@@ -204,8 +205,8 @@ public class AuthService {
 
         String password = account.getPassword();
         if (!password.startsWith("$2a$") && !password.startsWith("$2b$")) {
-            String encoded = validateAndEncodePassword(password);
-            account.setPassword(encoded);
+            if(CommonUtils.validateAndEncodePassword(password))
+                account.setPassword(passwordEncoder.encode(password));
         }
 
 //        account.setStatus(AccountStatus.BANNED);
@@ -276,8 +277,9 @@ public class AuthService {
 
         String password = account.getPassword();
         if (!password.startsWith("$2a$") && !password.startsWith("$2b$")) {
-            String encoded = validateAndEncodePassword(password);
-            account.setPassword(encoded);
+
+            if(CommonUtils.validateAndEncodePassword(password))
+                account.setPassword(passwordEncoder.encode(password));
         }
 
         account.setStatus(AccountStatus.SUSPENDED);
@@ -329,7 +331,6 @@ public class AuthService {
 
             account.setStatus(AccountStatus.ACTIVATED);
 
-//            TODO: dealing with this and phone number later
             if (dto.identifier().contains("@"))
                 account.setEmailVerified(true);
 
@@ -345,29 +346,5 @@ public class AuthService {
                 null
         );
     }
-
-    private  String validateAndEncodePassword(String rawPassword) {
-        if (rawPassword == null || rawPassword.isBlank()) {
-            throw new ApiException("Password cannot be empty",HttpStatus.BAD_REQUEST);
-        }
-        if (rawPassword.length() < 8) {
-            throw new ApiException("Password must be at least 8 characters long",HttpStatus.BAD_REQUEST);
-        }
-        if (!rawPassword.matches(".*[A-Z].*")) {
-            throw new ApiException("Password must contain at least one uppercase letter",HttpStatus.BAD_REQUEST);
-        }
-        if (!rawPassword.matches(".*[a-z].*")) {
-            throw new ApiException("Password must contain at least one lowercase letter",HttpStatus.BAD_REQUEST);
-        }
-        if (!rawPassword.matches(".*\\d.*")) {
-            throw new ApiException("Password must contain at least one digit",HttpStatus.BAD_REQUEST);
-        }
-        if (!rawPassword.matches(".*[!@#$%^&*].*")) {
-            throw new ApiException("Password must contain at least one special character",HttpStatus.BAD_REQUEST);
-        }
-        return passwordEncoder.encode(rawPassword);
-    }
-
-
 
 }
