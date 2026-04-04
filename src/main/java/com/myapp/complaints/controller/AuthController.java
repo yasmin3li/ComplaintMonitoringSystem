@@ -64,10 +64,9 @@ public class AuthController {
     public ResponseEntity<?> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequestDTO request) {
 
-        restLinkService.sendResetLink(request);
 //        verificationCodeService.generateCode(request.emailOrPhone(),);
 
-        return ResponseEntity.ok("reset link has been sent");
+        return ResponseEntity.ok(restLinkService.sendResetLink(request));
     }
 
     @PostMapping("/verify/reset-password-link")
