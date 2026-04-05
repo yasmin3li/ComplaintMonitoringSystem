@@ -236,7 +236,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
     CorsConfigurationSource corsConfigurationSource() { // TODO do this for all beans !!
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Your frontend URL
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         configuration.setAllowedHeaders(List.of("*")); // Allow all headers
         configuration.setAllowCredentials(true); // Allow credentials (cookies, auth headers)
         configuration.setMaxAge(3600L); // Max age for preflight cache
