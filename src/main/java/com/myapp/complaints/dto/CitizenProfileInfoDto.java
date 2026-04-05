@@ -6,6 +6,7 @@ public record CitizenProfileInfoDto(
         String userName,
         String email,
         String phoneNumber,
+        String nationalNumber,
         boolean emailTemporary,
         String profileImageUrl,
         LocalDateTime createdAt,

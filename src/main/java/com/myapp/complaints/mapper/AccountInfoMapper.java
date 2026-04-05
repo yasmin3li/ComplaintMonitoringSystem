@@ -84,6 +84,7 @@ public class AccountInfoMapper {
                 citizen.getAccount().getUserName(),
                 citizen.getAccount().getEmail(),
                 citizen.getAccount().getPhoneNumber(),
+                citizen.getAccount().getNationalNumber(),
                 citizen.getAccount().isEmailTemporary(),
                 citizen.getAccount().getProfileImageUrl(),
                 citizen.getAccount().getCreatedAt(),
