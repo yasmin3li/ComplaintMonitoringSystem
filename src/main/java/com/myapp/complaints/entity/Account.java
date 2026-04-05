@@ -70,7 +70,6 @@ public class Account {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = createdAt;
         if (status == null) {
             status = AccountStatus.PENDING;//later for auth
         }
