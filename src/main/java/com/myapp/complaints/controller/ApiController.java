@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -72,7 +73,7 @@ public class ApiController {
             );
         }
 
-//        @GetMapping("citizenAccount/{accountId}")
+    @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/citizen/profile")
     public ResponseEntity<?> citizenProfile(
 //                @PathVariable Long accountId
@@ -80,6 +81,7 @@ public class ApiController {
             return ResponseEntity.ok(apiService.getCitizenInfo());
         }
 
+    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
     @GetMapping("/employee/profile")
     public ResponseEntity<?> employeeProfile(
     ){
@@ -93,6 +95,7 @@ public class ApiController {
 //        return ResponseEntity.ok(statisticsService.buildCitizenDashboardResponse(email));
 //    }
 //TODO: Replace with specification Query
+    @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/citizen/dashboard/statistics")
     public ResponseEntity<?> getCitizenDashboardStatistics() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -106,7 +109,7 @@ public class ApiController {
 //        String email = auth.getName();
 //        return ResponseEntity.ok(statisticsService.getTop3ComplaintsForCitizen(email));
 //    }
-
+    @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/citizen/myComplaints")
     public ResponseEntity<?> getMyComplaints(ComplaintFilterRequestDto filter) {
 
@@ -118,6 +121,7 @@ public class ApiController {
         return ResponseEntity.ok(apiService.getComplaints(filter,false));
     }
 
+    @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/citizen/complaints/{complaintId}/timeline")
     public ResponseEntity<?> getTimeLine(@PathVariable Long complaintId) throws AccessDeniedException, NotFoundException {
         return ResponseEntity.ok(apiService.getTimeLine(complaintId));
@@ -138,17 +142,20 @@ public class ApiController {
         return ResponseEntity.ok(votingService.getVotes(complaintId));
     }
 
+    @PreAuthorize("hasRole('CITIZEN')")
     @PostMapping("/homepage/complaint/{complaintId}/like")
     public ResponseEntity<?> addLike(@PathVariable Long complaintId) throws NotFoundException {
         return ResponseEntity.ok(votingService.Voting(complaintId, VotingType.LIKE));
     }
 
+    @PreAuthorize("hasRole('CITIZEN')")
     @PostMapping("/homepage/complaint/{complaintId}/disLike")
     public ResponseEntity<?> addDisLike(@PathVariable Long complaintId) throws NotFoundException {
         return ResponseEntity.ok(votingService.Voting(complaintId, VotingType.DISLIKE));
     }
 
 //TODO: add logic change phone number / email / and dealing with employee's account
+    @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/citizen/profile")
     public ResponseEntity<?> updateCitizenProfile(@RequestBody @Valid UpdateCitizenProfileInfoDto dto,
                                            Authentication auth) {
@@ -162,22 +169,39 @@ public class ApiController {
 //        return ResponseEntity.ok(notificationService.buildNotification();
 //    }
 
+    @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/citizen/notifications")
     public ResponseEntity<?> displayNotifications(Authentication auth){
         String email = auth.getName();
         return ResponseEntity.ok(notificationService.displayNotifications(email));
     }
 
+    @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/citizen/notifications/{notificationId}")
     public ResponseEntity<?> openNotification(Authentication auth, @PathVariable Long notificationId){
         String email = auth.getName();
         return ResponseEntity.ok(notificationService.openNotification(email,notificationId));
     }
 
+    @PreAuthorize("hasRole('CITIZEN')")
     @PostMapping("/citizen/notifications/mark")
     public ResponseEntity<?> marksAsReadAllNotification(Authentication auth){
         String email = auth.getName();
         return ResponseEntity.ok(notificationService.marksAsReadAllNotifications(email));
+    }
+
+    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+    @GetMapping("/employee/notifications")
+    public ResponseEntity<?> displayEmployeeNotifications(Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(notificationService.displayNotifications(email));
+    }
+
+    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+    @GetMapping("/employee/notifications/{notificationId}")
+    public ResponseEntity<?> openEmployeeNotification(Authentication auth, @PathVariable Long notificationId){
+        String email = auth.getName();
+        return ResponseEntity.ok(notificationService.openNotification(email,notificationId));
     }
 
     @GetMapping("/allGovernorates")

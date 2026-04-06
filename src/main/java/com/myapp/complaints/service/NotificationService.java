@@ -1,21 +1,13 @@
 package com.myapp.complaints.service;
 
-import com.myapp.complaints.DAO.AccountRepo;
-import com.myapp.complaints.DAO.ComplaintRepo;
-import com.myapp.complaints.DAO.NotificationReceiverRepo;
-import com.myapp.complaints.DAO.NotificationRepo;
+import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.NotificationDto;
-import com.myapp.complaints.entity.Account;
-import com.myapp.complaints.entity.Complaint;
-import com.myapp.complaints.entity.Notification;
-import com.myapp.complaints.entity.NotificationReceiver;
-import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.entity.*;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.NotificationMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -30,21 +22,12 @@ public class NotificationService {
 
     private final NotificationMapper notificationMapper;
     private final NotificationReceiverRepo notificationReceiverRepo;
-    private final NotificationRepo notificationRepo;
     private final AccountRepo accountRepo;
     private final ComplaintRepo complaintRepo;
+    private final NotificationTemplateRepo notificationTemplateRepo;
+    private final NotificationRepo notificationRepo;
 
 
-    @Transactional
-    public Notification buildNotification(Complaint complaint, ComplaintState complaintState, String reason) {
-
-        Notification notification = new Notification();
-        notification.setTitle(NotificationFactory.getTitle(complaintState));
-        notification.setMessage(NotificationFactory.getMessage(complaintState, complaint.getTitle(), reason));
-        notification.setComplaint(complaint);
-        notificationRepo.save(notification);
-        return notification;
-    }
 
     @Transactional
     public void sendNotification(Notification notification, Account account) {
@@ -55,6 +38,35 @@ public class NotificationService {
         notificationReceiver.setIsRead(false);
         notificationReceiverRepo.save(notificationReceiver);
 //        notificationReceiver.getNotification().getReceivers().add(notificationReceiver);
+    }
+
+    @Transactional
+    public void notifyUsers(Complaint complaint, String reason, List<Account> users) {
+
+        for (Account user : users) {
+
+            Long role = user.getRole().getId();
+
+            Optional<NotificationTemplate> template =
+                    notificationTemplateRepo.findByStateAndRoleId(complaint.getState(), role);
+
+            if(template.isPresent()){
+                String message = template.get().getMessage()
+                        .replace("{title}", complaint.getTitle())
+                        .replace("{reason}", reason);
+                Notification notification = new Notification();
+                notification.setTitle(template.get().getTitle());
+                notification.setMessage(message);
+                notification.setComplaint(complaint);
+
+                notificationRepo.save(notification);
+
+                sendNotification(notification, user);
+            }
+            else {
+                throw new ApiException("no template for role: "+role+" and state: "+complaint.getState(),HttpStatus.BAD_REQUEST);
+            }
+        }
     }
 
     public List<NotificationDto> displayNotifications(String email) {
@@ -107,4 +119,7 @@ public class NotificationService {
         }
         throw  new ApiException( "no notifications exist to mark it",HttpStatus.NOT_FOUND );
     }
+
+
+
 }

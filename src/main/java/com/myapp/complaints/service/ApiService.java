@@ -22,9 +22,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.ResourceAccessException;
 
-import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +56,7 @@ public class ApiService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
-        Account account = accountRepo.findByEmail(email)
+        Account citizenAccount = accountRepo.findByEmail(email)
                 .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
 
         Complaint complaint = complaintMapper.fromdto(dto);
@@ -98,7 +96,7 @@ public class ApiService {
  //       complaint.setAddress(address);
  */
 
-        complaint.setAddedBy(account);
+        complaint.setAddedBy(citizenAccount);
 
 //Add this Complaint to ComplaintTrackingLog
         ComplaintTrackingLog log = new ComplaintTrackingLog();
@@ -106,7 +104,7 @@ public class ApiService {
         log.setPreviousState(null);
         log.setNewState(ComplaintState.NEW);
         log.setActionType(ActionType.CREATED);
-        log.setActionBy(account);
+        log.setActionBy(citizenAccount);
         log.setComments("Citizen Added Complaint");
         complaint.getLogs().add(log);
 
@@ -120,7 +118,7 @@ public class ApiService {
 
                 img.setComplaint(complaint);
                 img.setImageUrl(url);
-                img.setAddedBy(account);
+                img.setAddedBy(citizenAccount);
                 img.setType(ImageType.BEFORE_SOLVE);
 
                 //حتى تبقى البيانات متزامنة بحال طلبت الصور في نفس المناقلة
@@ -131,9 +129,19 @@ public class ApiService {
 
         Complaint savedComplaint= complaintRepo.save(complaint);
 
-        Notification notification = notificationService.buildNotification(complaint,ComplaintState.NEW,"");
+//        notificationService.notifyUsers(complaint,"",List.of(account));
+        //find all employee at institution: complaint-institution name, with role: perception employee, to send new notification with content: "new complaint has been added"
+        List<Employee> employees = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),2);
 
-        notificationService.sendNotification(notification,account);
+        List<Account> accounts = new ArrayList<>(List.of());
+
+        for (Employee employee : employees) {
+            accounts.add(employee.getAccount());
+        }
+
+//        List<Account> accounts = accountRepo.findByRoleId(2L);
+        accounts.add(citizenAccount);
+        notificationService.notifyUsers(complaint,"no reason to add with state NEW",accounts);
 
         return new ApiResponseDto<>(
                 true,
