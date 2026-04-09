@@ -13,4 +13,29 @@ public class AuthorizationService {
 
         return currentUser.equals(realOwnerEmail);
     }
+
+    private Authentication getAuth(){
+        return SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    private boolean hasRole(String role){
+        return getAuth().getAuthorities().stream().anyMatch(a -> a.getAuthority().equals(role));
+    }
+
+    public boolean IsReceptionist() {
+        return hasRole("ROLE_RECEPTIONIST");
+    }
+
+    public boolean isCitizen() {
+        return hasRole("ROLE_CITIZEN");
+    }
+
+    public boolean isAdmin() {
+        return hasRole("ROLE_ADMIN");
+    }
+
+    public boolean isManager() {
+        return hasRole("ROLE_MANAGER");
+    }
+
 }

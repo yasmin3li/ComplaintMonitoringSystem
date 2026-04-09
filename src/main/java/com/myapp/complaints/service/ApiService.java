@@ -14,7 +14,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -188,12 +187,40 @@ public class ApiService {
 
 
 //
-    public List<ComplaintResponseDto> getComplaints(ComplaintFilterRequestDto filter,boolean localUser) {
+    public Object getComplaints(ComplaintFilterRequestDto filter,boolean localUser) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
         String email = auth.getName();
 
-        Specification<Complaint> spec = (root, query, cb) -> {
+        Specification<Complaint> spec;
+
+        if (authorizationService.IsReceptionist()){
+
+            Employee employee = employeeRepo.findByAccount_Email(email);
+
+             spec = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                predicates.add(cb.equal(root.get("deleted"), false));
+                predicates.add(cb.equal(root.get("governorate").get("id"), employee.getGovernorate().getId()));
+                predicates.add(cb.equal(root.get("institution").get("id"), employee.getInstitution().getId()));
+
+                if (filter.state() == null){
+                    predicates.add(cb.equal(root.get("state"), ComplaintState.NEW));
+                }
+
+                else {
+                    ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
+                    predicates.add(cb.equal(root.get("state"), complaintState));
+                }
+
+                query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
+                return cb.and(predicates.toArray(new Predicate[0]));
+            };
+        }
+
+        else{
+             spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             // deleted = false
@@ -239,14 +266,17 @@ public class ApiService {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+        }
 
-        return complaintRepo.findAll(
-                        spec,
-                        PageRequest.of(filter.page(), filter.size())
-                ).stream()
-                .map(complaintMapper::toDto)
-                .toList();
-    }
+
+            return complaintRepo.findAll(
+                            spec,
+                            PageRequest.of(filter.page(), filter.size())
+                    ).stream()
+                    .map(complaintMapper::toDto)
+                    .toList();
+        }
+
 
     public List<ComplaintTrackingLogDto> getTimeLine(Long complaintId){
 
@@ -264,10 +294,16 @@ public class ApiService {
 
 
 // chose complaint from the ui to interact with it
-    public ComplaintResponseDto getComplaint(Long complaintId) throws NotFoundException {
+    public Object getComplaint(Long complaintId){
         Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
                 .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
-        return complaintMapper.toDto(complaint);
+
+
+        if (authorizationService.IsReceptionist())
+            return complaintMapper.toPerceptionComplaintDto(complaint);
+        else {
+            return complaintMapper.toDto(complaint);
+        }
     }
 
     @Transactional

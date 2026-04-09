@@ -142,6 +142,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                         .requestMatchers(HttpMethod.GET,"/api/institutionSectorGovernorates/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/sectorGovernorates/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/verificationCodes/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/institutions/complaints/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/institutions/**","/api/statistics/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
                         .requestMatchers(HttpMethod.GET,"api/complaints/**").authenticated()

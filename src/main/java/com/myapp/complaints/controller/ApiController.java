@@ -132,19 +132,31 @@ public class ApiController {
         return ResponseEntity.ok(apiService.getComplaint(complaintId));
     }
 
+    @PreAuthorize("hasRole('RECEPTIONIST')")
+    @GetMapping("/institutions/complaints/{complaintId}")
+    public ResponseEntity<?> getInstitutionComplaint(@PathVariable Long complaintId){
+        return ResponseEntity.ok(apiService.getComplaint(complaintId));
+    }
+
+    @PreAuthorize("hasRole('RECEPTIONIST')")
+    @GetMapping("/institutions/complaints")
+    public ResponseEntity<?> geNewInstitutionComplaints(ComplaintFilterRequestDto filter){
+        return ResponseEntity.ok(apiService.getComplaints(filter,true));
+    }
+
     @GetMapping("/images/complaint/{complaintId}")
     public ResponseEntity<?> complaintImages( @PathVariable Long complaintId){
         return ResponseEntity.ok(apiService.complaintImages(complaintId));
     }
 
     @GetMapping("/homepage/complaint/{complaintId}/votes")
-    public ResponseEntity<?> getVotes(@PathVariable Long complaintId) throws NotFoundException {
+    public ResponseEntity<?> getVotes(@PathVariable Long complaintId) {
         return ResponseEntity.ok(votingService.getVotes(complaintId));
     }
 
     @PreAuthorize("hasRole('CITIZEN')")
     @PostMapping("/homepage/complaint/{complaintId}/like")
-    public ResponseEntity<?> addLike(@PathVariable Long complaintId) throws NotFoundException {
+    public ResponseEntity<?> addLike(@PathVariable Long complaintId){
         return ResponseEntity.ok(votingService.Voting(complaintId, VotingType.LIKE));
     }
 

@@ -2,13 +2,11 @@ package com.myapp.complaints.mapper;
 
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
-import com.myapp.complaints.dto.AddressDto;
-import com.myapp.complaints.dto.ComplaintCreateDto;
-import com.myapp.complaints.dto.ComplaintResponseDto;
-import com.myapp.complaints.dto.LocationDto;
+import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Address;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.exceptionHandller.ApiException;
+import com.myapp.complaints.service.ApiService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +22,7 @@ public class ComplaintMapper {
     private final SectorRepo sectorRepo;
     private final InstitutionSectorGovernorateRepo institutionSectorGovernorateRepo;
     private final SectorGovernorateRepo sectorGovernorateRepo;
+    private final ComplaintImageRepo complaintImageRepo;
 
     public ComplaintResponseDto toDto(Complaint complaint) {
 
@@ -129,4 +128,16 @@ public class ComplaintMapper {
 
         return complaint;
     }
+
+
+    public PerceptionComplaintResponseDto toPerceptionComplaintDto(Complaint complaint) {
+
+        return new PerceptionComplaintResponseDto(
+                toDto(complaint),
+                complaint.getAddedBy().getUserName(),
+                complaint.getAddedBy().getPhoneNumber(),
+                complaintImageRepo.findByComplaint_Id(complaint.getId())
+        );
+    }
+
 }
