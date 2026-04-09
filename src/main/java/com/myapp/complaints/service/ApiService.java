@@ -195,21 +195,19 @@ public class ApiService {
 
         Specification<Complaint> spec;
 
-        if (authorizationService.IsReceptionist()){
+        if (authorizationService.IsReceptionist()) {
 
             Employee employee = employeeRepo.findByAccount_Email(email);
 
-             spec = (root, query, cb) -> {
+            spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
                 predicates.add(cb.equal(root.get("deleted"), false));
                 predicates.add(cb.equal(root.get("governorate").get("id"), employee.getGovernorate().getId()));
                 predicates.add(cb.equal(root.get("institution").get("id"), employee.getInstitution().getId()));
 
-                if (filter.state() == null){
+                if (filter.state() == null) {
                     predicates.add(cb.equal(root.get("state"), ComplaintState.NEW));
-                }
-
-                else {
+                } else {
                     ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
                     predicates.add(cb.equal(root.get("state"), complaintState));
                 }
@@ -217,58 +215,64 @@ public class ApiService {
                 query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
-        }
+        } else {
+            spec = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
 
-        else{
-             spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
+                // deleted = false
+                predicates.add(cb.equal(root.get("deleted"), false));
 
-            // deleted = false
-            predicates.add(cb.equal(root.get("deleted"), false));
+                if (filter.governorateId() != null) {
+                    predicates.add(cb.equal(root.get("governorate").get("id"), filter.governorateId()));
+                }
 
-            if (filter.governorateId() != null) {
-                predicates.add(cb.equal(root.get("governorate").get("id"), filter.governorateId()));
-            }
+                if (filter.sectorId() != null) {
+                    predicates.add(cb.equal(root.get("sector").get("id"), filter.sectorId()));
+                }
 
-            if (filter.sectorId() != null) {
-                predicates.add(cb.equal(root.get("sector").get("id"), filter.sectorId()));
-            }
+                if (filter.institutionId() != null) {
 
-            if (filter.institutionId() != null) {
+                    predicates.add(cb.equal(root.get("institution").get("id"), filter.institutionId()));
+                }
 
-                predicates.add(cb.equal(root.get("institution").get("id"), filter.institutionId()));
-            }
+                if (filter.state() != null && !filter.state().isBlank()) {
 
-            if (filter.state() != null && !filter.state().isBlank()) {
+                    ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
 
-                ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
+                    predicates.add(cb.equal(root.get("state"), complaintState));
+                }
 
-                predicates.add(cb.equal(root.get("state"), complaintState));
-            }
-
-            // citizen only
-            if (localUser){
+                // citizen only
+                if (localUser) {
 //                if (Boolean.TRUE.equals(filter.myComplaints())) {
-                predicates.add(cb.equal(root.get("addedBy").get("email"), email));
-            }
+                    predicates.add(cb.equal(root.get("addedBy").get("email"), email));
+                }
 
 
-            // Keyword search
-            if (filter.keyword() != null && !filter.keyword().isEmpty()) {
-                String pattern = "%" + filter.keyword().toLowerCase() + "%";
-                predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("title")), pattern),
-                        cb.like(cb.lower(root.get("description")), pattern)
-                ));
-            }
+                // Keyword search
+                if (filter.keyword() != null && !filter.keyword().isEmpty()) {
+                    String pattern = "%" + filter.keyword().toLowerCase() + "%";
+                    predicates.add(cb.or(
+                            cb.like(cb.lower(root.get("title")), pattern),
+                            cb.like(cb.lower(root.get("description")), pattern)
+                    ));
+                }
 
-            query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
+                query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
 
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
+                return cb.and(predicates.toArray(new Predicate[0]));
+            };
         }
 
+        if (filter.page() == null || filter.size() == null) {
 
+            return complaintRepo.findAll(
+                            spec,
+                            PageRequest.of(0, 1000)).stream()
+                    .map(complaintMapper::toPerceptionComplaintDto)
+                    .toList();
+
+        } else {
             return complaintRepo.findAll(
                             spec,
                             PageRequest.of(filter.page(), filter.size())
@@ -276,7 +280,7 @@ public class ApiService {
                     .map(complaintMapper::toDto)
                     .toList();
         }
-
+    }
 
     public List<ComplaintTrackingLogDto> getTimeLine(Long complaintId){
 

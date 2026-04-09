@@ -8,7 +8,7 @@ public record ComplaintFilterRequestDto(
         Long institutionId,
         String state,
 //        Boolean myComplaints,
-        int page,
-        int size,
+        Integer page,
+        Integer size,
         String keyword
 ) {}
