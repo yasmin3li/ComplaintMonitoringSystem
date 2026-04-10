@@ -215,7 +215,24 @@ public class ApiService {
                 query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
-        } else {
+            if (filter.page() == null || filter.size() == null) {
+
+                return complaintRepo.findAll(
+                                spec,
+                                PageRequest.of(0, 100)).stream()
+                        .map(complaintMapper::toPerceptionComplaintDto)
+                        .toList();
+
+            } else {
+                return complaintRepo.findAll(
+                                spec,
+                                PageRequest.of(filter.page(), filter.size())
+                        ).stream()
+                        .map(complaintMapper::toPerceptionComplaintDto)
+                        .toList();
+            }
+        }
+        else {
             spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
 
@@ -262,23 +279,23 @@ public class ApiService {
 
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
-        }
+            if (filter.page() == null || filter.size() == null) {
 
-        if (filter.page() == null || filter.size() == null) {
+                return complaintRepo.findAll(
+                                spec,
+                                PageRequest.of(0, 100)).stream()
+                        .map(complaintMapper::toDto)
+                        .toList();
 
-            return complaintRepo.findAll(
-                            spec,
-                            PageRequest.of(0, 1000)).stream()
-                    .map(complaintMapper::toPerceptionComplaintDto)
-                    .toList();
+            } else {
+                return complaintRepo.findAll(
+                                spec,
+                                PageRequest.of(filter.page(), filter.size())
+                        ).stream()
+                        .map(complaintMapper::toDto)
+                        .toList();
+            }
 
-        } else {
-            return complaintRepo.findAll(
-                            spec,
-                            PageRequest.of(filter.page(), filter.size())
-                    ).stream()
-                    .map(complaintMapper::toDto)
-                    .toList();
         }
     }
 
