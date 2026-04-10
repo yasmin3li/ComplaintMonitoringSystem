@@ -1,6 +1,7 @@
 package com.myapp.complaints.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record ComplaintResponseDto(
 
@@ -14,5 +15,7 @@ public record ComplaintResponseDto(
         String status,
         LocalDateTime createdAt,
 
-        LocationDto location
+        LocationDto location,
+
+        List<ComplaintImageDto> complaintImageDtoList
 ) {}

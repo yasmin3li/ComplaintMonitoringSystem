@@ -48,7 +48,8 @@ public class ComplaintMapper {
                                 complaint.getAddress().getId(),
                                 complaint.getAddress().getFullAddressText()
                         )
-                )
+                ),
+                complaintImageRepo.findByComplaint_Id(complaint.getId())
         );
     }
 
