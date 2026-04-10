@@ -100,7 +100,7 @@ public class RestLinkService {
                 return new ApiResponseDto<>(
                         true,
                         "reset link sent to your email",
-                        null
+                        isDevMode() && "SMS".equals(type) ? token : null
                 );
             }
             else {
@@ -112,9 +112,13 @@ public class RestLinkService {
             return new ApiResponseDto<>(
                     true,
                     "reset link sent to yor phone number",
-                    null
+                    isDevMode() && "SMS".equals(type)  ? token : null
             );
     }
+    }
+
+    private boolean isDevMode() {
+        return true; // لاحقًا تربطها بـ application.properties
     }
 
 //    public boolean validLink(Account account, String token) {

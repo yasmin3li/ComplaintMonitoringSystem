@@ -75,9 +75,13 @@ public class VerificationCodeService {
         return new ApiResponseDto<>(
                 true,
                 "verification code sent successfully",
-                null
+                isDevMode() && "SMS".equals(type)  ? code : null
         );
-//        return code;
+//        return code; && "SMS".equals(type)
+    }
+
+    private boolean isDevMode() {
+        return true; // later link at application.properties
     }
 
     private boolean sendCodeToEmail(String email, String code) {

@@ -223,7 +223,7 @@ public class AuthService {
                 codeResponse.success(),
                 "account for user " + account.getUserName() +
                         " created successfully. " + codeResponse.message(),
-                null
+                codeResponse.data()
         );
     }
 
