@@ -46,7 +46,9 @@ public class ComplaintMapper {
 
                         new AddressDto(
                                 complaint.getAddress().getId(),
-                                complaint.getAddress().getFullAddressText()
+                                complaint.getAddress().getFullAddressText(),
+                                complaint.getAddress().getLongitude(),
+                                complaint.getAddress().getLatitude()
                         )
                 ),
                 complaintImageRepo.findByComplaint_Id(complaint.getId())
