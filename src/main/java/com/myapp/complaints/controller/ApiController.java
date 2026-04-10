@@ -127,6 +127,12 @@ public class ApiController {
         return ResponseEntity.ok(apiService.getTimeLine(complaintId));
     }
 
+    @PreAuthorize("hasRole('CITIZEN')")
+    @GetMapping("/citizen/myComplaints/{complaintId}")
+    public ResponseEntity<?> getCitizenComplaint(@PathVariable Long complaintId){
+        return ResponseEntity.ok(apiService.getComplaint(complaintId));
+    }
+
     @GetMapping("/homepage/complaints/{complaintId}")
     public ResponseEntity<?> getComplaint(@PathVariable Long complaintId) throws NotFoundException {
         return ResponseEntity.ok(apiService.getComplaint(complaintId));
