@@ -13,4 +13,8 @@ public interface NotificationReceiverRepo extends JpaRepository<NotificationRece
     Optional<NotificationReceiver> findByAccount_EmailAndNotification_Id(String email, Long notificationId);
 
     Optional<NotificationReceiver> findByNotification_Id(Long id);
+
+    long countByAccount_Email(String email);
+
+    long countByAccount_EmailAndIsReadFalse(String email);
 }

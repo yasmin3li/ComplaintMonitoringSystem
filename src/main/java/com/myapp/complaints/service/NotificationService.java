@@ -3,6 +3,7 @@ package com.myapp.complaints.service;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.NotificationDto;
+import com.myapp.complaints.dto.NotificationStatisticsDto;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.NotificationMapper;
@@ -121,5 +122,11 @@ public class NotificationService {
     }
 
 
+    public NotificationStatisticsDto getNotificationStatistics(String email) {
 
+        return new NotificationStatisticsDto(
+                notificationReceiverRepo.countByAccount_Email(email),
+                notificationReceiverRepo.countByAccount_EmailAndIsReadFalse(email)
+        );
+    }
 }

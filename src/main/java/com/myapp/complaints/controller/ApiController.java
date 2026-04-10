@@ -181,6 +181,12 @@ public class ApiController {
 //        return ResponseEntity.ok(notificationService.buildNotification();
 //    }
 
+    @GetMapping("/notifications/statistics")
+    public ResponseEntity<?> notificationStatistics(Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(notificationService.getNotificationStatistics(email));
+    }
+
     @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/citizen/notifications")
     public ResponseEntity<?> displayNotifications(Authentication auth){
