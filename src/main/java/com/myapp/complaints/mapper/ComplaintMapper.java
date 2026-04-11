@@ -8,6 +8,7 @@ import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.service.ApiService;
 import com.myapp.complaints.service.AuthorizationService;
+import com.myapp.complaints.service.Formatter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ public class ComplaintMapper {
     private final SectorGovernorateRepo sectorGovernorateRepo;
     private final ComplaintImageRepo complaintImageRepo;
     private final AuthorizationService authorizationService;
+    private final Formatter formatter;
 
     public ComplaintResponseDto toDto(Complaint complaint) {
 
@@ -135,14 +137,16 @@ public class ComplaintMapper {
         return complaint;
     }
 
-
+//TODO: replace email with identifier
     public PerceptionComplaintResponseDto toPerceptionComplaintDto(Complaint complaint) {
 
         return new PerceptionComplaintResponseDto(
                 toDto(complaint),
                 complaint.getAddedBy().getUserName(),
-                complaint.getAddedBy().getPhoneNumber(),
-                complaintImageRepo.findByComplaint_Id(complaint.getId())
+                complaint.getAddedBy().getEmail(),
+                formatter.complaintIdFormatter(complaint.getDateTimeOfAdd().getMinute()+complaint.getId()+complaint.getDateTimeOfAdd().getYear()+
+                        complaint.getDateTimeOfAdd().getSecond()+complaint.getDateTimeOfAdd().getNano())
+
         );
     }
 

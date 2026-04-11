@@ -9,6 +9,6 @@ public record PerceptionComplaintResponseDto(
     String addedByName,
     String addedByIdentifier,
 
-    List<ComplaintImageDto> complaintImageDto
+    String complaintNumber
 
 ) {}
