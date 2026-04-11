@@ -74,7 +74,7 @@ public class NotificationService {
 
         List<Notification> notifications = new ArrayList<>();
 
-        List<NotificationReceiver> notificationsReceiver = notificationReceiverRepo.findByAccount_Email(email);
+        List<NotificationReceiver> notificationsReceiver = notificationReceiverRepo.findByAccount_EmailOrderByNotification_CreatedAtDesc(email);
 
         for (NotificationReceiver notificationReceiver : notificationsReceiver) {
             notifications.add(notificationReceiver.getNotification());
@@ -104,7 +104,7 @@ public class NotificationService {
 
     public ApiResponseDto<Object> marksAsReadAllNotifications(String email) {
 
-        List<NotificationReceiver> notificationsReceiver = notificationReceiverRepo.findByAccount_Email(email);
+        List<NotificationReceiver> notificationsReceiver = notificationReceiverRepo.findByAccount_EmailOrderByNotification_CreatedAtDesc(email);
 
         if(!notificationsReceiver.isEmpty()){
             for (NotificationReceiver notificationReceiver : notificationsReceiver){

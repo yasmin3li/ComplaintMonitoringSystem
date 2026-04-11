@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface NotificationReceiverRepo extends JpaRepository<NotificationReceiver,Long> {
 
-    List<NotificationReceiver> findByAccount_Email(String email);
+    List<NotificationReceiver> findByAccount_EmailOrderByNotification_CreatedAtDesc(String email);
 
     Optional<NotificationReceiver> findByAccount_EmailAndNotification_Id(String email, Long notificationId);
 

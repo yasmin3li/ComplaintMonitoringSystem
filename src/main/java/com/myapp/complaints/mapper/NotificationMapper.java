@@ -2,13 +2,10 @@ package com.myapp.complaints.mapper;
 
 import com.myapp.complaints.DAO.NotificationReceiverRepo;
 import com.myapp.complaints.dto.NotificationDto;
-import com.myapp.complaints.dto.NotificationReceiverDto;
 import com.myapp.complaints.entity.Notification;
 import com.myapp.complaints.entity.NotificationReceiver;
 import com.myapp.complaints.exceptionHandller.ApiException;
-import com.myapp.complaints.service.AuthorizationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
