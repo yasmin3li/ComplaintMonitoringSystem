@@ -7,6 +7,7 @@ import com.myapp.complaints.entity.Address;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.service.ApiService;
+import com.myapp.complaints.service.AuthorizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,7 @@ public class ComplaintMapper {
     private final InstitutionSectorGovernorateRepo institutionSectorGovernorateRepo;
     private final SectorGovernorateRepo sectorGovernorateRepo;
     private final ComplaintImageRepo complaintImageRepo;
+    private final AuthorizationService authorizationService;
 
     public ComplaintResponseDto toDto(Complaint complaint) {
 
@@ -51,6 +53,7 @@ public class ComplaintMapper {
                                 complaint.getAddress().getLatitude()
                         )
                 ),
+                authorizationService.checkAccess(complaint.getAddedBy().getEmail()),
                 complaintImageRepo.findByComplaint_Id(complaint.getId())
         );
     }
