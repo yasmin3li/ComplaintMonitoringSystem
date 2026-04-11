@@ -316,12 +316,23 @@ public class ApiService {
 
 // chose complaint from the ui to interact with it
     public Object getComplaint(Long complaintId){
+
         Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
                 .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
 
+        if (authorizationService.IsReceptionist()){
 
-        if (authorizationService.IsReceptionist())
-            return complaintMapper.toPerceptionComplaintDto(complaint);
+            Employee employee = employeeRepo.findByAccount_Email
+                    (SecurityContextHolder.getContext().getAuthentication().getName());
+
+            if(complaint.getInstitution().getName().equals(employee.getInstitution().getName())){
+
+                return complaintMapper.toPerceptionComplaintDto(complaint);
+            }
+
+            else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
+        }
+
         else {
             return complaintMapper.toDto(complaint);
         }
