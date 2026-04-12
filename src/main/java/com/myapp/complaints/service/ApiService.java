@@ -48,6 +48,7 @@ public class ApiService {
     private final AuthorizationService authorizationService;
     private final VotingService votingService;
     private final NotificationService notificationService;
+    private final EmployeeComplaintWorkflow employeeComplaintWorkflow;
 
     @Transactional
     public ApiResponseDto<?> createComplaint(@Valid ComplaintCreateDto dto) {
@@ -186,7 +187,7 @@ public class ApiService {
     }
 
 
-//
+//display list of complaints based on account's role and special filter
     public Object getComplaints(ComplaintFilterRequestDto filter,boolean localUser) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -198,23 +199,8 @@ public class ApiService {
         if (authorizationService.IsReceptionist()) {
 
             Employee employee = employeeRepo.findByAccount_Email(email);
+            spec = employeeComplaintWorkflow.getComplaints(employee,filter);
 
-            spec = (root, query, cb) -> {
-                List<Predicate> predicates = new ArrayList<>();
-                predicates.add(cb.equal(root.get("deleted"), false));
-                predicates.add(cb.equal(root.get("governorate").get("id"), employee.getGovernorate().getId()));
-                predicates.add(cb.equal(root.get("institution").get("id"), employee.getInstitution().getId()));
-
-                if (filter.state() == null) {
-                    predicates.add(cb.equal(root.get("state"), ComplaintState.NEW));
-                } else {
-                    ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
-                    predicates.add(cb.equal(root.get("state"), complaintState));
-                }
-
-                query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
-                return cb.and(predicates.toArray(new Predicate[0]));
-            };
             if (filter.page() == null || filter.size() == null) {
 
                 return complaintRepo.findAll(
@@ -279,6 +265,7 @@ public class ApiService {
 
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
+
             if (filter.page() == null || filter.size() == null) {
 
                 return complaintRepo.findAll(
@@ -315,24 +302,20 @@ public class ApiService {
 
 
 // chose complaint from the ui to interact with it
+    @Transactional
     public Object getComplaint(Long complaintId){
 
         Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
                 .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
 
+// open complaint by receptionist employee
         if (authorizationService.IsReceptionist()){
 
-            Employee employee = employeeRepo.findByAccount_Email
-                    (SecurityContextHolder.getContext().getAuthentication().getName());
+            return employeeComplaintWorkflow.reviewComplaint(complaint);
 
-            if(complaint.getInstitution().getName().equals(employee.getInstitution().getName())){
-
-                return complaintMapper.toPerceptionComplaintDto(complaint);
-            }
-
-            else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
         }
 
+// open complaint by citizen
         else {
             return complaintMapper.toDto(complaint);
         }
