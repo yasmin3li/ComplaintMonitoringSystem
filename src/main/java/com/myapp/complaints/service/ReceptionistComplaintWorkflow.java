@@ -42,19 +42,19 @@ public class ReceptionistComplaintWorkflow {
 
             if(complaint.getState().equals(ComplaintState.NEW)){
 
-                ComplaintTrackingLog trackingLog = CommonUtils.buildComplaintTrackingLog(complaint, employee.getAccount(),ComplaintState.IN_VERIFY,
+                ComplaintTrackingLog trackingLog = CommonUtils.buildComplaintTrackingLog(complaint, employee.getAccount(),ComplaintState.IN_REVIEW,
                         null, ActionType.OPENED,"الشكوى قيد المراجعة");
 
                 complaintTracingLogRepo.save(trackingLog);
 
-                complaint.setState(ComplaintState.IN_VERIFY);
+                complaint.setState(ComplaintState.IN_REVIEW);
                 complaintRepo.save(complaint);
 
                 return complaintMapper.toPerceptionComplaintDto(complaint);
 
                 //ensure same employee is handling complaint in review state
-            } else if (complaint.getState().equals(ComplaintState.IN_VERIFY) &&
-                    (complaintTracingLogRepo.findByComplaint_IdAndActionBy_IdAndNewState(complaint.getId(), employee.getAccount().getId(),ComplaintState.IN_VERIFY).isEmpty())
+            } else if (complaint.getState().equals(ComplaintState.IN_REVIEW) &&
+                    (complaintTracingLogRepo.findByComplaint_IdAndActionBy_IdAndNewState(complaint.getId(), employee.getAccount().getId(),ComplaintState.IN_REVIEW).isEmpty())
             ) {
                 throw new ApiException("there are other employee working on this complaint", HttpStatus.FORBIDDEN);
             }
@@ -84,7 +84,7 @@ public class ReceptionistComplaintWorkflow {
                     ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
                     predicates.add(cb.equal(root.get("state"), complaintState));
 
-                    if (complaintState == ComplaintState.IN_VERIFY) {
+                    if (complaintState == ComplaintState.IN_REVIEW) {
 
                         Join<Complaint, ComplaintTrackingLog> logJoin = root.join("logs");
 
@@ -95,7 +95,7 @@ public class ReceptionistComplaintWorkflow {
 
                         predicates.add(cb.equal(
                                 logJoin.get("newState"),
-                                ComplaintState.IN_VERIFY
+                                ComplaintState.IN_REVIEW
                         ));
 
 //                        query.distinct(true);
