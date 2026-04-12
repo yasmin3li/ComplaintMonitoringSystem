@@ -26,7 +26,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class EmployeeComplaintWorkflow {
+public class ReceptionistComplaintWorkflow {
 
     private final EmployeeRepo employeeRepo;
     private final ComplaintTracingLogRepo complaintTracingLogRepo;
@@ -67,42 +67,46 @@ public class EmployeeComplaintWorkflow {
         else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
     }
 
-    public Specification<Complaint> getComplaints(Employee employee, ComplaintFilterRequestDto filter) {
+    public Specification<Complaint> getInstitutionComplaints(ComplaintFilterRequestDto filter) {
 
-        return  (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("deleted"), false));
-            predicates.add(cb.equal(root.get("governorate").get("id"), employee.getGovernorate().getId()));
-            predicates.add(cb.equal(root.get("institution").get("id"), employee.getInstitution().getId()));
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Employee employee = employeeRepo.findByAccount_Email(email);
 
-            if (filter.state() == null) {
-                predicates.add(cb.equal(root.get("state"), ComplaintState.NEW));
-            } else {
-                ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
-                predicates.add(cb.equal(root.get("state"), complaintState));
+            return  (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                predicates.add(cb.equal(root.get("deleted"), false));
+                predicates.add(cb.equal(root.get("governorate").get("id"), employee.getGovernorate().getId()));
+                predicates.add(cb.equal(root.get("institution").get("id"), employee.getInstitution().getId()));
 
-                if (complaintState == ComplaintState.IN_VERIFY) {
+                if (filter.state() == null) {
+                    predicates.add(cb.equal(root.get("state"), ComplaintState.NEW));
+                } else {
+                    ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
+                    predicates.add(cb.equal(root.get("state"), complaintState));
 
-                    Join<Complaint, ComplaintTrackingLog> logJoin = root.join("logs");
+                    if (complaintState == ComplaintState.IN_VERIFY) {
 
-                    predicates.add(cb.equal(
-                            logJoin.get("actionBy").get("id"),
-                            employee.getAccount().getId()
-                    ));
+                        Join<Complaint, ComplaintTrackingLog> logJoin = root.join("logs");
 
-                    predicates.add(cb.equal(
-                            logJoin.get("newState"),
-                            ComplaintState.IN_VERIFY
-                    ));
+                        predicates.add(cb.equal(
+                                logJoin.get("actionBy").get("id"),
+                                employee.getAccount().getId()
+                        ));
+
+                        predicates.add(cb.equal(
+                                logJoin.get("newState"),
+                                ComplaintState.IN_VERIFY
+                        ));
 
 //                        query.distinct(true);
+                    }
                 }
-            }
 
-            query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
+                query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
+                return cb.and(predicates.toArray(new Predicate[0]));
+            };
+        }
+
     }
-}
 
 

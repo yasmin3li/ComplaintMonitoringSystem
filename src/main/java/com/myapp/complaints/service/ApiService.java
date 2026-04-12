@@ -1,6 +1,5 @@
 package com.myapp.complaints.service;
 
-import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
@@ -10,7 +9,6 @@ import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
 import com.myapp.complaints.mapper.ComplaintMapper;
-import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,17 +36,14 @@ public class ApiService {
     private final AccountRepo accountRepo;
     private final ServiceAvailableRepo serviceAvailableRepo;
     private final GovernorateRepo governorateRepo;
-    private final SectorRepo sectorRepo;
-    private final AddressRepo addressRepo;
-    private final InstitutionRepo institutionRepo;
     private final ComplaintRepo complaintRepo;
     private final ComplaintMapper complaintMapper;
     private final CitizenRepo citizenRepo;
     private final ComplaintImageRepo complaintImageRepo;
     private final AuthorizationService authorizationService;
-    private final VotingService votingService;
+    private final CitizenComplaintWorkFlow citizenComplaintWorkFlow;
     private final NotificationService notificationService;
-    private final EmployeeComplaintWorkflow employeeComplaintWorkflow;
+    private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
 
     @Transactional
     public ApiResponseDto<?> createComplaint(@Valid ComplaintCreateDto dto) {
@@ -190,16 +185,12 @@ public class ApiService {
 //display list of complaints based on account's role and special filter
     public Object getComplaints(ComplaintFilterRequestDto filter,boolean localUser) {
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
-        String email = auth.getName();
-
         Specification<Complaint> spec;
+//TODO :later when dealing with admin_role or manager_role will do like this role_condition and local user will be always true
 
         if (authorizationService.IsReceptionist()) {
 
-            Employee employee = employeeRepo.findByAccount_Email(email);
-            spec = employeeComplaintWorkflow.getComplaints(employee,filter);
+            spec = receptionistComplaintWorkflow.getInstitutionComplaints(filter);
 
             if (filter.page() == null || filter.size() == null) {
 
@@ -218,54 +209,10 @@ public class ApiService {
                         .toList();
             }
         }
+
         else {
-            spec = (root, query, cb) -> {
-                List<Predicate> predicates = new ArrayList<>();
 
-                // deleted = false
-                predicates.add(cb.equal(root.get("deleted"), false));
-
-                if (filter.governorateId() != null) {
-                    predicates.add(cb.equal(root.get("governorate").get("id"), filter.governorateId()));
-                }
-
-                if (filter.sectorId() != null) {
-                    predicates.add(cb.equal(root.get("sector").get("id"), filter.sectorId()));
-                }
-
-                if (filter.institutionId() != null) {
-
-                    predicates.add(cb.equal(root.get("institution").get("id"), filter.institutionId()));
-                }
-
-                if (filter.state() != null && !filter.state().isBlank()) {
-
-                    ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
-
-                    predicates.add(cb.equal(root.get("state"), complaintState));
-                }
-
-                // citizen only
-                if (localUser) {
-//                if (Boolean.TRUE.equals(filter.myComplaints())) {
-                    predicates.add(cb.equal(root.get("addedBy").get("email"), email));
-                }
-
-
-                // Keyword search
-                if (filter.keyword() != null && !filter.keyword().isEmpty()) {
-                    String pattern = "%" + filter.keyword().toLowerCase() + "%";
-                    predicates.add(cb.or(
-                            cb.like(cb.lower(root.get("title")), pattern),
-                            cb.like(cb.lower(root.get("description")), pattern)
-                    ));
-                }
-
-                query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
-
-                return cb.and(predicates.toArray(new Predicate[0]));
-            };
-
+            spec = citizenComplaintWorkFlow.getCitizensComplaints(localUser,filter);
             if (filter.page() == null || filter.size() == null) {
 
                 return complaintRepo.findAll(
@@ -311,7 +258,7 @@ public class ApiService {
 // open complaint by receptionist employee
         if (authorizationService.IsReceptionist()){
 
-            return employeeComplaintWorkflow.reviewComplaint(complaint);
+            return receptionistComplaintWorkflow.reviewComplaint(complaint);
 
         }
 
