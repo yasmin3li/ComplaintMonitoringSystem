@@ -1,21 +1,140 @@
 package com.myapp.complaints.service;
 
 import com.myapp.complaints.CommonUtils;
+import com.myapp.complaints.DAO.*;
+import com.myapp.complaints.dto.ApiResponseDto;
+import com.myapp.complaints.dto.ComplaintCreateDto;
 import com.myapp.complaints.dto.ComplaintFilterRequestDto;
-import com.myapp.complaints.entity.Complaint;
+import com.myapp.complaints.entity.*;
+import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.enums.ImageType;
+import com.myapp.complaints.exceptionHandller.ApiException;
+import com.myapp.complaints.mapper.ComplaintMapper;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CitizenComplaintWorkFlow {
+
+    private final EmployeeRepo employeeRepo;
+    private final AccountRepo accountRepo;
+    private final ComplaintRepo complaintRepo;
+    private final ComplaintMapper complaintMapper;
+    private final NotificationService notificationService;
+
+    @Transactional
+    public ApiResponseDto<?> createComplaint(@Valid ComplaintCreateDto dto) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String email = auth.getName();
+
+        Account citizenAccount = accountRepo.findByEmail(email)
+                .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
+
+        Complaint complaint = complaintMapper.fromdto(dto);
+
+/**moved to mapper
+ // create:  Address
+ Address address = new Address();
+ address.setLatitude(dto.latitude());
+ address.setLongitude(dto.longitude());
+ address.setFullAddressText(dto.fullAddressText());
+
+ address = addressRepo.save(address);
+
+
+ Complaint complaint = new Complaint();
+ complaint.setTitle(dto.title());
+ complaint.setDescription(dto.description());
+ **/
+
+        complaint.setState(ComplaintState.NEW);
+        complaint.setDeleted(false);
+        complaint.setDateTimeOfAdd(LocalDateTime.now());
+
+/** moved to mapper
+ //        complaint.setService(serviceAvailableRepo.findById(dto.serviceId())
+ //                .orElseThrow(() -> new RuntimeException("Service not found")));
+ //
+ //        complaint.setInstitution(institutionRepo.findById(dto.institutionId())
+ //                .orElseThrow(() -> new RuntimeException("Institution not found")));
+ //
+ //        complaint.setGovernorate(governorateRepo.findById(dto.governorateId())
+ //                .orElseThrow(() -> new RuntimeException("Governorate not found")));
+ //
+ //        complaint.setSector(sectorRepo.findById(dto.sectorId())
+ //                .orElseThrow(() -> new RuntimeException("Sector not found")));
+
+ //       complaint.setAddress(address);
+ */
+
+        complaint.setAddedBy(citizenAccount);
+
+//Add this Complaint to ComplaintTrackingLog
+        ComplaintTrackingLog log = new ComplaintTrackingLog();
+        log.setComplaint(complaint);
+        log.setPreviousState(null);
+        log.setNewState(ComplaintState.NEW);
+        log.setActionType(ActionType.CREATED);
+        log.setActionBy(citizenAccount);
+        log.setComments("Citizen Added Complaint");
+        complaint.getLogs().add(log);
+
+
+//TODO    dealing with images
+        if(dto.images() != null) {
+
+            for(String url : dto.images()) {
+
+                ComplaintImage img = new ComplaintImage();
+
+                img.setComplaint(complaint);
+                img.setImageUrl(url);
+                img.setAddedBy(citizenAccount);
+                img.setType(ImageType.BEFORE_SOLVE);
+
+                //حتى تبقى البيانات متزامنة بحال طلبت الصور في نفس المناقلة
+                complaint.getImages().add(img);
+//                complaintImageRepo.save(img);
+            }
+        }
+
+        Complaint savedComplaint= complaintRepo.save(complaint);
+
+//        notificationService.notifyUsers(complaint,"",List.of(account));
+        //find all employee at institution: complaint-institution name, with role: perception employee, to send new notification with content: "new complaint has been added"
+        List<Employee> employees = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),2);
+
+        List<Account> accounts = new ArrayList<>(List.of());
+
+        for (Employee employee : employees) {
+            accounts.add(employee.getAccount());
+        }
+
+//        List<Account> accounts = accountRepo.findByRoleId(2L);
+        accounts.add(citizenAccount);
+        notificationService.notifyUsers(complaint,"no reason to add with state NEW",accounts);
+
+        return new ApiResponseDto<>(
+                true,
+                String.format("تم حفظ شكواك: \"%s\" بنجاح",savedComplaint.getTitle()),
+                null
+        );
+    }
+
 
     public Specification<Complaint> getCitizensComplaints(boolean localUser, ComplaintFilterRequestDto filter) {
         return (root, query, cb) -> {
@@ -66,4 +185,3 @@ public class CitizenComplaintWorkFlow {
         };
     }
 }
-//TODO: refactor, translate add complaint from ApiService to here

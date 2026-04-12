@@ -3,10 +3,7 @@ package com.myapp.complaints.controller;
 
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.enums.VotingType;
-import com.myapp.complaints.service.ApiService;
-import com.myapp.complaints.service.NotificationService;
-import com.myapp.complaints.service.StatisticsService;
-import com.myapp.complaints.service.VotingService;
+import com.myapp.complaints.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
@@ -29,14 +26,14 @@ public class ApiController {
     private final StatisticsService statisticsService;
     private final VotingService votingService;
     private final NotificationService notificationService;
+    private final CitizenComplaintWorkFlow citizenComplaintWorkFlow;
 
-// content-type: multipart/form-data not Json, before data+images
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
             @Valid @RequestBody ComplaintCreateDto dto) {
 
         return ResponseEntity.ok(
-                apiService.createComplaint(dto)
+                citizenComplaintWorkFlow.createComplaint(dto)
         );
     }
 //    @PostMapping(value="/complaint", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
