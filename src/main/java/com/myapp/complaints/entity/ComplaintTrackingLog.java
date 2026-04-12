@@ -54,9 +54,5 @@ public class ComplaintTrackingLog {
         actionDate = LocalDateTime.now();
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        actionDate = LocalDateTime.now();
-    }
 }
 
