@@ -6,11 +6,11 @@ import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.ComplaintCreateDto;
 import com.myapp.complaints.dto.ComplaintFilterRequestDto;
 import com.myapp.complaints.entity.*;
-import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.ComplaintMapper;
+import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +34,8 @@ public class CitizenComplaintWorkFlow {
     private final ComplaintRepo complaintRepo;
     private final ComplaintMapper complaintMapper;
     private final NotificationService notificationService;
+    private final ComplaintWorkflowEngine workflowEngine;
+
 
     @Transactional
     public ApiResponseDto<?> createComplaint(@Valid ComplaintCreateDto dto) {
@@ -83,17 +85,6 @@ public class CitizenComplaintWorkFlow {
 
         complaint.setAddedBy(citizenAccount);
 
-//Add this Complaint to ComplaintTrackingLog
-        ComplaintTrackingLog log = new ComplaintTrackingLog();
-        log.setComplaint(complaint);
-        log.setPreviousState(null);
-        log.setNewState(ComplaintState.NEW);
-        log.setActionType(ActionType.CREATED);
-        log.setActionBy(citizenAccount);
-        log.setComments("Citizen Added Complaint");
-        complaint.getLogs().add(log);
-
-
 //TODO    dealing with images
         if(dto.images() != null) {
 
@@ -114,8 +105,15 @@ public class CitizenComplaintWorkFlow {
 
         Complaint savedComplaint= complaintRepo.save(complaint);
 
-//        notificationService.notifyUsers(complaint,"",List.of(account));
-        //find all employee at institution: complaint-institution name, with role: perception employee, to send new notification with content: "new complaint has been added"
+/**
+ * Add this event to ComplaintTrackingLogDto
+ */
+        workflowEngine.createInitialLog(savedComplaint, citizenAccount);
+
+/**
+ *  find all employee at institution: complaint-institution name,
+ * with role: perception employee, to send new notification with content: "new complaint has been added"
+ */
         List<Employee> employees = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),2);
 
         List<Account> accounts = new ArrayList<>(List.of());

@@ -9,10 +9,10 @@ import com.myapp.complaints.dto.PerceptionComplaintResponseDto;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.entity.Employee;
-import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.ComplaintMapper;
+import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +32,9 @@ public class ReceptionistComplaintWorkflow {
     private final ComplaintTracingLogRepo complaintTracingLogRepo;
     private final ComplaintRepo complaintRepo;
     private final ComplaintMapper complaintMapper;
-    
+    private final ComplaintWorkflowEngine workflowEngine;
+
+
     public PerceptionComplaintResponseDto reviewComplaint(Complaint complaint) {
 
         Employee employee = employeeRepo.findByAccount_Email
@@ -42,13 +44,10 @@ public class ReceptionistComplaintWorkflow {
 
             if(complaint.getState().equals(ComplaintState.NEW)){
 
-                ComplaintTrackingLog trackingLog = CommonUtils.buildComplaintTrackingLog(complaint, employee.getAccount(),ComplaintState.IN_REVIEW,
-                        null, ActionType.OPENED,"الشكوى قيد المراجعة");
-
-                complaintTracingLogRepo.save(trackingLog);
-
-                complaint.setState(ComplaintState.IN_REVIEW);
-                complaintRepo.save(complaint);
+                /**
+                 * Add this event to ComplaintTrackingLogDto
+                 */
+                workflowEngine.changeState(complaint,ComplaintState.IN_REVIEW,employee.getAccount(),null);
 
                 return complaintMapper.toPerceptionComplaintDto(complaint);
 

@@ -8,5 +8,5 @@ public enum ActionType {
     STATE_CHANGED,
     COMMENTED,
     CLOSED,
-    DELETED
+    REJECTED, DELETED
 }
