@@ -14,7 +14,7 @@ public class CommonUtils {
         return switch (state) {
             case "جديدة" -> ComplaintState.NEW;
             case "قيد التقدم" -> ComplaintState.IN_PROGRESS;
-            case "قيد المراجعة" -> ComplaintState.IN_VERIFY;
+            case "قيد المراجعة" -> ComplaintState.IN_REVIEW;
             case "محلولة" -> ComplaintState.RESOLVED;
             case "مرفوضة" ->ComplaintState.REJECTED;
             case "مغلقة" -> ComplaintState.CLOSED;
@@ -30,7 +30,7 @@ public class CommonUtils {
         return switch (state) {
             case ComplaintState.NEW -> "جديدة";
             case ComplaintState.IN_PROGRESS -> "قيد التقدم";
-            case ComplaintState.IN_VERIFY -> "قيد المراجعة";
+            case ComplaintState.IN_REVIEW -> "قيد المراجعة";
             case ComplaintState.RESOLVED -> "محلولة";
             case ComplaintState.REJECTED ->"مرفوضة";
             case ComplaintState.CLOSED -> "مغلقة";
