@@ -1,16 +1,27 @@
 package com.myapp.complaints.service;
 
+import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
+import com.myapp.complaints.entity.Complaint;
+import com.myapp.complaints.entity.ComplaintTrackingLog;
+import com.myapp.complaints.entity.Employee;
+import com.myapp.complaints.exceptionHandller.ApiException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
+@RequiredArgsConstructor
 public class AuthorizationService {
+    private final ComplaintTracingLogRepo complaintTracingLogRepo;
+
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     public boolean checkAccess(String realOwnerEmail){
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = auth.getName();
-
         return currentUser.equals(realOwnerEmail);
     }
 
@@ -36,6 +47,15 @@ public class AuthorizationService {
 
     public boolean isManager() {
         return hasRole("ROLE_MANAGER");
+    }
+
+    //An open complaint is the responsibility of the employee who opened it only
+    public boolean checkResponsibility(Employee employee, Complaint complaint){
+
+        List<ComplaintTrackingLog> check = complaintTracingLogRepo.findByComplaint_IdAndActionBy_Id
+                (complaint.getId(), employee.getAccount().getId());
+
+        return !check.isEmpty();
     }
 
 }

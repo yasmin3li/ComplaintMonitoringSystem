@@ -40,6 +40,7 @@ public class ReceptionistComplaintWorkflow {
     private final ComplaintWorkflowEngine workflowEngine;
     private final AccountRepo accountRepo;
     private final NotificationService notificationService;
+    private final AuthorizationService authorizationService;
 
 
     public PerceptionComplaintResponseDto reviewComplaint(Complaint complaint) {
@@ -51,18 +52,13 @@ public class ReceptionistComplaintWorkflow {
 
             if(complaint.getState().equals(ComplaintState.NEW)){
 
-                /**
-                 * Add this event to ComplaintTrackingLogDto
-                 */
                 workflowEngine.changeState(complaint,ComplaintState.IN_REVIEW,employee.getAccount(),null,"الشكوى قيد المراجعة");
 
                 return complaintMapper.toPerceptionComplaintDto(complaint);
 
-                //ensure same employee is handling complaint in review state
-            } else if (complaint.getState().equals(ComplaintState.IN_REVIEW) &&
-                    (complaintTracingLogRepo.findByComplaint_IdAndActionBy_IdAndNewState(complaint.getId(), employee.getAccount().getId(),ComplaintState.IN_REVIEW).isEmpty())
-            ) {
-                throw new ApiException("there are other employee working on this complaint", HttpStatus.FORBIDDEN);
+            } else if (!authorizationService.checkResponsibility(employee,complaint)) {
+
+                throw new ApiException("This complaint is not your responsibility, there are another employee working on it", HttpStatus.FORBIDDEN);
             }
             else {
                 return complaintMapper.toPerceptionComplaintDto(complaint);
