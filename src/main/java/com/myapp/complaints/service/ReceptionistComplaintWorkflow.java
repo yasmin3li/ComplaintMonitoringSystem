@@ -1,11 +1,15 @@
 package com.myapp.complaints.service;
 
 import com.myapp.complaints.CommonUtils;
+import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.ComplaintRepo;
 import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
 import com.myapp.complaints.DAO.EmployeeRepo;
+import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.ComplaintFilterRequestDto;
+import com.myapp.complaints.dto.ComplaintRejectDto;
 import com.myapp.complaints.dto.PerceptionComplaintResponseDto;
+import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.entity.Employee;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +38,8 @@ public class ReceptionistComplaintWorkflow {
     private final ComplaintRepo complaintRepo;
     private final ComplaintMapper complaintMapper;
     private final ComplaintWorkflowEngine workflowEngine;
+    private final AccountRepo accountRepo;
+    private final NotificationService notificationService;
 
 
     public PerceptionComplaintResponseDto reviewComplaint(Complaint complaint) {
@@ -47,7 +54,7 @@ public class ReceptionistComplaintWorkflow {
                 /**
                  * Add this event to ComplaintTrackingLogDto
                  */
-                workflowEngine.changeState(complaint,ComplaintState.IN_REVIEW,employee.getAccount(),null);
+                workflowEngine.changeState(complaint,ComplaintState.IN_REVIEW,employee.getAccount(),null,"الشكوى قيد المراجعة");
 
                 return complaintMapper.toPerceptionComplaintDto(complaint);
 
@@ -83,7 +90,7 @@ public class ReceptionistComplaintWorkflow {
                     ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
                     predicates.add(cb.equal(root.get("state"), complaintState));
 
-                    if (complaintState == ComplaintState.IN_REVIEW) {
+                    if (complaintState == ComplaintState.IN_REVIEW || complaintState == ComplaintState.REJECTED ) {
 
                         Join<Complaint, ComplaintTrackingLog> logJoin = root.join("logs");
 
@@ -94,7 +101,7 @@ public class ReceptionistComplaintWorkflow {
 
                         predicates.add(cb.equal(
                                 logJoin.get("newState"),
-                                ComplaintState.IN_REVIEW
+                                complaintState
                         ));
 
 //                        query.distinct(true);
@@ -106,6 +113,33 @@ public class ReceptionistComplaintWorkflow {
             };
         }
 
+
+    public ApiResponseDto<?> rejectComplaint(String email, ComplaintRejectDto dto) {
+
+        Optional<Complaint> complaint = complaintRepo.findByIdAndDeletedFalse(dto.complaintId());
+        if(complaint.isEmpty()){
+            throw new ApiException("complaint with title"+complaint.get().getTitle()+"not found",HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Account> account = accountRepo.findByEmail(email);
+
+        List<ComplaintTrackingLog> log =
+                complaintTracingLogRepo.findByComplaint_IdAndActionBy_Id(
+                        complaint.get().getId(),account.get().getId());
+
+                if(!log.isEmpty() && complaint.get().getState().equals(ComplaintState.IN_REVIEW)){
+                   workflowEngine.changeState(complaint.get(),ComplaintState.REJECTED,account.get(),null,dto.reason());
+                   notificationService.notifyUsers(complaint.get(),dto.reason(),List.of(complaint.get().getAddedBy()));
+                }
+                else{
+                    throw new ApiException("you aren't allowed to reject this complaint, you aren't working on it",HttpStatus.FORBIDDEN);
+                }
+        return new ApiResponseDto<>(
+                true,
+                String.format("تم رفض شكواك: \"%s\" بسبب \"%s\" ",complaint.get().getTitle(),dto.reason()),
+                null
+        );
     }
+}
 
 

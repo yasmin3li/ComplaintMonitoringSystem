@@ -27,6 +27,7 @@ public class ApiController {
     private final VotingService votingService;
     private final NotificationService notificationService;
     private final CitizenComplaintWorkFlow citizenComplaintWorkFlow;
+    private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
 
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
@@ -245,6 +246,13 @@ public class ApiController {
     @GetMapping("/servicesAvailable/findByInstitutionId/{institutionId}")
     public ResponseEntity<?> servicesAvailable( @PathVariable Long institutionId){
         return ResponseEntity.ok(apiService.servicesAvailable(institutionId));
+    }
+
+    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+    @PostMapping("/employee/rejectComplaint")
+    public ResponseEntity<?> receptionistRejectComplaint(@RequestBody ComplaintRejectDto dto,Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(receptionistComplaintWorkflow.rejectComplaint(email,dto));
     }
 
 }

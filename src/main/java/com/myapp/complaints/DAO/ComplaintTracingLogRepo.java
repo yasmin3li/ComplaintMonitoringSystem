@@ -14,4 +14,6 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
     List<ComplaintTrackingLogDto> findByComplaintId(Long complaintId);
 
     Optional<ComplaintTrackingLog> findByComplaint_IdAndActionBy_IdAndNewState(Long complaintId, long accountId, ComplaintState state);
+
+    List<ComplaintTrackingLog> findByComplaint_IdAndActionBy_Id(Long id, Long id1);
 }
