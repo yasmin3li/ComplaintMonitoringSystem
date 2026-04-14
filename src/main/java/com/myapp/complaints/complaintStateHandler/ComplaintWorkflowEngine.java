@@ -19,7 +19,7 @@ public class ComplaintWorkflowEngine {
     private final ComplaintTracingLogRepo logRepo;
     private final ComplaintStateValidator validator;
 
-    public void changeState(Complaint complaint, ComplaintState newState, Account actor, Employee assignedTo) {
+    public void changeState(Complaint complaint, ComplaintState newState, Account actor, Employee assignedTo, String comment) {
 
         ComplaintState currentState = complaint.getState();
 
@@ -34,7 +34,7 @@ public class ComplaintWorkflowEngine {
         log.setActionBy(actor);
         log.setAssignedTo(assignedTo);
         log.setActionType(resolveActionType(currentState, newState));
-        log.setComments(resolveComment(newState));
+        log.setComments(comment);
 
         logRepo.save(log);
 
@@ -51,15 +51,6 @@ public class ComplaintWorkflowEngine {
             return ActionType.REJECTED;
         }
         return ActionType.UPDATED;
-    }
-
-    private String resolveComment(ComplaintState state) {
-        return switch (state) {
-            case IN_REVIEW -> "الشكوى قيد المراجعة";
-            case REJECTED -> "تم رفض الشكوى";
-            case RESOLVED -> "تم حل الشكوى";
-            default -> "تم تحديث الحالة";
-        };
     }
 
     public void createInitialLog(Complaint complaint, Account actor) {
