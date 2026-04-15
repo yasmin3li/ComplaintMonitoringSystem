@@ -2,9 +2,7 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
-import com.myapp.complaints.dto.ApiResponseDto;
-import com.myapp.complaints.dto.ComplaintCreateDto;
-import com.myapp.complaints.dto.ComplaintFilterRequestDto;
+import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
@@ -20,7 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +32,11 @@ public class CitizenComplaintWorkFlow {
     private final ComplaintMapper complaintMapper;
     private final NotificationService notificationService;
     private final ComplaintWorkflowEngine workflowEngine;
+    private final AuthorizationService authorizationService;
+    private final ServiceAvailableRepo serviceAvailableRepo ;
+    private final GovernorateRepo governorateRepo;
+    private  final SectorRepo sectorRepo;
+    private final InstitutionRepo institutionRepo;
 
 
     @Transactional
@@ -133,7 +135,6 @@ public class CitizenComplaintWorkFlow {
         );
     }
 
-
     public Specification<Complaint> getCitizensComplaints(boolean localUser, ComplaintFilterRequestDto filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -181,5 +182,101 @@ public class CitizenComplaintWorkFlow {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    public ApiResponseDto<?> updateComplaint(String email, UpdateComplaintDto dto) {
+
+        Complaint complaint = complaintRepo
+                .findByIdAndDeletedFalse(dto.complaintId())
+                .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
+
+
+        if (!authorizationService.checkAccess(complaint.getAddedBy().getEmail())) {
+            throw new ApiException("Access denied, you aren't the owner for this complaint",HttpStatus.FORBIDDEN);
+        }
+
+        ComplaintState complaintState = complaint.getState();
+
+        if (!(complaintState.equals(ComplaintState.NEW) ||
+                complaintState.equals(ComplaintState.REJECTED))) {
+
+            throw new RuntimeException("Cannot update complaint in this state");
+        }
+
+        if (dto.title() != null) {
+            complaint.setTitle(dto.title());
+        }
+
+        if (dto.description() != null) {
+            complaint.setDescription(dto.description());
+        }
+
+        if (dto.latitude() != null && dto.longitude() != null) {
+            Address address = complaint.getAddress();
+
+            if (address == null) {
+                address = new Address();
+            }
+
+            address.setLatitude(dto.latitude());
+            address.setLongitude(dto.longitude());
+
+            complaint.setAddress(address);
+        }
+
+        if (dto.serviceId() != null) {
+            ServiceAvailable service = serviceAvailableRepo.findById(dto.serviceId())
+                    .orElseThrow(() -> new RuntimeException("Service not found"));
+            complaint.setService(service);
+        }
+
+        if (dto.governorateId() != null) {
+            Governorate governorate = governorateRepo.findById(dto.governorateId())
+                    .orElseThrow(() -> new RuntimeException("Governorate not found"));
+            complaint.setGovernorate(governorate);
+        }
+
+        if (dto.sectorId() != null) {
+            Sector sector = sectorRepo.findById(dto.sectorId())
+                    .orElseThrow(() -> new RuntimeException("Sector not found"));
+            complaint.setSector(sector);
+        }
+
+        if (dto.institutionId() != null) {
+            Institution institution = institutionRepo.findById(dto.institutionId())
+                    .orElseThrow(() -> new RuntimeException("institution not found"));
+            complaint.setInstitution(institution);
+        }
+
+        if (dto.images() != null) {
+
+            Account account = accountRepo.findByEmail(email)
+                    .orElseThrow(() -> new ApiException("Account not found",HttpStatus.NOT_FOUND));
+
+        complaint.getImages().clear();
+
+            for (String img : dto.images()) {
+
+                ComplaintImage complaintImage = new ComplaintImage();
+                complaintImage.setImageUrl(img);
+                complaintImage.setType(ImageType.BEFORE_SOLVE);
+                complaintImage.setComplaint(complaint);
+                complaintImage.setAddedBy(account);
+
+                complaint.getImages().add(complaintImage);
+            }
+        }
+        else{
+            if(dto.deleteOldImages())
+                complaint.getImages().clear();
+        }
+
+        complaintRepo.save(complaint);
+
+        return new ApiResponseDto<>(
+                true,
+                "complaint updated successfully",
+                null
+        );
     }
 }
