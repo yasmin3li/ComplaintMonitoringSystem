@@ -67,17 +67,8 @@ public class UserInfoConfig implements UserDetails {
     @Override
     public boolean isEnabled() {
 
-//        if ((account.getStatus()==AccountStatus.SUSPENDED) && !account.isDeleted())
-//            throw new RuntimeException("you should reset your password");
-
-//        if (account.getStatus() == AccountStatus.BANNED && !account.isDeleted())
-//            throw new RuntimeException("your account not verified yet");
-//
-//        else
-//            return true;
-            return  true;
-//                    account.getStatus() == AccountStatus.ACTIVATED && !account.isDeleted();
-        }
+        return !account.isDeleted();
+    }
 
     }
 

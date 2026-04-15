@@ -263,4 +263,26 @@ public class ApiService {
                 null
         );
     }
+
+    @Transactional
+    public ApiResponseDto<?> deleteAccount(String email, Long accountId) {
+
+        Account account = accountRepo.findByEmail(email)
+                .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
+
+        if(account.getId().equals(accountId)){
+            account.setDeleted(true);
+            accountRepo.save(account);
+        }
+
+        else {
+            throw  new ApiException("we can't delete this account because you are not the owner", HttpStatus.FORBIDDEN);
+        }
+
+        return new ApiResponseDto<>(
+                true,
+                String.format("تم حذف الحساب للمستخدم : \"%s\" بنجاح",account.getUserName()),
+                null
+        );
+    }
 }

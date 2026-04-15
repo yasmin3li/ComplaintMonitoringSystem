@@ -2,10 +2,7 @@ package com.myapp.complaints.controller;
 
 import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.dto.*;
-import com.myapp.complaints.service.AuthService;
-import com.myapp.complaints.service.PasswordService;
-import com.myapp.complaints.service.RestLinkService;
-import com.myapp.complaints.service.VerificationCodeService;
+import com.myapp.complaints.service.*;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     private final AuthService authService;
     private final EntityManager entityManager;
-    private final AccountRepo accountRepo;
+    private final ApiService apiService;
     private final VerificationCodeService verificationCodeService;
     private final PasswordEncoder passwordEncoder;
     private final PasswordService passwordService;
@@ -113,7 +110,11 @@ public class AuthController {
         return ResponseEntity.ok(restLinkService.resendRestLink(emailOrPhone));
     }
 
-
+    @DeleteMapping("/account/{accountId}")
+    public ResponseEntity<?> deleteAccount(@PathVariable Long accountId, Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(apiService.deleteAccount(email,accountId));
+    }
 
 }
 
