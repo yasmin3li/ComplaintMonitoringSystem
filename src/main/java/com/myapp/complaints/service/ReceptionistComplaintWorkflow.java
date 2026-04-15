@@ -5,15 +5,10 @@ import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.ComplaintRepo;
 import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
 import com.myapp.complaints.DAO.EmployeeRepo;
-import com.myapp.complaints.dto.ApiResponseDto;
-import com.myapp.complaints.dto.ComplaintFilterRequestDto;
-import com.myapp.complaints.dto.ComplaintRejectDto;
-import com.myapp.complaints.dto.PerceptionComplaintResponseDto;
-import com.myapp.complaints.entity.Account;
-import com.myapp.complaints.entity.Complaint;
-import com.myapp.complaints.entity.ComplaintTrackingLog;
-import com.myapp.complaints.entity.Employee;
+import com.myapp.complaints.dto.*;
+import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.ComplaintMapper;
 import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
@@ -114,7 +109,7 @@ public class ReceptionistComplaintWorkflow {
 
         Optional<Complaint> complaint = complaintRepo.findByIdAndDeletedFalse(dto.complaintId());
         if(complaint.isEmpty()){
-            throw new ApiException("complaint with title"+complaint.get().getTitle()+"not found",HttpStatus.NOT_FOUND);
+            throw new ApiException("complaint not found",HttpStatus.NOT_FOUND);
         }
 
         Optional<Account> account = accountRepo.findByEmail(email);
@@ -133,6 +128,53 @@ public class ReceptionistComplaintWorkflow {
         return new ApiResponseDto<>(
                 true,
                 String.format("تم رفض شكواك: \"%s\" بسبب \"%s\" ",complaint.get().getTitle(),dto.reason()),
+                null
+        );
+    }
+
+    public ApiResponseDto<?> updateComplaint(String email, UpdateComplaintDto dto) {
+
+        Employee employee = employeeRepo.findByAccount_Email(email);
+
+        Complaint complaint = complaintRepo
+                .findByIdAndDeletedFalse(dto.complaintId())
+                .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
+
+        if(!authorizationService.checkResponsibility(employee,complaint)){
+            throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
+        }
+
+        ComplaintState complaintState = complaint.getState();
+
+        if (!(complaintState.equals(ComplaintState.RESOLVED))) {
+
+            throw new RuntimeException("you can upload complaint's image only at state RESOLVED");
+        }
+
+        if (dto.images() != null) {
+
+            complaint.getImages().clear();
+
+            for (String img : dto.images()) {
+
+                ComplaintImage complaintImage = new ComplaintImage();
+                complaintImage.setImageUrl(img);
+                complaintImage.setType(ImageType.AFTER_SOLVE);
+                complaintImage.setComplaint(complaint);
+                complaintImage.setAddedBy(employee.getAccount());
+
+                complaint.getImages().add(complaintImage);
+            }
+        }
+        else{
+           throw new ApiException("it is not allowed for you to delete images citizen's complaint",HttpStatus.BAD_REQUEST);
+        }
+
+        complaintRepo.save(complaint);
+
+        return new ApiResponseDto<>(
+                true,
+                "images uploaded and complaint updated  successfully",
                 null
         );
     }
