@@ -279,4 +279,39 @@ public class CitizenComplaintWorkFlow {
                 null
         );
     }
+
+    @Transactional
+    public ApiResponseDto<?> deleteComplaint(String email, Long complaintId) {
+
+        Complaint complaint = complaintRepo
+                .findByIdAndDeletedFalse(complaintId)
+                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        if (authorizationService.checkAccess(complaint.getAddedBy().getEmail())) {
+
+            if (complaint.getState().equals(ComplaintState.NEW) || complaint.getState().equals(ComplaintState.REJECTED)) {
+                complaint.setDeleted(true);
+                complaintRepo.save(complaint);
+
+                return new ApiResponseDto<>(
+                        true,
+                        String.format("تم حذف شكواك: \"%s\" بنجاح",complaint.getTitle()),
+                        null
+                );
+            }
+            else {
+                throw new ApiException(
+                        "you can't delete this complaint at this state",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+        }
+
+        else {
+            throw new ApiException(
+                    "you can't delete this complaint because you are not the owner",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
 }

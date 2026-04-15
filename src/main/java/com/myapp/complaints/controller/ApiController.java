@@ -262,4 +262,10 @@ public class ApiController {
         return ResponseEntity.ok(apiService.updateComplaint(email,dto));
     }
 
+    //@PreAuthorize("hasAnyRole('CITIZEN','ADMIN')")
+    @DeleteMapping("/complaint/{complaintId}")
+    public ResponseEntity<?> deleteComplaint(@PathVariable Long complaintId, Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(apiService.deleteComplaint(email,complaintId));
+    }
 }
