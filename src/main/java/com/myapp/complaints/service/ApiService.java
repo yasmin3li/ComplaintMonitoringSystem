@@ -229,4 +229,22 @@ public class ApiService {
 
         return complaintImageRepo.findByComplaint_Id(complaintId);
     }
+
+    public ApiResponseDto<?> updateComplaint(String email, UpdateComplaintDto dto){
+
+        if(authorizationService.isCitizen()){
+            return citizenComplaintWorkFlow.updateComplaint(email,dto);
+        }
+
+        //later when employee want to add complaint's images after solve, [only add images]
+        else if (authorizationService.IsReceptionist() || authorizationService.isManager()) {
+            return receptionistComplaintWorkflow.updateComplaint(email,dto);
+        }
+        return new ApiResponseDto<>(
+                false,
+                "Access denied",
+                null
+        );
+    }
+
 }
