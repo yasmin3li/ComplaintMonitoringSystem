@@ -255,4 +255,11 @@ public class ApiController {
         return ResponseEntity.ok(receptionistComplaintWorkflow.rejectComplaint(email,dto));
     }
 
+    @PreAuthorize("hasRole('CITIZEN')")
+    @PatchMapping("/complaint")
+    public ResponseEntity<?> updateComplaint(@RequestBody UpdateComplaintDto dto, Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(apiService.updateComplaint(email,dto));
+    }
+
 }
