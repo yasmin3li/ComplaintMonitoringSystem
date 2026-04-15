@@ -18,9 +18,9 @@ import java.util.List;
 public class AuthorizationService {
     private final ComplaintTracingLogRepo complaintTracingLogRepo;
 
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
     public boolean checkAccess(String realOwnerEmail){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = auth.getName();
         return currentUser.equals(realOwnerEmail);
     }
