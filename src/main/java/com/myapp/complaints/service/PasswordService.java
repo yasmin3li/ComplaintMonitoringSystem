@@ -7,7 +7,9 @@ import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.ChangePasswordRequest;
 import com.myapp.complaints.dto.ResetPasswordRequestDTO;
 import com.myapp.complaints.entity.Account;
+import com.myapp.complaints.entity.PasswordResetToken;
 import com.myapp.complaints.enums.AccountStatus;
+import com.myapp.complaints.enums.CodeAndLinkState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,14 +44,26 @@ public class PasswordService {
                                         new ApiException( "Account not found",HttpStatus.NOT_FOUND))
                 );
 
-//        boolean validLink = restLinkService.validLink(account, dto.token());
-//        if (!validLink) {
+//        if(!restLinkService.validLink(account.getEmail(), dto.token()).success()){
+//
 //            return new ApiResponseDto<>(
 //                    false,
 //                    "Invalid reset link",
 //                    null
 //            );
 //        }
+        PasswordResetToken token = passwordResetTokenRepo
+                .findByTokenAndAccount_Email(dto.token(), account.getEmail())
+                .orElseThrow(() -> new ApiException("Invalid token", HttpStatus.BAD_REQUEST));
+
+        if (token.getState() != CodeAndLinkState.UNUSED ||
+                token.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new ApiException("Token expired", HttpStatus.BAD_REQUEST);
+        }
+
+        token.setState(CodeAndLinkState.USED);
+        passwordResetTokenRepo.save(token);
+
         if(CommonUtils.validateAndEncodePassword(dto.newPassword()))
             account.setPassword(passwordEncoder.encode(dto.newPassword()));
         //account.setMustChangePassword(false);

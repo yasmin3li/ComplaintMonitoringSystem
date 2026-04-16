@@ -142,8 +142,6 @@ public class RestLinkService {
         if (passwordResetToken.isPresent()){
             if(passwordResetToken.get().getExpiryDate().isAfter(LocalDateTime.now()) && passwordResetToken.get().getState().equals(CodeAndLinkState.UNUSED)) {
 
-                passwordResetToken.get().setState(CodeAndLinkState.USED);
-                passwordResetTokenRepo.save(passwordResetToken.get());
                 return new ApiResponseDto<>(
                         true,
                         "reset password verified successfully",
