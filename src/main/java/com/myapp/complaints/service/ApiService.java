@@ -3,13 +3,9 @@ package com.myapp.complaints.service;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
-import com.myapp.complaints.enums.ActionType;
-import com.myapp.complaints.enums.ComplaintState;
-import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
 import com.myapp.complaints.mapper.ComplaintMapper;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -20,7 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +58,7 @@ public class ApiService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
-        Account account = accountRepo.findByEmail(email)
+        Account account = accountRepo.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
         Citizen citizen=citizenRepo.findByAccountId(account.getId())
                 .orElseThrow(()->new ApiException("no citizen found for account "+account.getEmail(),HttpStatus.NOT_FOUND));
@@ -74,7 +69,7 @@ public class ApiService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
-        Account account = accountRepo.findByEmail(email)
+        Account account = accountRepo.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
         Employee employee=employeeRepo.findByAccountId(account.getId())
                 .orElseThrow(()->new ApiException("no employee found for account "+account.getEmail(),HttpStatus.NOT_FOUND));
@@ -265,19 +260,13 @@ public class ApiService {
     }
 
     @Transactional
-    public ApiResponseDto<?> deleteAccount(String email, Long accountId) {
+    public ApiResponseDto<?> deleteAccount(String email) {
 
-        Account account = accountRepo.findByEmail(email)
+        Account account = accountRepo.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
 
-        if(account.getId().equals(accountId)){
             account.setDeleted(true);
             accountRepo.save(account);
-        }
-
-        else {
-            throw  new ApiException("we can't delete this account because you are not the owner", HttpStatus.FORBIDDEN);
-        }
 
         return new ApiResponseDto<>(
                 true,

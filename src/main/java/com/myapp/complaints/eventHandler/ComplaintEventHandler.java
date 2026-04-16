@@ -42,7 +42,7 @@ public class ComplaintEventHandler {
 //        public void validateCreate(Complaint c) {
 
         String username = auth.getName();
-        Account currentUser = accountRepo.findByEmail(username)
+        Account currentUser = accountRepo.findByEmailAndDeletedFalse(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
             if (complaint.getAddedBy() == null) throw new RuntimeException("Complaint must have an owner");

@@ -30,7 +30,7 @@ public class JwtTokenUtils {
 
     public UserDetails userDetails(String username){
         System.out.println("############################################################   "+username);
-        return accountRepo.findByEmail(username)
+        return accountRepo.findByEmailAndDeletedFalse(username)
                 .map(UserInfoConfig::new)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 

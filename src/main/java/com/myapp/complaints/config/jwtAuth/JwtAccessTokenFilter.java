@@ -4,7 +4,6 @@ import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.ResponseWriter;
 import com.myapp.complaints.config.RSAKeyRecord;
 import com.myapp.complaints.entity.Account;
-import com.myapp.complaints.enums.TokenType;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,7 +20,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtValidationException;
@@ -38,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType.BEARER;
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
@@ -76,7 +71,7 @@ public class JwtAccessTokenFilter extends OncePerRequestFilter {
 
 
 //TODO
-            Optional<Account> account= accountRepo.findByEmail(userName);
+            Optional<Account> account= accountRepo.findByEmailAndDeletedFalse(userName);
             String uri = request.getRequestURI();
 
              if (account.isPresent()){

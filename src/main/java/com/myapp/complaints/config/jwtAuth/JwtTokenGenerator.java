@@ -32,7 +32,7 @@ public class JwtTokenGenerator {
     public String generateAccessToken(Authentication authentication) {
 
        log.warn("[JwtTokenGenerator:generateAccessToken] Token Creation Started for:{}", authentication.getName());
-        Account account = accountRepo.findByEmail(authentication.getName())
+        Account account = accountRepo.findByEmailAndDeletedFalse(authentication.getName())
                 .orElseThrow(() ->
                         new UsernameNotFoundException("Account not found for: " + authentication.getName())
                 );

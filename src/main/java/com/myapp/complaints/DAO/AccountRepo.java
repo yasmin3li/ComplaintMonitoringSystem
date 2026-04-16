@@ -15,7 +15,7 @@ public interface AccountRepo extends JpaRepository<Account,Long> {
 
     // denied accounts/search/findByEmail  only at HTTP (close only the endpoint)
    // @RestResource(exported = false)
-    Optional<Account> findByEmail(String email);
+    Optional<Account> findByEmailAndDeletedFalse(String email);
 
     @RestResource(path = "active", rel = "active")
     List<Account> findByDeletedFalse();
@@ -23,7 +23,7 @@ public interface AccountRepo extends JpaRepository<Account,Long> {
 
     Optional<Account> findByUserName(String userName);
 
-    Optional<Account> findByPhoneNumber(String phoneNumber);
+    Optional<Account> findByPhoneNumberAndDeletedFalse(String phoneNumber);
 
 
     @Query("""
@@ -32,7 +32,7 @@ public interface AccountRepo extends JpaRepository<Account,Long> {
         WHERE a.status = :status
         AND a.email = :email
     """)
-    Optional<Account> findByEmailAndStatus(
+    Optional<Account> findByEmailAndStatusAndDeletedFalse(
             String email,
             AccountStatus status
     );
@@ -43,7 +43,7 @@ public interface AccountRepo extends JpaRepository<Account,Long> {
         WHERE a.status = :status
         AND a.phoneNumber = :phoneNumber
     """)
-    Optional<Account> findByPhoneNumberAndStatus(
+    Optional<Account> findByPhoneNumberAndStatusAndDeletedFalse(
             String phoneNumber,
             AccountStatus status
     );

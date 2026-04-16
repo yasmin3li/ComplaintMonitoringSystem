@@ -1,14 +1,12 @@
 package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.AccountRepo;
-import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,7 +18,7 @@ public class EmailService {
 
     public boolean sendVerificationCode(String to, String code) {
 
-        Account account = accountRepo.findByEmail(to)
+        Account account = accountRepo.findByEmailAndDeletedFalse(to)
                 .orElseThrow(() ->
                         new ApiException("Email " + to + " not found", HttpStatus.NOT_FOUND)
                 );

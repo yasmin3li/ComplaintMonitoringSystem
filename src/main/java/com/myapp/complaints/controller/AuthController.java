@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -110,10 +111,11 @@ public class AuthController {
         return ResponseEntity.ok(restLinkService.resendRestLink(emailOrPhone));
     }
 
-    @DeleteMapping("/account/{accountId}")
-    public ResponseEntity<?> deleteAccount(@PathVariable Long accountId, Authentication auth){
+    @DeleteMapping("/account")
+    public ResponseEntity<?> deleteAccount(){
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
-        return ResponseEntity.ok(apiService.deleteAccount(email,accountId));
+        return ResponseEntity.ok(apiService.deleteAccount(email));
     }
 
 }

@@ -5,7 +5,6 @@ import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.PasswordResetTokenRepo;
 import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.ChangePasswordRequest;
-import com.myapp.complaints.dto.ForgotPasswordRequestDTO;
 import com.myapp.complaints.dto.ResetPasswordRequestDTO;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.enums.AccountStatus;
@@ -16,10 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class PasswordService {
@@ -36,9 +32,9 @@ public class PasswordService {
     @Transactional
     public ApiResponseDto<Object> resetPassword(ResetPasswordRequestDTO dto) {
 
-        Account account = accountRepo.findByEmail(dto.emailOrPhone())
+        Account account = accountRepo.findByEmailAndDeletedFalse(dto.emailOrPhone())
                 .orElseGet(() ->
-                        accountRepo.findByPhoneNumber(dto.emailOrPhone())
+                        accountRepo.findByPhoneNumberAndDeletedFalse(dto.emailOrPhone())
                                 .orElseThrow(() ->
                                         new ApiException( "Account not found",HttpStatus.NOT_FOUND))
                 );
@@ -67,7 +63,7 @@ public class PasswordService {
     @Transactional
     public ApiResponseDto<?> changePassword(Authentication auth, ChangePasswordRequest req) {
 
-        Account account = accountRepo.findByEmail(auth.getName())
+        Account account = accountRepo.findByEmailAndDeletedFalse(auth.getName())
                 .orElseThrow(() ->
                         new ApiException( "Account not found",HttpStatus.NOT_FOUND));
 

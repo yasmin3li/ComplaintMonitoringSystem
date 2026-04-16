@@ -12,7 +12,6 @@ import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -145,9 +144,9 @@ public class VerificationCodeService {
     }
 
     public ApiResponseDto<?> resendVerificationCode(ForgotPasswordRequestDTO emailOrPhone) {
-        Account account = accountRepo.findByEmailAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
+        Account account = accountRepo.findByEmailAndStatusAndDeletedFalse(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
                 .orElseGet(() ->
-                        accountRepo.findByPhoneNumberAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
+                        accountRepo.findByPhoneNumberAndStatusAndDeletedFalse(emailOrPhone.emailOrPhone(), AccountStatus.PENDING)
                                 .orElseThrow(() ->
                                         new ApiException("Account with identifier "+emailOrPhone.emailOrPhone()+" not found",HttpStatus.NOT_FOUND)
                                 )

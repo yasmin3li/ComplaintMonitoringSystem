@@ -7,7 +7,6 @@ import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.AccountStatus;
 import com.myapp.complaints.enums.TokenType;
-import com.myapp.complaints.enums.VerificationChannel;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
 import jakarta.servlet.http.Cookie;
@@ -25,12 +24,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -61,7 +57,7 @@ public class AuthService {
     @Transactional
     public AuthResponseDto getJwtTokensAfterAuthentication(Authentication authentication, HttpServletResponse response) {
 
-        var userInfoEntity = accountRepo.findByEmail(authentication.getName())
+        var userInfoEntity = accountRepo.findByEmailAndDeletedFalse(authentication.getName())
                 .orElseThrow(() -> {
                     AuthService.log.error("[AuthService:userSignInAuth] User :{} not found", authentication.getName());
                     return new ApiException("USER NOT FOUND ", HttpStatus.NOT_FOUND);
@@ -318,10 +314,10 @@ public class AuthService {
         Account account;
 
         if (dto.identifier().contains("@")) {
-            account = accountRepo.findByEmail(dto.identifier())
+            account = accountRepo.findByEmailAndDeletedFalse(dto.identifier())
                     .orElseThrow(() -> new ApiException("Account with " + dto.identifier() + " not found", HttpStatus.NOT_FOUND));
         } else {
-            account = accountRepo.findByPhoneNumber(dto.identifier())
+            account = accountRepo.findByPhoneNumberAndDeletedFalse(dto.identifier())
                     .orElseThrow(() -> new ApiException("Account with " + dto.identifier() + " not found", HttpStatus.NOT_FOUND));
         }
 

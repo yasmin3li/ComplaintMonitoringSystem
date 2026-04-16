@@ -45,7 +45,7 @@ public class CitizenComplaintWorkFlow {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
 
-        Account citizenAccount = accountRepo.findByEmail(email)
+        Account citizenAccount = accountRepo.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new ApiException("User not found", HttpStatus.NOT_FOUND));
 
         Complaint complaint = complaintMapper.fromdto(dto);
@@ -250,7 +250,7 @@ public class CitizenComplaintWorkFlow {
 
         if (dto.images() != null) {
 
-            Account account = accountRepo.findByEmail(email)
+            Account account = accountRepo.findByEmailAndDeletedFalse(email)
                     .orElseThrow(() -> new ApiException("Account not found",HttpStatus.NOT_FOUND));
 
         complaint.getImages().clear();

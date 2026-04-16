@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class RestLinkService {
@@ -28,9 +28,9 @@ public class RestLinkService {
 
     public ApiResponseDto<?> sendResetLink(ForgotPasswordRequestDTO dto) {
 
-        Account account = accountRepo.findByEmail(dto.emailOrPhone())
+        Account account = accountRepo.findByEmailAndDeletedFalse(dto.emailOrPhone())
                 .orElseGet(() ->
-                        accountRepo.findByPhoneNumber(dto.emailOrPhone())
+                        accountRepo.findByPhoneNumberAndDeletedFalse(dto.emailOrPhone())
                                 .orElseThrow(() ->
                                         new ApiException( "Account not found", HttpStatus.NOT_FOUND))
                 );
@@ -161,10 +161,10 @@ public class RestLinkService {
 
     public ApiResponseDto<?> resendRestLink(ForgotPasswordRequestDTO emailOrPhone) {
 
-        accountRepo.findByEmailAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.ACTIVATED)
+        accountRepo.findByEmailAndStatusAndDeletedFalse(emailOrPhone.emailOrPhone(), AccountStatus.ACTIVATED)
                 .orElseGet(() ->
 //                        TODO: ACTIVATED not PENDING
-                        accountRepo.findByPhoneNumberAndStatus(emailOrPhone.emailOrPhone(), AccountStatus.ACTIVATED)
+                        accountRepo.findByPhoneNumberAndStatusAndDeletedFalse(emailOrPhone.emailOrPhone(), AccountStatus.ACTIVATED)
                                 .orElseThrow(() ->
                                         new ApiException( "Account not found", HttpStatus.NOT_FOUND))
                 );

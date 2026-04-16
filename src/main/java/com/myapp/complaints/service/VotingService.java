@@ -11,8 +11,6 @@ import com.myapp.complaints.entity.Voting;
 import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -52,7 +50,7 @@ public class VotingService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String currentUser = auth.getName();
 
-        Account account = accountRepo.findByEmail(currentUser).
+        Account account = accountRepo.findByEmailAndDeletedFalse(currentUser).
                 orElseThrow(()-> new ApiException("account not found", HttpStatus.NOT_FOUND));
 
         Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)

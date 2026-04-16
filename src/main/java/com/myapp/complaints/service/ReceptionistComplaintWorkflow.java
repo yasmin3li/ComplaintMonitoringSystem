@@ -112,7 +112,7 @@ public class ReceptionistComplaintWorkflow {
             throw new ApiException("complaint not found",HttpStatus.NOT_FOUND);
         }
 
-        Optional<Account> account = accountRepo.findByEmail(email);
+        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(email);
 
         List<ComplaintTrackingLog> log =
                 complaintTracingLogRepo.findByComplaint_IdAndActionBy_Id(

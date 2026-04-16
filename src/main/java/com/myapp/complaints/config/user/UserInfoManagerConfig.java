@@ -20,10 +20,10 @@ public class UserInfoManagerConfig implements UserDetailsService {
     @Override
     //load the user from user details that is (load as) authentication object
     public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        Optional<Account> userOpt = userInfoRepo.findByEmail(userName);
+        Optional<Account> userOpt = userInfoRepo.findByEmailAndDeletedFalse(userName);
 
         if(userOpt.isEmpty()) {
-            userOpt = userInfoRepo.findByPhoneNumber(userName);
+            userOpt = userInfoRepo.findByPhoneNumberAndDeletedFalse(userName);
         }
 
         return userOpt
