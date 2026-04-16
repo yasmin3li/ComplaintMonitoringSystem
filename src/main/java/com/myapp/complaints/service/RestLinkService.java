@@ -139,6 +139,9 @@ public class RestLinkService {
     public ApiResponseDto<?> validLink(String email, String token) {
 
         Optional<PasswordResetToken> passwordResetToken = passwordResetTokenRepo.findByTokenAndAccount_Email(token,email);
+        if(passwordResetToken.isEmpty()){
+            passwordResetToken = passwordResetTokenRepo.findByTokenAndAccount_PhoneNumber(token,email);
+        }
         if (passwordResetToken.isPresent()){
             if(passwordResetToken.get().getExpiryDate().isAfter(LocalDateTime.now()) && passwordResetToken.get().getState().equals(CodeAndLinkState.UNUSED)) {
 

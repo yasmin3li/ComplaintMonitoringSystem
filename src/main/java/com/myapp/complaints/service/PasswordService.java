@@ -52,23 +52,28 @@ public class PasswordService {
 //                    null
 //            );
 //        }
-        PasswordResetToken token = passwordResetTokenRepo
-                .findByTokenAndAccount_Email(dto.token(), account.getEmail())
-                .orElseThrow(() -> new ApiException("Invalid token", HttpStatus.BAD_REQUEST));
 
-        if (token.getState() != CodeAndLinkState.UNUSED ||
-                token.getExpiryDate().isBefore(LocalDateTime.now())) {
-            throw new ApiException("Token expired", HttpStatus.BAD_REQUEST);
+        Optional<PasswordResetToken> passwordResetToken = passwordResetTokenRepo.findByTokenAndAccount_Email(dto.token(), account.getEmail());
+
+        if(passwordResetToken.isEmpty()){
+            passwordResetToken = passwordResetTokenRepo.findByTokenAndAccount_PhoneNumber(dto.token(), account.getEmail());
         }
 
-        token.setState(CodeAndLinkState.USED);
-        passwordResetTokenRepo.save(token);
+        if(passwordResetToken.isPresent()){
+            if (passwordResetToken.get().getState() != CodeAndLinkState.UNUSED ||
+                    passwordResetToken.get().getExpiryDate().isBefore(LocalDateTime.now())) {
+                throw new ApiException("Token expired", HttpStatus.BAD_REQUEST);
+            }
 
-        if(CommonUtils.validateAndEncodePassword(dto.newPassword()))
-            account.setPassword(passwordEncoder.encode(dto.newPassword()));
-        //account.setMustChangePassword(false);
-        //account.setStatus(AccountStatus.ACTIVATED);
-        accountRepo.save(account);
+            passwordResetToken.get().setState(CodeAndLinkState.USED);
+            passwordResetTokenRepo.save(passwordResetToken.get());
+
+            if(CommonUtils.validateAndEncodePassword(dto.newPassword()))
+                account.setPassword(passwordEncoder.encode(dto.newPassword()));
+            //account.setMustChangePassword(false);
+            //account.setStatus(AccountStatus.ACTIVATED);
+            accountRepo.save(account);
+        }
         return new ApiResponseDto<>(
                 true,
                 "Password reset successfully",

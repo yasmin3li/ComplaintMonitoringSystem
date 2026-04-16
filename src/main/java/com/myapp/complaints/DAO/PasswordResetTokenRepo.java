@@ -16,6 +16,7 @@ public interface PasswordResetTokenRepo extends JpaRepository<PasswordResetToken
 
     void deleteByAccount(Account account);
 
+//    TODO: deleted false
     int countByAccountAndExpiryDateAfter(
             Account account,
             LocalDateTime time
@@ -26,5 +27,8 @@ public interface PasswordResetTokenRepo extends JpaRepository<PasswordResetToken
             CodeAndLinkState state
     );
 
+    //
     Optional<PasswordResetToken> findByTokenAndAccount_Email(String token, String email);
+
+    Optional<PasswordResetToken> findByTokenAndAccount_PhoneNumber(String token, String email);
 }
