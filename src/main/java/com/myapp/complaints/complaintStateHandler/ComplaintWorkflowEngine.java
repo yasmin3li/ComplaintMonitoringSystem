@@ -19,7 +19,7 @@ public class ComplaintWorkflowEngine {
     private final ComplaintTracingLogRepo logRepo;
     private final ComplaintStateValidator validator;
 
-    public void changeState(Complaint complaint, ComplaintState newState, Account actor, Employee assignedTo, String comment) {
+    public void changeState(Complaint complaint, ComplaintState newState, Account actor, Employee assignedTo, String comment,ActionType actionType) {
 
         ComplaintState currentState = complaint.getState();
 
@@ -33,7 +33,7 @@ public class ComplaintWorkflowEngine {
         log.setNewState(newState);
         log.setActionBy(actor);
         log.setAssignedTo(assignedTo);
-        log.setActionType(resolveActionType(currentState, newState));
+        log.setActionType(actionType);
         log.setComments(comment);
 
         logRepo.save(log);
@@ -43,15 +43,6 @@ public class ComplaintWorkflowEngine {
         complaintRepo.save(complaint);
     }
 
-    private ActionType resolveActionType(ComplaintState from, ComplaintState to) {
-        if (from == ComplaintState.NEW && to == ComplaintState.IN_REVIEW) {
-            return ActionType.OPENED;
-        }
-        if (to == ComplaintState.REJECTED) {
-            return ActionType.REJECTED;
-        }
-        return ActionType.UPDATED;
-    }
 
     public void createInitialLog(Complaint complaint, Account actor) {
 
@@ -65,4 +56,32 @@ public class ComplaintWorkflowEngine {
 
         logRepo.save(log);
     }
+
+    public void createActionLog(Complaint complaint, Account actor,ActionType actionType) {
+
+        ComplaintTrackingLog log = new ComplaintTrackingLog();
+        log.setComplaint(complaint);
+        log.setPreviousState(complaint.getState());
+        log.setNewState(complaint.getState());
+        log.setActionBy(actor);
+        log.setActionType(actionType);
+        log.setComments(associatedComment(actionType));
+
+        logRepo.save(log);
+    }
+
+    private String associatedComment(ActionType actionType){
+         return switch (actionType){
+            case ActionType.DELETED -> "تم حذف الشكوى";
+             case CREATED -> null;
+             case OPENED -> null;
+             case ASSIGNED -> null;
+             case ActionType.UPDATED ->  "تم تحديث الشكوى";
+             case STATE_CHANGED -> null;
+             case COMMENTED -> null;
+             case CLOSED -> null;
+             case REJECTED -> null;
+         };
+    }
+
 }

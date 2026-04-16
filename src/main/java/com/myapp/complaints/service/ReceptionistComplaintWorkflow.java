@@ -7,6 +7,7 @@ import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
 import com.myapp.complaints.DAO.EmployeeRepo;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
+import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
@@ -47,7 +48,7 @@ public class ReceptionistComplaintWorkflow {
 
             if(complaint.getState().equals(ComplaintState.NEW)){
 
-                workflowEngine.changeState(complaint,ComplaintState.IN_REVIEW,employee.getAccount(),null,"الشكوى قيد المراجعة");
+                workflowEngine.changeState(complaint,ComplaintState.IN_REVIEW,employee.getAccount(),null,"الشكوى قيد المراجعة",ActionType.OPENED);
 
                 return complaintMapper.toPerceptionComplaintDto(complaint);
 
@@ -119,7 +120,7 @@ public class ReceptionistComplaintWorkflow {
                         complaint.get().getId(),account.get().getId());
 
                 if(!log.isEmpty() && complaint.get().getState().equals(ComplaintState.IN_REVIEW)){
-                   workflowEngine.changeState(complaint.get(),ComplaintState.REJECTED,account.get(),null,dto.reason());
+                   workflowEngine.changeState(complaint.get(),ComplaintState.REJECTED,account.get(),null,dto.reason(),ActionType.REJECTED);
                    notificationService.notifyUsers(complaint.get(),dto.reason(),List.of(complaint.get().getAddedBy()));
                 }
                 else{
@@ -171,6 +172,8 @@ public class ReceptionistComplaintWorkflow {
         }
 
         complaintRepo.save(complaint);
+
+        workflowEngine.createActionLog(complaint,employee.getAccount(), ActionType.UPDATED);
 
         return new ApiResponseDto<>(
                 true,

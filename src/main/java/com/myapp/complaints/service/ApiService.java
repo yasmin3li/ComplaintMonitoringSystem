@@ -244,19 +244,7 @@ public class ApiService {
 
     public ApiResponseDto<?> deleteComplaint(String email, Long complaintId) {
 
-        if(authorizationService.isCitizen()){
             return citizenComplaintWorkFlow.deleteComplaint(email,complaintId);
-        }
-
-//TODO: later when admin want to delete complaint
-        else if (authorizationService.isAdmin()) {
-            return null;
-        }
-        return new ApiResponseDto<>(
-                false,
-                "Access denied",
-                null
-        );
     }
 
     @Transactional

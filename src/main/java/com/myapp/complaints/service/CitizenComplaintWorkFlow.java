@@ -4,6 +4,7 @@ import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
+import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -190,6 +192,9 @@ public class CitizenComplaintWorkFlow {
                 .findByIdAndDeletedFalse(dto.complaintId())
                 .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
 
+        Account account = accountRepo.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new ApiException("Account not found",HttpStatus.NOT_FOUND));
+
 
         if (!authorizationService.checkAccess(complaint.getAddedBy().getEmail())) {
             throw new ApiException("Access denied, you aren't the owner for this complaint",HttpStatus.FORBIDDEN);
@@ -250,9 +255,6 @@ public class CitizenComplaintWorkFlow {
 
         if (dto.images() != null) {
 
-            Account account = accountRepo.findByEmailAndDeletedFalse(email)
-                    .orElseThrow(() -> new ApiException("Account not found",HttpStatus.NOT_FOUND));
-
         complaint.getImages().clear();
 
             for (String img : dto.images()) {
@@ -273,6 +275,8 @@ public class CitizenComplaintWorkFlow {
 
         complaintRepo.save(complaint);
 
+        workflowEngine.createActionLog(complaint,account, ActionType.UPDATED);
+
         return new ApiResponseDto<>(
                 true,
                 "complaint updated successfully",
@@ -287,31 +291,54 @@ public class CitizenComplaintWorkFlow {
                 .findByIdAndDeletedFalse(complaintId)
                 .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
 
-        if (authorizationService.checkAccess(complaint.getAddedBy().getEmail())) {
+        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(email);
 
-            if (complaint.getState().equals(ComplaintState.NEW) || complaint.getState().equals(ComplaintState.REJECTED)) {
+        if(account.isPresent()){
+            if (authorizationService.isAdmin()) {
+
                 complaint.setDeleted(true);
                 complaintRepo.save(complaint);
 
+                workflowEngine.createActionLog(complaint,account.get(), ActionType.DELETED);
+
                 return new ApiResponseDto<>(
                         true,
-                        String.format("تم حذف شكواك: \"%s\" بنجاح",complaint.getTitle()),
+                        String.format("تم حذف الشكوى: \"%s\" بنجاح", complaint.getTitle()),
                         null
                 );
             }
-            else {
-                throw new ApiException(
-                        "you can't delete this complaint at this state",
-                        HttpStatus.BAD_REQUEST
-                );
-            }
-        }
 
-        else {
-            throw new ApiException(
-                    "you can't delete this complaint because you are not the owner",
-                    HttpStatus.FORBIDDEN
-            );
+            else {
+
+                if (authorizationService.checkAccess(complaint.getAddedBy().getEmail())) {
+
+                    if (complaint.getState().equals(ComplaintState.NEW) || complaint.getState().equals(ComplaintState.REJECTED)) {
+                        complaint.setDeleted(true);
+                        complaintRepo.save(complaint);
+
+                        workflowEngine.createActionLog(complaint,account.get(), ActionType.DELETED);
+
+                        return new ApiResponseDto<>(
+                                true,
+                                String.format("تم حذف شكواك: \"%s\" بنجاح", complaint.getTitle()),
+                                null
+                        );
+                    } else {
+                        throw new ApiException(
+                                "you can't delete this complaint at this state",
+                                HttpStatus.BAD_REQUEST
+                        );
+                    }
+                } else {
+                    throw new ApiException(
+                            "you can't delete this complaint because you are not the owner",
+                            HttpStatus.FORBIDDEN
+                    );
+                }
+            }
+
         }
+        else
+            throw new ApiException("account not found",HttpStatus.NOT_FOUND);
     }
 }
