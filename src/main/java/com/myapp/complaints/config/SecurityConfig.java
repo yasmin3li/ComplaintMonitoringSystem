@@ -150,7 +150,9 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 //                        TODO: later make others see profile for each other
                         .requestMatchers(HttpMethod.GET,"/api/citizen/**","/api/employee/profile/**").authenticated()
                         .requestMatchers(HttpMethod.PATCH,"/api/citizen/**").authenticated()
-                        .requestMatchers(HttpMethod.POST,"/auth/verify/reset-password-code/**").permitAll()
+                                .requestMatchers(HttpMethod.DELETE,"/api/complaint/**").authenticated()
+
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -193,6 +195,25 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                                 .anyRequest().authenticated()
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(accessFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()))
+                .build();
+    }
+
+    @Order(5)
+    @Bean
+    public SecurityFilterChain accountChain(HttpSecurity http,
+                                            JwtAccessTokenFilter accessFilter) throws Exception {
+        return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .securityMatcher("/auth/account/**")
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.DELETE, "/auth/account/**").authenticated()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(accessFilter, UsernamePasswordAuthenticationFilter.class)
