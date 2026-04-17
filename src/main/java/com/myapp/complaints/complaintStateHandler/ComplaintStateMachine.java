@@ -14,7 +14,8 @@ public class ComplaintStateMachine {
             ComplaintState.IN_REVIEW, Set.of(ComplaintState.ASSIGNED, ComplaintState.REJECTED),
             ComplaintState.ASSIGNED, Set.of(ComplaintState.IN_PROGRESS),
             ComplaintState.IN_PROGRESS, Set.of(ComplaintState.RESOLVED),
-            ComplaintState.RESOLVED, Set.of(ComplaintState.CLOSED)
+            ComplaintState.RESOLVED, Set.of(ComplaintState.CLOSED),
+            ComplaintState.REJECTED, Set.of(ComplaintState.NEW)
     );
 
     public boolean isValidTransition(ComplaintState from, ComplaintState to) {
