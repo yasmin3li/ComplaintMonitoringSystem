@@ -269,7 +269,7 @@ public class CitizenComplaintWorkFlow {
             }
         }
         else{
-            if(dto.deleteOldImages())
+            if(!complaint.getImages().isEmpty())
                 complaint.getImages().clear();
         }
 

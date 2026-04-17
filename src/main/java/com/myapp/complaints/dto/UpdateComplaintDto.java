@@ -18,9 +18,6 @@ public record UpdateComplaintDto(
         Double latitude,
         Double longitude,
         @Size(max = 3)
-        List<String> images,
-
-        //by default is false
-        boolean deleteOldImages
+        List<String> images
 ) {
 }
