@@ -68,7 +68,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .securityMatcher("/auth/sign-in/**",
                         "/auth/sign-up/**",
-                        "/auth/verify",
+                        "/auth/verify/**",
                         "/auth/forgot-password/**",
                         "/auth/reset-password/**",
                         "/auth/resend/code/**",
