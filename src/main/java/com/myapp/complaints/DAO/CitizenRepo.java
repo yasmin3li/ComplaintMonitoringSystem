@@ -1,6 +1,5 @@
 package com.myapp.complaints.DAO;
 
-import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Citizen;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -15,4 +14,6 @@ public interface CitizenRepo extends JpaRepository<Citizen,Long> {
     Optional<Citizen> findByAccountId(Long accountId);
 
     Optional<Citizen> findByAccount_Email(String email);
+
+    Citizen findByAccount_Id(Long id);
 }

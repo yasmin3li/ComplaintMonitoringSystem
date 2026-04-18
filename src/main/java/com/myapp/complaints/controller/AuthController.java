@@ -52,6 +52,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.registerCitizen(dto));
     }
 
+    @PostMapping("/citizen/account/re-activate")
+    public ResponseEntity<?> reActivateAccount(@Valid @RequestBody CitizenRegistrationDto dto) {
+        return ResponseEntity.ok(authService.reActivateCitizenAccount(dto));
+    }
+
     @PostMapping("/sign-up/employee")
     public ResponseEntity<?> registerEmployee(@Valid @RequestBody EmployeeRegistrationDto dto) {
         return ResponseEntity.ok(authService.registerEmployee(dto));

@@ -167,6 +167,11 @@ public class AuthService {
     @Transactional
     public ApiResponseDto<?> registerCitizen(CitizenRegistrationDto dto) {
 
+//        Account account = accountRepo.findByNationalNumberAndDeletedTrue(dto.nationalNumber());
+//
+//        if(account != null){
+//            return new ApiResponseDto<>(true,"يوجد حساب من قبل هل تود ان تعيد تفعيله",account.getUserName());
+//        }
 
         Account account = accountInfoMapper.fromCitizenDto(dto);
         ApiResponseDto<Object> codeResponse;
@@ -342,6 +347,58 @@ public class AuthService {
                 true,
                 "account verified successfully",
                 null
+        );
+    }
+
+    public Object reActivateCitizenAccount(@Valid CitizenRegistrationDto dto) {
+
+        Account account = accountRepo.findByNationalNumberAndDeletedTrue(dto.nationalNumber());
+        account.setNationalNumber(dto.nationalNumber());
+        account.setUserName(dto.userName());
+        account.setPhoneNumber(dto.phoneNumber());
+        account.setPassword(dto.password());
+
+        Role citizenRole = roleRepo.findByName("مواطن")
+                .orElseThrow(() -> new ApiException("ROLE_CITIZEN not found", HttpStatus.NOT_FOUND));
+        account.setRole(citizenRole);
+
+        ApiResponseDto<Object> codeResponse;
+        String type;
+
+        if (dto.email() == null || dto.email().isBlank()) {
+
+            account.setEmail(dto.userName()+dto.phoneNumber().substring(4,9) + "@example.com");
+            account.setEmailTemporary(true);
+            type="SMS";
+
+        } else {
+            account.setEmail(dto.email());
+            account.setEmailTemporary(false);
+            type="EMAIL";
+        }
+
+        String password = account.getPassword();
+        if (!password.startsWith("$2a$") && !password.startsWith("$2b$")) {
+            if(CommonUtils.validateAndEncodePassword(password))
+                account.setPassword(passwordEncoder.encode(password));
+        }
+
+        account.setDeleted(false);
+
+        account = accountRepo.save(account);
+
+        Citizen citizen = citizenRepo.findByAccount_Id(account.getId());
+
+        citizen.setAccount(account);
+        citizen.setBirthDate(dto.birthDate());
+        citizenRepo.save(citizen);
+        codeResponse = verificationCodeService.generateCode(account,type);
+
+        return new ApiResponseDto<>(
+                codeResponse.success(),
+                "account for user reactivated successfully " + account.getUserName() +
+                        " created successfully. " + codeResponse.message(),
+                codeResponse.data()
         );
     }
 

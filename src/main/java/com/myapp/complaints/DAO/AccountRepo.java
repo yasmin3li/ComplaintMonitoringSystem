@@ -2,6 +2,7 @@ package com.myapp.complaints.DAO;
 
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.enums.AccountStatus;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -47,4 +48,6 @@ public interface AccountRepo extends JpaRepository<Account,Long> {
             String phoneNumber,
             AccountStatus status
     );
+
+    Account findByNationalNumberAndDeletedTrue(@NotEmpty(message = "nationalNumber  must not be empty") String s);
 }
