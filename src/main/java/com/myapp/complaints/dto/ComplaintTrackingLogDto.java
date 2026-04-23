@@ -7,7 +7,7 @@ import com.myapp.complaints.enums.ComplaintState;
 import java.time.LocalDateTime;
 
 public record ComplaintTrackingLogDto(
-        ComplaintState previousState,
+        ComplaintState newState,
         ActionType actionType,
         String comments,
         LocalDateTime actionDate,
