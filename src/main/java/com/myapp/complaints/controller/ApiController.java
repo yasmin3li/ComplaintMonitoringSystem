@@ -256,14 +256,14 @@ public class ApiController {
     }
 
     @PreAuthorize("hasRole('CITIZEN')")
-    @PatchMapping("/complaint")
+    @PatchMapping("/complaint/update")
     public ResponseEntity<?> updateComplaint(@RequestBody UpdateComplaintDto dto, Authentication auth){
         String email = auth.getName();
         return ResponseEntity.ok(apiService.updateComplaint(email,dto));
     }
 
     //@PreAuthorize("hasAnyRole('CITIZEN','ADMIN')")
-    @DeleteMapping("/complaint/{complaintId}")
+    @DeleteMapping("/complaint/delete/{complaintId}")
     public ResponseEntity<?> deleteComplaint(@PathVariable Long complaintId, Authentication auth){
         String email = auth.getName();
         return ResponseEntity.ok(apiService.deleteComplaint(email,complaintId));

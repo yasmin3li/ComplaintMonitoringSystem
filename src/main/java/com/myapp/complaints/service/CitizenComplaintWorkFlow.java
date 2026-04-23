@@ -273,8 +273,12 @@ public class CitizenComplaintWorkFlow {
                 complaint.getImages().clear();
         }
 
-        workflowEngine.changeState(complaint,ComplaintState.NEW,account,null,"تم تحديث الشكوى",ActionType.UPDATED);
-
+        if(complaintState.equals(ComplaintState.NEW)){
+            workflowEngine.createActionLog(complaint,account,ActionType.UPDATED);
+        }
+        else {
+            workflowEngine.changeState(complaint, ComplaintState.NEW, account, null, "تم تحديث الشكوى", ActionType.UPDATED);
+        }
         complaintRepo.save(complaint);
 
         return new ApiResponseDto<>(
