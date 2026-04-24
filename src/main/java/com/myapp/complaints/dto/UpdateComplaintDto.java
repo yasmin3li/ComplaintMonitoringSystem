@@ -17,6 +17,7 @@ public record UpdateComplaintDto(
         Long sectorId,
         Double latitude,
         Double longitude,
+        String fullAddressText,
         @Size(max = 3)
         List<String> images
 ) {

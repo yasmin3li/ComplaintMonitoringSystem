@@ -225,7 +225,7 @@ public class CitizenComplaintWorkFlow {
 
             address.setLatitude(dto.latitude());
             address.setLongitude(dto.longitude());
-
+            address.setFullAddressText(dto.fullAddressText());
             complaint.setAddress(address);
         }
 
@@ -252,6 +252,10 @@ public class CitizenComplaintWorkFlow {
                     .orElseThrow(() -> new RuntimeException("institution not found"));
             complaint.setInstitution(institution);
         }
+
+//        if (dto.fullAddressText() != null) {
+//            co;
+//        }
 
         if (dto.images() != null) {
 
