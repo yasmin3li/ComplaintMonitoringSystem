@@ -255,6 +255,12 @@ public class ApiController {
         return ResponseEntity.ok(receptionistComplaintWorkflow.rejectComplaint(email,dto));
     }
 
+    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+    @GetMapping("/employee/complaint/{complaintId}/reviewLater")
+    public ResponseEntity<?> reviewComplaintLater(@PathVariable Long complaintId){
+        return ResponseEntity.ok(receptionistComplaintWorkflow.reviewLater(complaintId));
+    }
+
     @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/complaint/update")
     public ResponseEntity<?> updateComplaint(@RequestBody UpdateComplaintDto dto, Authentication auth){

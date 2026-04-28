@@ -81,6 +81,7 @@ public class ComplaintWorkflowEngine {
              case COMMENTED -> null;
              case CLOSED -> null;
              case REJECTED -> null;
+             case REVIEW_LATER -> "تم تأجيل مراجعة الشكوى";
          };
     }
 

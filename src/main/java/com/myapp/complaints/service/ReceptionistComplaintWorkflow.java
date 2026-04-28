@@ -187,7 +187,42 @@ public class ReceptionistComplaintWorkflow {
                 null
         );
     }
+    public ApiResponseDto<?> reviewLater(long complaintId) {
 
+        Employee employee = employeeRepo.findByAccount_Email
+                (SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
+                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        ComplaintState complaintState = complaint.getState();
+
+        if(complaint.getInstitution().getId().equals(employee.getInstitution().getId())) {
+
+            switch (complaintState) {
+                case ComplaintState.NEW ->
+                {
+                    workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), null, "الشكوى قيد المراجعة", ActionType.OPENED);
+
+                    return new ApiResponseDto<>(true,"تم اضافة الشكوى للشكاوى قيد التحقق",null);
+                }
+
+                case ComplaintState.IN_REVIEW ->
+                {
+                    workflowEngine.createActionLog(complaint,employee.getAccount(),ActionType.REVIEW_LATER);
+                    return new ApiResponseDto<>(true,"تم تأجيل مراجعة الشكوى",null);
+                }
+                case ComplaintState.RESOLVED, ComplaintState.REJECTED, ComplaintState.CLOSED, ComplaintState.ASSIGNED,
+                     ComplaintState.CANCELLED, ComplaintState.IN_PROGRESS -> {
+                    throw new ApiException
+                            ("لايمكن تغيير حالة الشكوى الحالية الى قيد المراجعة -عملية غير مسموحة وفق حالتها الحالية-",HttpStatus.BAD_REQUEST);
+                }
+                default -> throw new ApiException("Invalid state: " + complaintState, HttpStatus.BAD_REQUEST);
+            }
+
+        }
+        else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
+    }
 }
 
 
