@@ -153,7 +153,7 @@ public class ApiService {
 // open complaint by receptionist employee
         if (authorizationService.IsReceptionist()){
 
-            return receptionistComplaintWorkflow.reviewComplaint(complaint);
+            return receptionistComplaintWorkflow.openComplaint(complaint,complaint.getState());
 
         }
 

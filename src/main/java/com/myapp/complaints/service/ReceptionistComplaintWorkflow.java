@@ -39,29 +39,35 @@ public class ReceptionistComplaintWorkflow {
     private final AuthorizationService authorizationService;
 
 
-    public PerceptionComplaintResponseDto reviewComplaint(Complaint complaint) {
+    public PerceptionComplaintResponseDto openComplaint(Complaint complaint, ComplaintState complaintState) {
 
         Employee employee = employeeRepo.findByAccount_Email
                 (SecurityContextHolder.getContext().getAuthentication().getName());
 
-        if(complaint.getInstitution().getId().equals(employee.getInstitution().getId())){
+        if(complaint.getInstitution().getId().equals(employee.getInstitution().getId())) {
 
-            if(complaint.getState().equals(ComplaintState.NEW)){
+            switch (complaintState) {
+                case ComplaintState.NEW ->
+                    {
+                        workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), null, "الشكوى قيد المراجعة", ActionType.OPENED);
 
-                workflowEngine.changeState(complaint,ComplaintState.IN_REVIEW,employee.getAccount(),null,"الشكوى قيد المراجعة",ActionType.OPENED);
+                        return complaintMapper.toPerceptionComplaintDto(complaint);
+                    }
 
-                return complaintMapper.toPerceptionComplaintDto(complaint);
+                case ComplaintState.IN_REVIEW ,ComplaintState.RESOLVED, ComplaintState.REJECTED, ComplaintState.CLOSED, ComplaintState.ASSIGNED,
+                     ComplaintState.CANCELLED, ComplaintState.IN_PROGRESS->
+                    {
+                        if (!authorizationService.checkResponsibility(employee, complaint)) {
 
-            } else if (!authorizationService.checkResponsibility(employee,complaint)) {
-
-                throw new ApiException("This complaint is not your responsibility, there are another employee working on it", HttpStatus.FORBIDDEN);
-            }
-            else {
-                return complaintMapper.toPerceptionComplaintDto(complaint);
+                            throw new ApiException("This complaint is not your responsibility, there are another employee working on it", HttpStatus.FORBIDDEN);
+                        } else {
+                            return complaintMapper.toPerceptionComplaintDto(complaint);
+                        }
+                    }
+                default -> throw new ApiException("Invalid state: " + complaintState, HttpStatus.BAD_REQUEST);
             }
 
         }
-
         else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
     }
 
@@ -181,6 +187,7 @@ public class ReceptionistComplaintWorkflow {
                 null
         );
     }
+
 }
 
 
