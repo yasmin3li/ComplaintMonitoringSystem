@@ -181,6 +181,19 @@ public class ApiService {
          );
     }
 
+    @Transactional
+    public ApiResponseDto<?> updateEmployeeProfile(String email, UpdateEmployeeProfileInfoDto dto ) {
+
+        Employee employee = employeeRepo.findByAccount_Email(email);
+
+        accountInfoMapper.updateAccountFromDto(dto,employee);
+        return new ApiResponseDto<>(
+                true,
+                "your info was updated successfully",
+                null
+        );
+    }
+
     public List<Governorate> governorates() {
         List<Governorate> governorates = governorateRepo.findAll();
         if(!governorates.isEmpty()){

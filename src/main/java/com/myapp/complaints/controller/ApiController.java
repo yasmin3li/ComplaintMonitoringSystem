@@ -173,12 +173,17 @@ public class ApiController {
 //TODO: add logic change phone number / email / and dealing with employee's account
     @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/citizen/profile")
-    public ResponseEntity<?> updateCitizenProfile(@RequestBody @Valid UpdateCitizenProfileInfoDto dto,
+    public ResponseEntity<?> updateProfile(@RequestBody @Valid UpdateCitizenProfileInfoDto dto,
                                            Authentication auth) {
         String email = auth.getName();
         return ResponseEntity.ok(apiService.updateCitizenProfile(email,dto));
     }
-
+    @PatchMapping("/employee/profile")
+    public ResponseEntity<?> updateEmployeeProfile(@RequestBody @Valid UpdateEmployeeProfileInfoDto dto,
+                                                  Authentication auth) {
+        String email = auth.getName();
+        return ResponseEntity.ok(apiService.updateEmployeeProfile(email,dto));
+    }
 //    @PostMapping("/citizen/sendNotification")
 //    public ResponseEntity<?> sendNotifications(Authentication auth,@RequestBody String reason){
 //        String email = auth.getName();
@@ -207,7 +212,14 @@ public class ApiController {
 
     @PreAuthorize("hasRole('CITIZEN')")
     @PostMapping("/citizen/notifications/mark")
-    public ResponseEntity<?> marksAsReadAllNotification(Authentication auth){
+    public ResponseEntity<?> marksAsReadAllCitizenNotification(Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(notificationService.marksAsReadAllNotifications(email));
+    }
+
+    @PreAuthorize("hasRole('RECEPTIONIST')")
+    @PostMapping("/employee/notifications/mark")
+    public ResponseEntity<?> marksAsReadAllEmployeeNotification(Authentication auth){
         String email = auth.getName();
         return ResponseEntity.ok(notificationService.marksAsReadAllNotifications(email));
     }
@@ -256,7 +268,7 @@ public class ApiController {
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
-    @GetMapping("/employee/complaint/{complaintId}/reviewLater")
+    @PostMapping("/employee/complaint/{complaintId}/reviewLater")
     public ResponseEntity<?> reviewComplaintLater(@PathVariable Long complaintId){
         return ResponseEntity.ok(receptionistComplaintWorkflow.reviewLater(complaintId));
     }

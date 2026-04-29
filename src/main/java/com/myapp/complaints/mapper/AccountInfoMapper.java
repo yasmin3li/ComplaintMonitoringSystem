@@ -10,11 +10,8 @@ import com.myapp.complaints.entity.Citizen;
 import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.entity.Role;
 import com.myapp.complaints.exceptionHandller.ApiException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -123,5 +120,18 @@ public class AccountInfoMapper {
             citizen.setBirthDate(dto.birthDate());
         }
         citizen.getAccount().setUpdatedAt(LocalDateTime.now());
+    }
+
+    public void updateAccountFromDto(UpdateEmployeeProfileInfoDto dto, Employee employee) {
+
+        if (dto.userName() != null) {
+            employee.getAccount().setUserName(dto.userName());
+        }
+
+        if (dto.profileImageUrl() != null) {
+            employee.getAccount().setProfileImageUrl(dto.profileImageUrl());
+        }
+
+        employee.getAccount().setUpdatedAt(LocalDateTime.now());
     }
 }
