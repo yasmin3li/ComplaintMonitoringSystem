@@ -11,6 +11,6 @@ public record ComplaintTrackingLogDto(
         ActionType actionType,
         String comments,
         LocalDateTime actionDate,
-        Employee assignedTo
+        AssignedToDto assignedTo
 ) {
 }

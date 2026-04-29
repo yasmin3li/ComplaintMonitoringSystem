@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTrackingLog,Long> {
 
-    List<ComplaintTrackingLogDto> findByComplaintId(Long complaintId);
+    List<ComplaintTrackingLog> findByComplaintId(Long complaintId);
 
     Optional<ComplaintTrackingLog> findByComplaint_IdAndActionBy_IdAndNewState(Long complaintId, long accountId, ComplaintState state);
 

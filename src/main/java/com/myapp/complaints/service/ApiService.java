@@ -6,6 +6,7 @@ import com.myapp.complaints.entity.*;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
 import com.myapp.complaints.mapper.ComplaintMapper;
+import com.myapp.complaints.mapper.ComplaintTrackingLogMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +40,7 @@ public class ApiService {
     private final CitizenComplaintWorkFlow citizenComplaintWorkFlow;
     private final NotificationService notificationService;
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
-
+    private final ComplaintTrackingLogMapper trackingLogMapper;
 
 //Get data for homePage (last complaints)
 //    public List<ComplaintResponseDto> getLast10Complaints() {
@@ -135,7 +136,10 @@ public class ApiService {
                 .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
 
         if (authorizationService.checkAccess(complaint.getAddedBy().getEmail())){
-            return  complaintTracingLogRepo.findByComplaintId(complaintId);
+            return  complaintTracingLogRepo.findByComplaintId(complaintId)
+                    .stream()
+                    .map(trackingLogMapper::dto)
+                    .toList();
         }
         else{
             throw  new ApiException("You are not allowed to view this complaint", HttpStatus.FORBIDDEN);
