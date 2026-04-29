@@ -82,9 +82,8 @@ public class ReceptionistComplaintWorkflow {
                 predicates.add(cb.equal(root.get("governorate").get("id"), employee.getGovernorate().getId()));
                 predicates.add(cb.equal(root.get("institution").get("id"), employee.getInstitution().getId()));
 
-                if (filter.state() == null) {
-                    predicates.add(cb.equal(root.get("state"), ComplaintState.NEW));
-                } else {
+                if (filter.state() != null) {
+
                     ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
                     predicates.add(cb.equal(root.get("state"), complaintState));
 
@@ -105,7 +104,6 @@ public class ReceptionistComplaintWorkflow {
 //                        query.distinct(true);
                     }
                 }
-
                 query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
