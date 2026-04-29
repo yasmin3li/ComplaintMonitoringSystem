@@ -235,11 +235,9 @@ public class ApiService {
         else if (authorizationService.IsReceptionist() || authorizationService.isManager()) {
             return receptionistComplaintWorkflow.updateComplaint(email,dto);
         }
-        return new ApiResponseDto<>(
-                false,
-                "Access denied",
-                null
-        );
+        else {
+            throw new ApiException("Unsupported role for this operation yet", HttpStatus.FORBIDDEN);
+        }
     }
 
     public ApiResponseDto<?> deleteComplaint(String email, Long complaintId) {
@@ -261,5 +259,18 @@ public class ApiService {
                 String.format("تم حذف الحساب للمستخدم : \"%s\" بنجاح",account.getUserName()),
                 null
         );
+    }
+
+    public ApiResponseDto<?> rejectComplaint(String email, ComplaintRejectDto dto) {
+
+// open complaint by receptionist employee
+        if (authorizationService.IsReceptionist()){
+            return receptionistComplaintWorkflow.rejectComplaint(email,dto);
+        }
+
+//TODO: later open complaint by manager / employee ...
+        else {
+            throw new ApiException("Unsupported role for this operation yet", HttpStatus.FORBIDDEN);
+        }
     }
 }

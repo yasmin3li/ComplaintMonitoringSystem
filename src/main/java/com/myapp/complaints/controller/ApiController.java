@@ -249,10 +249,10 @@ public class ApiController {
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
-    @PostMapping("/employee/rejectComplaint")
-    public ResponseEntity<?> receptionistRejectComplaint(@RequestBody ComplaintRejectDto dto,Authentication auth){
+    @PostMapping("/employee/complaint/reject")
+    public ResponseEntity<?> rejectComplaint(@RequestBody ComplaintRejectDto dto,Authentication auth){
         String email = auth.getName();
-        return ResponseEntity.ok(receptionistComplaintWorkflow.rejectComplaint(email,dto));
+        return ResponseEntity.ok(apiService.rejectComplaint(email,dto));
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")

@@ -40,6 +40,7 @@ public class ComplaintWorkflowEngine {
 
         //  update complaint
         complaint.setState(newState);
+        complaint.setAssignedTo(assignedTo);
         complaintRepo.save(complaint);
     }
 

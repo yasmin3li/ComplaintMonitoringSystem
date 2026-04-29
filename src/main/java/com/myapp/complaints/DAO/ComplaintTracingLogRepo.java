@@ -1,7 +1,6 @@
 package com.myapp.complaints.DAO;
 
 import com.myapp.complaints.dto.ComplaintTrackingLogDto;
-import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.enums.ComplaintState;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,5 +14,5 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
 
     Optional<ComplaintTrackingLog> findByComplaint_IdAndActionBy_IdAndNewState(Long complaintId, long accountId, ComplaintState state);
 
-    List<ComplaintTrackingLog> findByComplaint_IdAndActionBy_Id(Long id, Long id1);
+    Optional<ComplaintTrackingLog> findTopByComplaint_IdOrderByActionDateDesc(Long id);
 }

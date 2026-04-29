@@ -40,6 +40,10 @@ public class Complaint {
     @JoinColumn(name = "added_by_account_id")
     private Account addedBy;
 
+    @ManyToOne
+    @JoinColumn(name = "assigned_to")
+    private Employee assignedTo;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "service_id", nullable = false)
     private ServiceAvailable service;

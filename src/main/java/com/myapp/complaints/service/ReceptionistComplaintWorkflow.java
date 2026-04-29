@@ -49,7 +49,7 @@ public class ReceptionistComplaintWorkflow {
             switch (complaintState) {
                 case ComplaintState.NEW ->
                     {
-                        workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), null, "الشكوى قيد المراجعة", ActionType.OPENED);
+                        workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, "الشكوى قيد المراجعة", ActionType.OPENED);
 
                         return complaintMapper.toPerceptionComplaintDto(complaint);
                     }
@@ -117,18 +117,24 @@ public class ReceptionistComplaintWorkflow {
             throw new ApiException("complaint not found",HttpStatus.NOT_FOUND);
         }
 
-        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(email);
+        Employee employee = employeeRepo.findByAccount_Email(email);
 
-        List<ComplaintTrackingLog> log =
-                complaintTracingLogRepo.findByComplaint_IdAndActionBy_Id(
-                        complaint.get().getId(),account.get().getId());
+                if (complaint.get().getAssignedTo() == null) {
+                    throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
+                }
+                if(authorizationService.checkResponsibility(employee,complaint.get()))
 
-                if(!log.isEmpty() && complaint.get().getState().equals(ComplaintState.IN_REVIEW)){
-                   workflowEngine.changeState(complaint.get(),ComplaintState.REJECTED,account.get(),null,dto.reason(),ActionType.REJECTED);
-                   notificationService.notifyUsers(complaint.get(),dto.reason(),List.of(complaint.get().getAddedBy()));
+                {
+                    if((complaint.get().getState().equals(ComplaintState.IN_REVIEW))){
+                        workflowEngine.changeState(complaint.get(),ComplaintState.REJECTED,employee.getAccount(),null,dto.reason(),ActionType.REJECTED);
+                        notificationService.notifyUsers(complaint.get(),dto.reason(),List.of(complaint.get().getAddedBy()));
+                    }
+                    else{
+                        throw new ApiException("you can't reject a complaint at this state",HttpStatus.BAD_REQUEST);
+                    }
                 }
                 else{
-                    throw new ApiException("you aren't allowed to reject this complaint, you aren't working on it",HttpStatus.FORBIDDEN);
+                    throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
                 }
         return new ApiResponseDto<>(
                 true,
@@ -145,6 +151,9 @@ public class ReceptionistComplaintWorkflow {
                 .findByIdAndDeletedFalse(dto.complaintId())
                 .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
 
+        if (complaint.getAssignedTo() == null) {
+            throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
+        }
         if(!authorizationService.checkResponsibility(employee,complaint)){
             throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
         }
