@@ -270,7 +270,7 @@ public class ApiController {
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
     @PostMapping("/employee/complaint/priority")
     public ResponseEntity<?> addComplaintPriority(@RequestBody ComplaintPriorityDto dto){
-        return ResponseEntity.ok(receptionistComplaintWorkflow.addComplaintPriority(dto));
+        return ResponseEntity.ok(apiService.addComplaintPriority(dto));
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")

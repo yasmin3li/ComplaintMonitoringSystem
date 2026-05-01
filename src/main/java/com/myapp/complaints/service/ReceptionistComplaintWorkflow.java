@@ -237,31 +237,6 @@ public class ReceptionistComplaintWorkflow {
         else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
     }
 
-    @Transactional
-    public ApiResponseDto<?> addComplaintPriority(ComplaintPriorityDto dto) {
-
-        Employee employee = employeeRepo.findByAccount_Email
-                (SecurityContextHolder.getContext().getAuthentication().getName());
-
-        Complaint complaint = complaintRepo.findByIdAndDeletedFalse(dto.complaintId())
-                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
-
-
-        if(complaint.getState().equals(ComplaintState.NEW) || complaint.getState().equals(ComplaintState.REJECTED))
-        {
-            throw new ApiException("not allowed method [add priority] at this state",HttpStatus.BAD_REQUEST);
-        }
-        else {
-            if(!authorizationService.checkResponsibility(employee,complaint)){
-                throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
-            }
-        }
-
-        complaint.setPriority(dto.priority());
-        complaintRepo.save(complaint);
-
-        return new ApiResponseDto<>(true,"priority "+complaint.getPriority()+" was added successfully",null);
-    }
 }
 
 

@@ -3,6 +3,7 @@ package com.myapp.complaints.service;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
+import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
 import com.myapp.complaints.mapper.ComplaintMapper;
@@ -289,5 +290,31 @@ public class ApiService {
         else {
             throw new ApiException("Unsupported role for this operation yet", HttpStatus.FORBIDDEN);
         }
+    }
+
+    @Transactional
+    public ApiResponseDto<?> addComplaintPriority(ComplaintPriorityDto dto) {
+
+        Employee employee = employeeRepo.findByAccount_Email
+                (SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Complaint complaint = complaintRepo.findByIdAndDeletedFalse(dto.complaintId())
+                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+
+        if(complaint.getState().equals(ComplaintState.NEW) || complaint.getState().equals(ComplaintState.REJECTED))
+        {
+            throw new ApiException("not allowed method [add priority] at this state",HttpStatus.BAD_REQUEST);
+        }
+        else {
+            if(!authorizationService.checkResponsibility(employee,complaint)){
+                throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
+            }
+        }
+
+        complaint.setPriority(dto.priority());
+        complaintRepo.save(complaint);
+
+        return new ApiResponseDto<>(true,"priority "+complaint.getPriority()+" was added successfully",null);
     }
 }
