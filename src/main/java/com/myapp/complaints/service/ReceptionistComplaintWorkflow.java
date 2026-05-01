@@ -5,6 +5,7 @@ import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.ComplaintRepo;
 import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
 import com.myapp.complaints.DAO.EmployeeRepo;
+import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ActionType;
@@ -39,7 +40,7 @@ public class ReceptionistComplaintWorkflow {
     private final AccountRepo accountRepo;
     private final NotificationService notificationService;
     private final AuthorizationService authorizationService;
-
+    private final ComplaintStateValidator validator;
 
     public PerceptionComplaintResponseDto openComplaint(Complaint complaint, ComplaintState complaintState) {
 
@@ -196,6 +197,7 @@ public class ReceptionistComplaintWorkflow {
                 null
         );
     }
+
     public ApiResponseDto<?> reviewLater(long complaintId) {
 
         Employee employee = employeeRepo.findByAccount_Email
@@ -235,6 +237,44 @@ public class ReceptionistComplaintWorkflow {
 
         }
         else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
+    }
+
+    public ApiResponseDto<?> acceptAndForwardToManager(long complaintId) {
+
+        // the receptionist employee
+        Employee employee = employeeRepo.findByAccount_Email
+                (SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
+                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        ComplaintState complaintState = ComplaintState.FORWARDED_TO_MANAGER;
+
+        validator.validate(complaint.getState(),complaintState);
+
+        if(!authorizationService.checkResponsibility(employee,complaint)){
+            throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
+        }
+
+        if(complaint.getPriority() == null){
+            throw new ApiException("you must add priority to the complaint before forward it",HttpStatus.BAD_REQUEST);
+        }
+
+        //receptionist assigns this complaint to the manager by default
+        List<Employee> forwardTO = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),3);
+
+        workflowEngine.changeState
+                (complaint,ComplaintState.FORWARDED_TO_MANAGER,employee.getAccount(),null,"تم قبول الشكوى وتحويلها الى المدير", ActionType.ACCEPTED);
+
+        List<Account> accounts = new ArrayList<>(List.of());
+
+        for (Employee assignTo : forwardTO) {
+            accounts.add(assignTo.getAccount());
+        }
+
+        notificationService.notifyUsers(complaint,"priority: "+complaint.getPriority().toString(),accounts);
+
+        return new ApiResponseDto<>(true,"تم قبول الشكوى وتحويلها الى المدير",null);
     }
 
 }

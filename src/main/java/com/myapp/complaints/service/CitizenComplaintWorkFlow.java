@@ -108,7 +108,7 @@ public class CitizenComplaintWorkFlow {
             }
         }
 
-        complaint.setPriority(ComplaintPriority.LOW);
+        complaint.setPriority(null);
         Complaint savedComplaint= complaintRepo.save(complaint);
 
 /**

@@ -270,7 +270,7 @@ public class ApiController {
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
     @PostMapping("/employee/complaint/accept/{complaintId}")
     public ResponseEntity<?> acceptComplaintAndForward(@PathVariable Long complaintId){
-        return ResponseEntity.ok(apiService.acceptAndForwardToManager(complaintId));
+        return ResponseEntity.ok(receptionistComplaintWorkflow.acceptAndForwardToManager(complaintId));
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
