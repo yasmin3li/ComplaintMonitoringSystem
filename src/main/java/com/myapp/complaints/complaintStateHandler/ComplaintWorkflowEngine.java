@@ -66,6 +66,7 @@ public class ComplaintWorkflowEngine {
         log.setNewState(complaint.getState());
         log.setActionBy(actor);
         log.setActionType(actionType);
+        log.setAssignedTo(complaint.getAssignedTo());
         log.setComments(associatedComment(actionType));
 
         logRepo.save(log);

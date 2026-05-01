@@ -209,13 +209,17 @@ public class ReceptionistComplaintWorkflow {
             switch (complaintState) {
                 case ComplaintState.NEW ->
                 {
-                    workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), null, "الشكوى قيد المراجعة", ActionType.OPENED);
+                   // workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), null, "الشكوى قيد المراجعة", ActionType.OPENED);
 
-                    return new ApiResponseDto<>(true,"تم اضافة الشكوى للشكاوى قيد التحقق",null);
+                    //return new ApiResponseDto<>(true,"تم اضافة الشكوى للشكاوى قيد التحقق",null);
+                    throw  new ApiException("you can;t add this complaint to In_Review you should open it before",HttpStatus.BAD_REQUEST);
                 }
 
                 case ComplaintState.IN_REVIEW ->
                 {
+                    if(!authorizationService.checkResponsibility(employee,complaint)){
+                        throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
+                    }
                     workflowEngine.createActionLog(complaint,employee.getAccount(),ActionType.REVIEW_LATER);
                     return new ApiResponseDto<>(true,"تم تأجيل مراجعة الشكوى",null);
                 }
