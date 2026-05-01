@@ -268,6 +268,12 @@ public class ApiController {
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+    @PostMapping("/employee/complaint/accept/{complaintId}")
+    public ResponseEntity<?> acceptComplaintAndForward(@PathVariable Long complaintId){
+        return ResponseEntity.ok(apiService.acceptAndForwardToManager(complaintId));
+    }
+
+    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
     @PostMapping("/employee/complaint/priority")
     public ResponseEntity<?> addComplaintPriority(@RequestBody ComplaintPriorityDto dto){
         return ResponseEntity.ok(apiService.addComplaintPriority(dto));

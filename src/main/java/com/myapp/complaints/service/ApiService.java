@@ -1,8 +1,11 @@
 package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.*;
+import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
+import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
+import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
@@ -42,7 +45,7 @@ public class ApiService {
     private final NotificationService notificationService;
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
     private final ComplaintTrackingLogMapper trackingLogMapper;
-
+    private final ComplaintWorkflowEngine workflowEngine;
 //Get data for homePage (last complaints)
 //    public List<ComplaintResponseDto> getLast10Complaints() {
 //
@@ -316,5 +319,40 @@ public class ApiService {
         complaintRepo.save(complaint);
 
         return new ApiResponseDto<>(true,"priority "+complaint.getPriority()+" was added successfully",null);
+    }
+
+    private final ComplaintStateValidator validator;
+    public ApiResponseDto<?> acceptAndForwardToManager(long complaintId) {
+
+        // the receptionist employee
+        Employee employee = employeeRepo.findByAccount_Email
+                (SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
+                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        ComplaintState complaintState = ComplaintState.FORWARDED_TO_MANAGER;
+
+        validator.validate(complaint.getState(),complaintState);
+
+            if(!authorizationService.checkResponsibility(employee,complaint)){
+                throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
+        }
+
+        //receptionist assigns this complaint to the manager by default
+        List<Employee> forwardTO = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),3);
+
+        workflowEngine.changeState
+                (complaint,ComplaintState.FORWARDED_TO_MANAGER,employee.getAccount(),null,"تم قبول الشكوى وتحويلها الى المدير", ActionType.ACCEPTED);
+
+        List<Account> accounts = new ArrayList<>(List.of());
+
+        for (Employee assignTo : forwardTO) {
+            accounts.add(assignTo.getAccount());
+        }
+
+        notificationService.notifyUsers(complaint,"priority: "+complaint.getPriority().toString(),accounts);
+
+        return null;
     }
 }

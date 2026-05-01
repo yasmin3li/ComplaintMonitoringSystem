@@ -5,7 +5,7 @@ public enum ActionType {
     OPENED,
     ASSIGNED,
     UPDATED,
-    STATE_CHANGED,
+    STATE_CHANGED,ACCEPTED,
     COMMENTED,
     CLOSED,
     REJECTED, DELETED,

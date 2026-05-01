@@ -20,6 +20,7 @@ public class CommonUtils {
             case "مغلقة" -> ComplaintState.CLOSED;
             case "مسندة" -> ComplaintState.ASSIGNED;
             case "تم مقاطعة التقدم" -> ComplaintState.CANCELLED;
+            case "محولة" -> ComplaintState.FORWARDED_TO_MANAGER;
             default -> throw new ApiException("Invalid Arabic state: " + state, HttpStatus.BAD_REQUEST);
         };
 
@@ -36,6 +37,7 @@ public class CommonUtils {
             case ComplaintState.CLOSED -> "مغلقة";
             case ComplaintState.ASSIGNED -> "مسندة";
             case ComplaintState.CANCELLED -> "تم مقاطعة التقدم";
+            case ComplaintState.FORWARDED_TO_MANAGER -> "محولة";
             default -> throw new ApiException("Invalid English state: " + state, HttpStatus.BAD_REQUEST);
         };
     }

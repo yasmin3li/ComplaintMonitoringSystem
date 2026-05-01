@@ -14,6 +14,7 @@ public class NotificationFactory {
             case ASSIGNED -> "Complaint Assigned";
             case CANCELLED -> "Complaint Cancelled";
             case IN_REVIEW -> "شكواك قيد المراجعة";
+            case FORWARDED_TO_MANAGER -> "تم قبول شكواك ";
         };
     }
 
@@ -27,6 +28,8 @@ public class NotificationFactory {
             case ASSIGNED -> "Your complaint \"" + complaintTitle + "\" has been assigned to an employee.";
             case CANCELLED -> "Your complaint \"" + complaintTitle + "\" has been cancelled.";
             case IN_REVIEW -> "شكواك \"" + complaintTitle + "\" قيد المراجعة ";
+            case FORWARDED_TO_MANAGER -> "شكواك \"" + complaintTitle + "\" تم قبولها وتحويلها الى المدير ";
+
         };
     }
 }
