@@ -1,0 +1,538 @@
+-- ===============================================
+-- add notification_templates and edit the inserts
+-- DROP DATABASE IF EXISTS
+-- ===============================================
+DROP DATABASE IF EXISTS complaint_monitoring_sys;
+
+-- ===============================================
+-- CREATE DATABASE
+-- ===============================================
+CREATE DATABASE IF NOT EXISTS complaint_monitoring_sys;
+USE complaint_monitoring_sys;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+-- ===============================================
+-- DROP TABLES
+-- ===============================================
+DROP TABLE IF EXISTS voting;
+DROP TABLE IF EXISTS rating;
+DROP TABLE IF EXISTS complaint_image;
+DROP TABLE IF EXISTS complaint_tracking_log;
+DROP TABLE IF EXISTS complaint;
+DROP TABLE IF EXISTS employee;
+DROP TABLE IF EXISTS citizen;
+DROP TABLE IF EXISTS service;
+DROP TABLE IF EXISTS address;
+DROP TABLE IF EXISTS institution_sector_governorate;
+DROP TABLE IF EXISTS institution;
+DROP TABLE IF EXISTS sector_governorate;
+DROP TABLE IF EXISTS sector;
+DROP TABLE IF EXISTS account;
+DROP TABLE IF EXISTS governorate;
+DROP TABLE IF EXISTS role;
+DROP TABLE IF EXISTS refreshToken;
+DROP TABLE IF EXISTS password_reset_token;
+DROP TABLE IF EXISTS verification_code;
+DROP TABLE IF EXISTS notification;
+DROP TABLE IF EXISTS notification_receiver;
+-- ===============================================
+-- TABLE: Role
+-- ===============================================
+CREATE TABLE role (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) UNIQUE NOT NULL
+) ENGINE=InnoDB;
+
+-- TABLE: Governorate
+CREATE TABLE governorate (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(200) NOT NULL
+) ENGINE=InnoDB;
+
+-- TABLE: Sector
+CREATE TABLE sector (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(200) NOT NULL
+) ENGINE=InnoDB;
+
+-- TABLE: Sector_Governorate
+CREATE TABLE sector_governorate (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    sector_id BIGINT NOT NULL,
+    governorate_id BIGINT NOT NULL,
+    FOREIGN KEY (sector_id) REFERENCES sector(id),
+    FOREIGN KEY (governorate_id) REFERENCES governorate(id)
+) ENGINE=InnoDB;
+
+-- TABLE: Institution
+CREATE TABLE institution (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(200) NOT NULL
+) ENGINE=InnoDB;
+
+-- TABLE: Institution_Sector_Governorate
+CREATE TABLE institution_sector_governorate (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    institution_id BIGINT NOT NULL,
+    sector_governorate_id BIGINT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (institution_id) REFERENCES institution(id),
+    FOREIGN KEY (sector_governorate_id) REFERENCES sector_governorate(id)
+) ENGINE=InnoDB;
+
+-- TABLE: Account
+CREATE TABLE account (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    user_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) unique,
+    password VARCHAR(500) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'BANNED',
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    phone_number VARCHAR(10) NOT NULL unique,
+    profile_image_url VARCHAR(500),
+    email_temporary BOOLEAN,
+    email_verified BOOLEAN,
+    phone_number_verified boolean,
+    must_change_password BOOLEAN,
+    national_number VARCHAR(20) NOT NULL unique,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    role_id BIGINT NOT NULL,
+    FOREIGN KEY (role_id) REFERENCES role(id)
+) ENGINE=InnoDB;
+
+-- TABLE: Citizen
+CREATE TABLE citizen (
+    id BIGINT NOT NULL PRIMARY KEY,
+    birth_date DATE,
+    FOREIGN KEY (id) REFERENCES account(id)
+) ENGINE=InnoDB;
+
+-- TABLE: Employee
+CREATE TABLE employee (
+    id BIGINT NOT NULL PRIMARY KEY,
+    institution_id BIGINT NOT NULL,
+    governorate_id BIGINT NOT NULL,
+    sector_id BIGINT NOT NULL,
+    FOREIGN KEY (id) REFERENCES account(id),
+    FOREIGN KEY (institution_id) REFERENCES institution(id),
+    FOREIGN KEY (governorate_id) REFERENCES governorate(id),
+    FOREIGN KEY (sector_id) REFERENCES sector(id)
+) ENGINE=InnoDB;
+
+-- TABLE: Verification_Code
+CREATE TABLE verification_code (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    verification_code TEXT,
+    verification_code_expire_time DATETIME,
+    state VARCHAR(20) NOT NULL,
+    type VARCHAR(60),
+    account_id BIGINT,
+    FOREIGN KEY (account_id) REFERENCES account(id)
+);
+
+-- TABLE: Password_Reset_Token
+CREATE TABLE password_reset_token (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    token VARCHAR(10000),
+    expiry_date DATETIME,
+    type VARCHAR(20),
+    state VARCHAR(20) NOT NULL,
+    account_id BIGINT,
+    FOREIGN KEY (account_id) REFERENCES account(id)
+);
+
+-- TABLE: Refresh_Token
+CREATE TABLE refresh_token (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    refresh_token VARCHAR(10000),
+    revoked BOOLEAN,
+    account_id BIGINT,
+    FOREIGN KEY (account_id) REFERENCES account(id)
+);
+
+-- TABLE: Address
+CREATE TABLE address (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    latitude DOUBLE NOT NULL,
+    longitude DOUBLE NOT NULL,
+    full_address_text VARCHAR(500)
+) ENGINE=InnoDB;
+
+-- TABLE: Service
+CREATE TABLE service (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(200) UNIQUE NOT NULL,
+    description TEXT,
+    is_active BOOLEAN DEFAULT TRUE,
+    institution_id BIGINT NOT NULL,
+    FOREIGN KEY (institution_id) REFERENCES institution(id)
+) ENGINE=InnoDB;
+
+-- TABLE: Complaint
+CREATE TABLE complaint (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(300) NOT NULL,
+    description TEXT,
+    state VARCHAR(50) NOT NULL DEFAULT 'NEW',
+    date_time_of_add DATETIME DEFAULT CURRENT_TIMESTAMP,
+    date_time_of_solve DATETIME,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    added_by_account_id BIGINT NOT NULL,
+    service_id BIGINT NOT NULL,
+    institution_id BIGINT NOT NULL,
+    governorate_id BIGINT NOT NULL,
+    sector_id BIGINT NOT NULL,
+    address_id BIGINT NOT NULL,
+    assigned_to bigint default null,
+    priority ENUM('LOW','MEDIUM','HIGH','CRITICAL') default 'LOW',
+    FOREIGN KEY (assigned_to) REFERENCES employee(id),
+    FOREIGN KEY (added_by_account_id) REFERENCES account(id),
+    FOREIGN KEY (service_id) REFERENCES service(id),
+    FOREIGN KEY (institution_id) REFERENCES institution(id),
+    FOREIGN KEY (governorate_id) REFERENCES governorate(id),
+    FOREIGN KEY (sector_id) REFERENCES sector(id),
+    FOREIGN KEY (address_id) REFERENCES address(id)
+) ENGINE=InnoDB;
+
+-- TABLE: Complaint Image
+CREATE TABLE complaint_image (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	type ENUM('BEFORE_SOLVE','AFTER_SOLVE') Not null,
+    image_url VARCHAR(500),
+    complaint_id BIGINT NOT NULL,
+    added_by bigint Not null,
+    foreign key (added_by) references account(id),
+    FOREIGN KEY (complaint_id) REFERENCES complaint(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- TABLE: Complaint Tracking Log
+CREATE TABLE complaint_tracking_log (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    previous_status VARCHAR(50),
+    new_status VARCHAR(50),
+    action_type VARCHAR(50),
+    comments TEXT,
+    action_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    complaint_id BIGINT NOT NULL,
+    action_by_account_id BIGINT,
+    assigned_to_employee_id BIGINT,
+    FOREIGN KEY (complaint_id) REFERENCES complaint(id) ON DELETE CASCADE,
+    FOREIGN KEY (action_by_account_id) REFERENCES account(id),
+    FOREIGN KEY (assigned_to_employee_id) REFERENCES employee(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE notification(
+id BIGINT NOT NULL primary key auto_increment,
+title varchar(50),
+message varchar(100),
+created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+related_complaint_id bigint not null,
+foreign key (related_complaint_id) references complaint(id)
+);
+
+CREATE TABLE notification_receiver(
+id BIGINT NOT NULL primary key auto_increment,
+is_read bool default false,
+read_at DATETIME,
+notification_id bigint not null,
+account_id bigint not null,
+foreign key (notification_id) references notification(id),
+foreign key (account_id) references account(id)
+);
+
+create table notification_templates(
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    state ENUM('NEW','REJECTED','IN_REVIEW','FORWARDED_TO_MANAGER'),
+    role_id BIGINT NOT NULL,
+    title varchar(50),
+    message varchar(100),
+    FOREIGN KEY (role_id) REFERENCES role(id)
+    );
+
+
+-- TABLE: Rating
+CREATE TABLE rating (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    rating_value INT,
+    note TEXT,
+    date_time_of_rating DATETIME DEFAULT CURRENT_TIMESTAMP,
+    complaint_id BIGINT NOT NULL,
+    account_id BIGINT NOT NULL,
+    FOREIGN KEY (complaint_id) REFERENCES complaint(id),
+    FOREIGN KEY (account_id) REFERENCES account(id)
+) ENGINE=InnoDB;
+
+-- TABLE: Voting
+CREATE TABLE voting (
+    id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    type ENUM('LIKE','DISLIKE'),
+    date_time_of_voting DATETIME DEFAULT CURRENT_TIMESTAMP,
+    complaint_id BIGINT NOT NULL,
+    account_id BIGINT NOT NULL,
+    FOREIGN KEY (complaint_id) REFERENCES complaint(id),
+    FOREIGN KEY (account_id) REFERENCES account(id)
+) ENGINE=InnoDB;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+-- ===============================================
+-- INSERTS: Roles
+-- ===============================================
+INSERT INTO role (id,name) VALUES
+(1,'مواطن'),
+(2,'موظف الاستقبال'),
+(3,'مدير'),
+(4,'أدمن');
+
+-- Governorates
+INSERT INTO governorate (id,name) VALUES
+(1,'حماه'),(2,'دمشق'),(3,'حمص'),(4,'اللاذقية'),(5,'طرطوس'),(6,'إدلب'),(7,'دير الزور'),(8,'حلب');
+
+INSERT INTO sector (id,name) VALUES
+(1,'الكهرباء والطاقة'),(2,'المياه'),(3,'الاتصالات'),(4,'الطرق والنقل'),(5,'االنظافة'),(6,'الزراعة');
+
+-- Institutions
+INSERT INTO institution (id, name) VALUES
+(1, 'شركة الكهرباء العامة'),
+(2, 'مديرية نقل الطاقة'),
+(3, 'مؤسسة مياه الشرب'),
+(4, 'مؤسسة الصرف الصحي'),
+(5, 'شركة الاتصالات الأرضية'),
+(6, 'شركة الاتصالات الخلوية'),
+(7, 'مركز خدمات الإنترنت'),
+(8, 'مديرية الطرق المركزية'),
+(9, 'مديرية النقل البري'),
+(10, 'مؤسسة تعبيد وصيانة الطرق الريفية'),
+(11, 'مديرية النظافة'),
+(12, 'ورشات جمع القمامة المتعاقدة'),
+(13, 'مؤسسة استصلاح الأراضي');
+
+-- ===============================================
+-- Sector_Governorate (ربط القطاعات بالمحافظات مع الاستثناءات)
+-- ===============================================
+INSERT INTO sector_governorate (id, sector_id, governorate_id) VALUES
+-- الكهرباء (1) في كل المحافظات (1-8)
+(1,1,1),(2,1,2),(3,1,3),(4,1,4),(5,1,5),(6,1,6),(7,1,7),(8,1,8),
+-- المياه (2) في كل المحافظات عدا ادلب (6)
+(9,2,1),(10,2,2),(11,2,3),(12,2,4),(13,2,5),(14,2,7),(15,2,8),
+-- الاتصالات (3) في كل المحافظات عدا دير الزور (7)
+(16,3,1),(17,3,2),(18,3,3),(19,3,4),(20,3,5),(21,3,6),(22,3,8),
+-- الطرق والنقل (4) في كل المحافظات عدا دير الزور (7)
+(23,4,1),(24,4,2),(25,4,3),(26,4,4),(27,4,5),(28,4,6),(29,4,8),
+-- النظافة (5) في كل المحافظات (1-8)
+(30,5,1),(31,5,2),(32,5,3),(33,5,4),(34,5,5),(35,5,6),(36,5,7),(37,5,8),
+-- الزراعة (6) في كل المحافظات عدا دمشق (2)
+(38,6,1),(39,6,3),(40,6,4),(41,6,5),(42,6,6),(43,6,7),(44,6,8);
+
+-- ===============================================
+-- Institution_Sector_Governorate (ربط المؤسسات بالقطاع المحلي)
+-- ===============================================
+INSERT INTO institution_sector_governorate (institution_id, sector_governorate_id, is_active) VALUES
+-- الكهرباء (مؤسسة 1 و 2 تغطي المعرفات 1 إلى 8)
+(1,1,true),(1,2,true),(1,3,true),(1,4,true),(1,5,true),(1,6,true),(1,7,true),(1,8,true),
+(2,1,true),(2,2,true),(2,3,true),(2,4,true),(2,5,true),(2,6,true),(2,7,true),(2,8,true),
+
+-- المياه والصرف الصحي (مؤسسة 3 و 4 تغطي المعرفات 9 إلى 15)
+(3,9,true),(3,10,true),(3,11,true),(3,12,true),(3,13,true),(3,14,true),(3,15,true),
+(4,9,true),(4,10,true),(4,11,true),(4,12,true),(4,13,true),(4,14,true),(4,15,true),
+
+-- الاتصالات (مؤسسة 5 و 6 و 7 تغطي المعرفات 16 إلى 22)
+(5,16,true),(5,17,true),(5,18,true),(5,19,true),(5,20,true),(5,21,true),(5,22,true),
+(6,16,true),(6,17,true),(6,18,true),(6,19,true),(6,20,true),(6,21,true),(6,22,true),
+(7,16,true),(7,17,true),(7,18,true),(7,19,true),(7,20,true),(7,21,true),(7,22,true),
+
+-- الطرق والنقل (مؤسسة 8 و 9 و 10 تغطي المعرفات 23 إلى 29)
+(8,23,true),(8,24,true),(8,25,true),(8,26,true),(8,27,true),(8,28,true),(8,29,true),
+(9,23,true),(9,24,true),(9,25,true),(9,26,true),(9,27,true),(9,28,true),(9,29,true),
+(10,23,true),(10,24,true),(10,25,true),(10,26,true),(10,27,true),(10,28,true),(10,29,true),
+
+-- النظافة (مؤسسة 11 و 12 تغطي المعرفات 30 إلى 37)
+(11,30,true),(11,31,true),(11,32,true),(11,33,true),(11,34,true),(11,35,true),(11,36,true),(11,37,true),
+(12,30,true),(12,31,true),(12,32,true),(12,33,true),(12,34,true),(12,35,true),(12,36,true),(12,37,true),
+
+-- الزراعة (مؤسسة 13 تغطي المعرفات 38 إلى 44)
+(13,38,true),(13,39,true),(13,40,true),(13,41,true),(13,42,true),(13,43,true),(13,44,true);
+
+-- ===============================================
+-- Services (تأكيد ربط الخدمات بالمؤسسات)
+-- ===============================================
+-- [بقية أكواد الـ Services التي أرفقتها صحيحة طالما IDs المؤسسات (1-13) ثابتة]
+INSERT INTO service (name, institution_id, description, is_active) VALUES
+--  الكهرباء (1,2)
+('إصلاح انقطاع الكهرباء',1,'معالجة الانقطاع الكهربائي',true),
+('صيانة الأعطال المنزلية',1,'إصلاح الأعطال داخل المنازل',true),
+('الإبلاغ عن تماس كهربائي',1,'حالات الخطر الكهربائي',true),
+('تركيب عداد كهرباء جديد',1,'طلب عداد جديد',true),
+('نقل اشتراك كهرباء',1,'نقل العداد لموقع جديد',true),
+('صيانة خطوط التوتر العالي',2,'إصلاح خطوط النقل',true),
+('الإبلاغ عن سقوط برج كهرباء',2,'بلاغ طارئ',true),
+--  المياه (3,4)
+('معالجة انقطاع المياه',3,'إعادة ضخ المياه',true),
+('معالجة ضعف ضغط المياه',3,'تحسين الضغط',true),
+('الإبلاغ عن كسر أنبوب مياه',3,'إصلاح الأعطال',true),
+('تركيب عداد مياه',3,'طلب اشتراك جديد',true),
+('تسليك مجاري الصرف الصحي',4,'تنظيف الشبكات',true),
+('الإبلاغ عن طفح مجاري',4,'حالات طارئة',true),
+('صيانة شبكة الصرف',4,'إصلاح الأعطال',true),
+--  الاتصالات (5,6,7)
+('إصلاح الهاتف الأرضي',5,'صيانة الخطوط',true),
+('تركيب خط هاتف جديد',5,'طلب خط جديد',true),
+('ضعف الشبكة الخلوية',6,'تحسين التغطية',true),
+('انقطاع الاتصال',6,'إصلاح الأعطال',true),
+('مشاكل الرسائل والمكالمات',6,'خدمات الدعم',true),
+('انقطاع الإنترنت',7,'إصلاح الخدمة',true),
+('بطء الإنترنت',7,'تحسين السرعة',true),
+('تركيب خط إنترنت',7,'اشتراك جديد',true),
+--  الطرق والنقل (8,9,10)
+('إصلاح الحفر في الطرق',8,'صيانة الطرق',true),
+('إصلاح إشارات المرور',8,'صيانة الإشارات',true),
+('إصدار رخصة قيادة',9,'خدمة المرور',true),
+('تجديد رخصة مركبة',9,'تجديد الأوراق',true),
+('نقل ملكية مركبة',9,'تغيير ملكية',true),
+('تعبيد طرق ريفية',10,'تحسين الطرق',true),
+('فتح طرق زراعية',10,'خدمة المناطق الريفية',true),
+-- النظافة (11,12)
+('جمع النفايات المنزلية',11,'تنظيف الأحياء',true),
+('تنظيف الشوارع',11,'خدمات النظافة',true),
+('إزالة الأنقاض',11,'تنظيف بعد البناء',true),
+('إزالة مكب عشوائي',12,'تنظيف المناطق',true),
+('تنظيف مناطق مهجورة',12,'خدمات خاصة',true),
+--  الزراعة (13)
+('دعم المزارعين',13,'تقديم دعم زراعي',true),
+('مكافحة الآفات الزراعية',13,'حماية المحاصيل',true),
+('تأمين بذور وأسمدة',13,'توزيع مستلزمات',true),
+('الإبلاغ عن أمراض نباتية',13,'تشخيص ومعالجة',true),
+-- الكهرباء
+('فصل عداد كهرباء',1,'طلب فصل الاشتراك',true),
+('إعادة توصيل الكهرباء',1,'إعادة تفعيل الخدمة',true),
+('شكاوى الفواتير',1,'الاعتراض على الفواتير',true),
+-- نقل الطاقة
+('صيانة محطات التحويل',2,'صيانة المحطات الرئيسية',true),
+('فحص الأحمال الكهربائية',2,'تحليل الأحمال',true),
+-- المياه
+('تلوث المياه',3,'الإبلاغ عن مياه غير صالحة',true),
+('تسريب مياه',3,'كشف وإصلاح التسريبات',true),
+-- الصرف الصحي
+('انسداد شبكة الصرف',4,'معالجة الانسدادات',true),
+-- الاتصالات
+('إلغاء اشتراك هاتف',5,'إيقاف الخدمة',true),
+('نقل خط إنترنت',7,'نقل الاشتراك لموقع جديد',true),
+-- الطرق
+('إزالة مطبات غير نظامية',8,'تنظيم الطرق',true),
+('إنارة الطرق العامة',8,'صيانة إنارة الشوارع',true),
+-- النظافة
+('رش مبيدات',11,'مكافحة الحشرات',true),
+('تعقيم المناطق',11,'خدمات صحية',true),
+-- الزراعة
+('تأهيل أراضي زراعية',13,'تحسين الأراضي',true),
+('دعم مشاريع زراعية',13,'تمويل ودعم',true);
+
+-- Accounts
+INSERT INTO account (id,user_name,password,role_id,email,phone_number,national_number,status,deleted,email_temporary,must_change_password,email_verified,phone_number_verified) VALUES
+(1,'ahmad.alAhmad','$2a$10$Bw6PdefBy8ybhFLIjDfg7.KOOaDpqBisIqTRW3ZFNdULaAQMjIIoe',1,'ahmad@example.com','0999999999','05010565489','ACTIVATED',FALSE,FALSE,true,TRUE,TRUE),
+(2,'sara.mohamed','$2a$10$I8p/LuzVrg0pMZ3j2D6TCegw2P8I3MhecJHMCYCe0PqF0NGUtCx6.',1,'sara@example.com','0999998888','05010565789','PENDING',FALSE,FALSE,FALSE,FALSE,TRUE),
+(3,'reception1','$2a$10$PvOjmBfjgArkJ4U2tdYFKOZiGDfJ.SSDsBAUw0sXRPbmUqtpFqSQG',2,'reception1@example.com','0999977777','05010585489','PENDING',FALSE,FALSE,FALSE,FALSE,TRUE),
+(4,'manager1','$2a$10$IKb9sbyBDqO2LP2T.Uc1N.WStHROH.qiiNIxK8efRalbvGLanoneK',3,'manager1@example.com','0999966666','05010556489','PENDING',FALSE,FALSE,FALSE,FALSE,TRUE),
+(5,'admin1','$2a$10$GiwwFqukfqobyyWbZgdSROHwnhkcS/iSWdLJyY02wlDTtV2mTBDVC',4,'admin1@example.com','0986987048','05010563389','ACTIVATED',FALSE,FALSE,FALSE,TRUE,TRUE);
+
+-- Citizen
+INSERT INTO citizen (id,birth_date) VALUES
+(1,'1990-01-01'),(2,'1992-02-02');
+
+-- Employee
+INSERT INTO employee (id,institution_id,governorate_id,sector_id) VALUES
+(3,1,1,1),(4,3,2,2),(5,11,1,5);
+
+-- Addresses
+-- INSERT INTO address (id,latitude,longitude,full_address_text) VALUES
+-- (1,33.5138,36.2765,'دمشق - منطقة القنوات'),
+-- (2,34.7333,36.7167,'حماه - حي العمال'),
+-- (3,34.7333,36.7167,'حمص - شارع الملكي'),
+-- (4,35.5400,35.8100,'اللاذقية - منطقة الساحل'),
+-- (5,33.5200,36.3000,'دمشق - شارع الثورة'),
+-- (6,34.7300,36.7000,'حماه - شارع الصناعة'),
+-- (7,34.7300,36.7100,'حمص - منطقة الجلاء'),
+-- (8,35.5500,35.8000,'اللاذقية - شارع الفردوس');
+
+-- Complaints
+-- INSERT INTO complaint (id,title,description,state,deleted,added_by_account_id,service_id,institution_id,governorate_id,sector_id,address_id) VALUES
+-- (1,'انقطاع التيار الكهربائي','انقطاع الكهرباء في المنزل منذ يومين','NEW',FALSE,1,2,1,1,1,1),
+-- (2,'مشكلة في ضغط المياه','ضغط المياه منخفض في الحي','NEW',FALSE,2,4,3,2,2,2),
+-- (3,'صيانة الأعطال','أعطال كهربائية في المصانع','NEW',FALSE,1,1,1,1,1,3),
+-- (4,'انقطاع الانترنت','انقطاع الانترنت منذ الصباح','NEW',FALSE,1,3,5,1,3,4),
+-- (5,'تأخر جمع النفايات','النفايات لم تجمع منذ أسبوع','NEW',FALSE,2,4,11,1,5,5),
+-- (6,'مشروع استصلاح أرض','الأراضي بحاجة لمعالجة عاجلة','NEW',FALSE,2,4,13,1,6,6),
+-- (7,'انقطاع المياه الساخنة','المياه الساخنة لا تعمل','NEW',FALSE,1,4,3,2,2,7),
+-- (8,'انقطاع الكهرباء المتكرر','انقطاع الكهرباء بشكل متكرر','NEW',FALSE,2,1,1,1,1,8);
+
+
+-- INSERT INTO complaint_tracking_log (id,previous_status,new_status,action_type,comments,action_date,complaint_id,action_by_account_id,assigned_to_employee_id) VALUES
+-- (1,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-10 09:30:00',1,1,NULL),
+-- (2,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-11 14:15:00',2,1,NULL),
+-- (3,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-12 11:45:00',3,NULL,NULL),
+-- (4,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-13 08:20:00',4,NULL,NULL),
+-- (5,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-14 10:10:00',5,NULL,NULL),
+-- (6,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-14 16:30:00',6,NULL,NULL),
+-- (7,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-15 09:00:00',7,NULL,NULL),
+-- (8,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-15 13:45:00',8,NULL,NULL);
+
+
+INSERT INTO notification_templates (id, state, role_id, title, message) VALUES
+(1, 'NEW', 1, 'تم إرسال شكواك', 'تم إرسال شكواك "{title}" بنجاح'),
+
+(2, 'NEW', 2, 'شكوى جديدة', 'يوجد شكوى جديدة بعنوان "{title}" تحتاج للمراجعة'),
+
+(3, 'REJECTED', 1, 'تم رفض شكواك', 'تم رفض شكواك "{title}" بسبب: {reason}'),
+(4,'IN_REVIEW', 1, 'تتم قبول شكواك', 'تم قبول شكواك وتحويلها الى المدير "{title}" بنجاح'),
+(5,'FORWARDED_TO_MANAGER', 3, 'شكوى جديدة', 'يوجد شكوى جديدة بعنوان "{title}"  بحاجة الى حل');
+-- -----------------------------------------------------------------
+
+INSERT INTO account
+(id,user_name,password,role_id,email,phone_number,national_number,status,deleted,email_temporary,must_change_password,email_verified,phone_number_verified)
+VALUES
+-- password Yasminabu3li!
+-- ================== الكهرباء ==================
+(6,'emp_elec1_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',2,'elec1_hama@test.com','0910000001','20000000001','ACTIVATED',false,false,false,true,true),
+(28,'emp_elec2_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',2,'elec2_hama@test.com','0333562','884578','ACTIVATED',false,false,false,true,true),
+(7,'emp_elec_damascus','$2a$10$SVb2gHVdqVAPK5lyv9cKFOd/Z8Ufiyt68dBun2aWGbJOTMaZT026G',2,'elec_damascus@test.com','0910000002','20000000002','ACTIVATED',false,false,false,true,true),
+(8,'emp_elec_homs','$2a$10$kAq.tOA86qqG0/yK5txG6evQde74TmqGr9loTVsrMKV5pvrKD29O6',2,'elec_homs@test.com','0910000003','20000000003','ACTIVATED',false,false,false,true,true),
+(9,'emp_elec_lattakia','$2a$10$myYGZqM0NS42v3qsnLzuGecDo/ybVzRLETJDP0NgvOlgnvyxesjX6',2,'elec_lattakia@test.com','0910000004','20000000004','ACTIVATED',false,false,false,true,true),
+(10,'emp_elec_tartous','$2a$10$RIyB5YksbxL2RmPgpgwf4.dEFaQ0n4jUQZsbohoXmtOkCIyqW3x.y',2,'elec_tartous@test.com','0910000005','20000000005','ACTIVATED',false,false,false,true,true),
+(11,'emp_elec_idlib','$2a$10$BSWwFOgSCGXTr2mYmVyCfOd53XPV.8cT/yUW4uNgRTapH/fHbjjNW',2,'elec_idlib@test.com','0910000006','20000000006','ACTIVATED',false,false,false,true,true),
+(12,'emp_elec_deir','$2a$10$x9r7tmPdqPMDW4iIqwgcBe8Kh.nVrNkrtpGmeuHPGpC3bHykItYQy',2,'elec_deir@test.com','0910000007','20000000007','ACTIVATED',false,false,false,true,true),
+(13,'emp_elec_aleppo','$2a$10$xMj.lFblxO2dqLP52zIaSultr/3qp0CJL65F9oEb.Uz5H82/Cf2L.',2,'elec_aleppo@test.com','0910000008','20000000008','ACTIVATED',false,false,false,true,true),
+(29,'manager_elec1_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',3,'man_elec1_hama@test.com','0911000001','20100000001','ACTIVATED',false,false,false,true,true),
+(30,'manager_elec2_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',3,'mana_elec2_hama@test.com','03331562','8845178','ACTIVATED',false,false,false,true,true),
+-- ================== المياه ==================
+(14,'emp_water_hama','$2a$10$ZUevVfBt6oHyiuDk/G8rpuuvgNRretUf1tV1H3iAuZTwBD35c3OU6',2,'water_hama@test.com','0910000009','20000000009','ACTIVATED',false,false,false,true,true),
+(15,'emp_water_damascus','$2a$10$4PnjKUe7.d05s9gGvgp/lOJWWr1MHx77.DveniIej.4YRCLgsHozC',2,'water_damascus@test.com','0910000010','20000000010','ACTIVATED',false,false,false,true,true),
+(16,'emp_water_homs','$2a$10$4UXYNMJ8omSivtMh2lGxQe9lmpo9F/Ot9lg087rcfDvU48fG9DVkW',2,'water_homs@test.com','0910000011','20000000011','ACTIVATED',false,false,false,true,true),
+(17,'emp_water_lattakia','$2a$10$cOv.hJZNowQNdWxTVwdMm.fRYDLeX59dwQesz8uE9ia0TTNGd9/Ky',2,'water_lattakia@test.com','0910000012','20000000012','ACTIVATED',false,false,false,true,true),
+(18,'emp_water_tartous','$2a$10$hZGWJf//A/vvSSeuswx1IOO9BmiMUkLoVvKBtWwElNwLP8vg4XW2e',2,'water_tartous@test.com','0910000013','20000000013','ACTIVATED',false,false,false,true,true),
+(19,'emp_water_deir','$2a$10$WkPt6sXI1eac3XJyIrOyWeeA4ShJnEqB9qj0XQJmYRtYyWU1Wmlba',2,'water_deir@test.com','0910000014','20000000014','ACTIVATED',false,false,false,true,true),
+(20,'emp_water_aleppo','$2a$10$nks6Q/0dR3j74.h3lKsFM.draTqOK6Z9gWELDn0g6n5b6m.pOad0C',2,'water_aleppo@test.com','0910000015','20000000015','ACTIVATED',false,false,false,true,true),
+
+-- ================== الاتصالات ==================
+(21,'emp_tel_hama','$2a$10$mkC.ivJzr23GLhRRNk0WFuDHVFGyEwvkx1W.DLNx7N2WNtHpbOgdi',2,'tel_hama@test.com','0910000016','20000000016','ACTIVATED',false,false,false,true,true),
+(22,'emp_tel_damascus','$2a$10$sUHVyGOFyXB87yZYxHT1Z.IbjmtZrpew2OTxtmsit0LvJR5c7ts12',2,'tel_damascus@test.com','0910000017','20000000017','ACTIVATED',false,false,false,true,true),
+(23,'emp_tel_homs','$2a$10$W0QFk.N6ZjAxrB2hGDfkSOSh8Kk7EZP5b9AcqZS1Awj7Y/u6pUsXS',2,'tel_homs@test.com','0910000018','20000000018','ACTIVATED',false,false,false,true,true),
+(24,'emp_tel_lattakia','$2a$10$Ev8V6imadvZAJkwKkKBNNuRXtpn087VR7oR1kCsI.8Iwj56RAOgZS',2,'tel_lattakia@test.com','0910000019','20000000019','ACTIVATED',false,false,false,true,true),
+(25,'emp_tel_tartous','$2a$10$YIAbWCsuao2YKB5F.qI5Ne1KLHtH05GfIlnBwUi1cVdIzOZk4GWaO',2,'tel_tartous@test.com','0910000020','20000000020','ACTIVATED',false,false,false,true,true),
+(26,'emp_tel_idlib','$2a$10$Z85vWGBOKhwMsNI.yLqOdeg1ZhI8i4svwPg9wJ1W1PCqxVJ8eaUs6',2,'tel_idlib@test.com','0910000021','20000000021','ACTIVATED',false,false,false,true,true),
+(27,'emp_tel_aleppo','$2a$10$Ekh9xsKcuT8al6BrkO0T7uOdmbxaglXbFULbSTQUrTxCWnUcw4vHy',2,'tel_aleppo@test.com','0910000022','20000000022','ACTIVATED',false,false,false,true,true);
+INSERT INTO employee (id,institution_id,governorate_id,sector_id) VALUES
+
+-- الكهرباء (sector 1)
+(6,1,1,1),(7,1,2,1),(8,1,3,1),(9,1,4,1),
+(28,1,1,1),(29,1,1,1),(30,1,1,1),
+(10,1,5,1),(11,1,6,1),(12,1,7,1),(13,1,8,1),
+
+-- المياه (sector 2) (مافي إدلب)
+(14,3,1,2),(15,3,2,2),(16,3,3,2),(17,3,4,2),
+(18,3,5,2),(19,3,7,2),(20,3,8,2),
+
+-- الاتصالات (sector 3) (مافي دير الزور)
+(21,5,1,3),(22,5,2,3),(23,5,3,3),(24,5,4,3),
+(25,5,5,3),(26,5,6,3),(27,5,8,3);
