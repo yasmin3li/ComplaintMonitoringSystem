@@ -1,5 +1,6 @@
 package com.myapp.complaints.entity;
 
+import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,6 +36,10 @@ public class Complaint {
 
 // TODO: add this column to db
     private boolean deleted = false;
+
+    @Column(name = "priority")
+    @Enumerated(EnumType.STRING)
+    private ComplaintPriority priority;
 
     @ManyToOne
     @JoinColumn(name = "added_by_account_id")

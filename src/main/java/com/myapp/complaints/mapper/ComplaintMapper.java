@@ -145,8 +145,8 @@ public class ComplaintMapper {
                 complaint.getAddedBy().getUserName(),
                 complaint.getAddedBy().getEmail(),
                 formatter.complaintIdFormatter(complaint.getDateTimeOfAdd().getMinute()+complaint.getId()+complaint.getDateTimeOfAdd().getYear()+
-                        complaint.getDateTimeOfAdd().getSecond()+complaint.getDateTimeOfAdd().getNano())
-
+                        complaint.getDateTimeOfAdd().getSecond()+complaint.getDateTimeOfAdd().getNano()),
+                complaint.getPriority()
         );
     }
 

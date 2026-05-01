@@ -1,5 +1,7 @@
 package com.myapp.complaints.dto;
 
+import com.myapp.complaints.enums.ComplaintPriority;
+
 import java.util.List;
 
 public record PerceptionComplaintResponseDto(
@@ -9,6 +11,6 @@ public record PerceptionComplaintResponseDto(
     String addedByName,
     String addedByIdentifier,
 
-    String complaintNumber
-
+    String complaintNumber,
+    ComplaintPriority priority
 ) {}

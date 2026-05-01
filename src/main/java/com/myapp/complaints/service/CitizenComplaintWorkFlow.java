@@ -5,6 +5,7 @@ import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ActionType;
+import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
@@ -107,6 +108,7 @@ public class CitizenComplaintWorkFlow {
             }
         }
 
+        complaint.setPriority(ComplaintPriority.LOW);
         Complaint savedComplaint= complaintRepo.save(complaint);
 
 /**
