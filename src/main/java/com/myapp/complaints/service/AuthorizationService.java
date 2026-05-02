@@ -1,16 +1,15 @@
 package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
-import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.entity.Employee;
+import com.myapp.complaints.enums.ComplaintState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -61,4 +60,9 @@ public class AuthorizationService {
 //                && log.get().getAssignedTo().getAccount().getId().equals(employee.getId());
     }
 
+    public boolean checkAccessibility(Employee employee, Complaint complaint) {
+        Optional<ComplaintTrackingLog> log =
+                complaintTracingLogRepo.findByComplaint_IdAndActionBy_IdAndNewState(complaint.getId(),employee.getAccount().getId(),complaint.getState());
+        return log.isPresent();
+    }
 }

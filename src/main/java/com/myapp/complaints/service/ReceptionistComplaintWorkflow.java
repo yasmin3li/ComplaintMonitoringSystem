@@ -9,7 +9,6 @@ import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ActionType;
-import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
@@ -22,7 +21,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +55,18 @@ public class ReceptionistComplaintWorkflow {
                         return complaintMapper.toPerceptionComplaintDto(complaint);
                     }
 
-                case ComplaintState.IN_REVIEW ,ComplaintState.RESOLVED, ComplaintState.REJECTED, ComplaintState.CLOSED, ComplaintState.ASSIGNED,
+                case ComplaintState.REJECTED, ComplaintState.FORWARDED_TO_MANAGER -> {
+                    {
+                        if (!authorizationService.checkAccessibility(employee, complaint)) {
+
+                            throw new ApiException("This complaint is not your responsibility, there are another employee working on it", HttpStatus.FORBIDDEN);
+                        } else {
+                            return complaintMapper.toPerceptionComplaintDto(complaint);
+                        }
+                    }
+                }
+
+                case ComplaintState.IN_REVIEW ,ComplaintState.RESOLVED, ComplaintState.CLOSED, ComplaintState.ASSIGNED,
                      ComplaintState.CANCELLED, ComplaintState.IN_PROGRESS->
                     {
                         if (!authorizationService.checkResponsibility(employee, complaint)) {
@@ -90,7 +99,8 @@ public class ReceptionistComplaintWorkflow {
                     ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
                     predicates.add(cb.equal(root.get("state"), complaintState));
 
-                    if (complaintState == ComplaintState.IN_REVIEW || complaintState == ComplaintState.REJECTED ) {
+                    if (complaintState == ComplaintState.IN_REVIEW || complaintState == ComplaintState.REJECTED
+                            || complaintState == ComplaintState.FORWARDED_TO_MANAGER ) {
 
                         Join<Complaint, ComplaintTrackingLog> logJoin = root.join("logs");
 
