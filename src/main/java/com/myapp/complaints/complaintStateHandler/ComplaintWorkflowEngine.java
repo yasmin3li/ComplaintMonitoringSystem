@@ -34,7 +34,7 @@ public class ComplaintWorkflowEngine {
         log.setActionBy(actor);
         log.setAssignedTo(assignedTo);
         log.setActionType(actionType);
-        log.setComments(comment);
+        log.setComments(buildComment(actionType,newState,comment));
 
         logRepo.save(log);
 
@@ -53,7 +53,7 @@ public class ComplaintWorkflowEngine {
         log.setNewState(ComplaintState.NEW);
         log.setActionBy(actor);
         log.setActionType(ActionType.CREATED);
-        log.setComments("تم اضافة شكوى جديدة");
+        log.setComments(buildComment(ActionType.CREATED,ComplaintState.NEW,null));
 
         logRepo.save(log);
     }
@@ -67,25 +67,36 @@ public class ComplaintWorkflowEngine {
         log.setActionBy(actor);
         log.setActionType(actionType);
         log.setAssignedTo(complaint.getAssignedTo());
-        log.setComments(associatedComment(actionType));
+        log.setComments(buildComment(actionType,complaint.getState(),null));
 
         logRepo.save(log);
     }
 
-    private String associatedComment(ActionType actionType){
-         return switch (actionType){
-            case ActionType.DELETED -> "تم حذف الشكوى";
-             case CREATED -> null;
-             case OPENED -> null;
-             case ASSIGNED -> null;
-             case ActionType.UPDATED ->  "تم تحديث الشكوى";
-             case STATE_CHANGED -> null;
-             case COMMENTED -> null;
-             case CLOSED -> null;
-             case REJECTED -> null;
-             case REVIEW_LATER -> "تم تأجيل مراجعة الشكوى";
-             case ACCEPTED -> "تم قبول الشكوى وتحويلها للمدير";
-         };
+    private String buildComment(ActionType actionType, ComplaintState newState, String customComment) {
+
+        if (customComment != null && !customComment.isBlank()) {
+            return customComment;
+        }
+
+        return switch (actionType) {
+            case DELETED -> "تم حذف الشكوى";
+            case UPDATED -> "تم تحديث الشكوى";
+            case OPENED -> "الشكوى قيد المراجعة";
+            case REVIEW_LATER -> "تم تأجيل مراجعة الشكوى";
+            case CREATED ->  "تم اضافة شكوى جديدة";
+            case ACCEPTED -> "تم قبول الشكوى وتحويلها للمدير";
+
+            case REJECTED -> "تم رفض الشكوى";
+
+            case STATE_CHANGED -> switch (newState) {
+                case IN_REVIEW -> "الشكوى قيد المراجعة";
+                case RESOLVED -> "تم حل الشكوى";
+                case CLOSED -> "تم إغلاق الشكوى";
+                default -> "تم تغيير حالة الشكوى";
+            };
+
+            default -> "تم تنفيذ إجراء على الشكوى";
+        };
     }
 
 }

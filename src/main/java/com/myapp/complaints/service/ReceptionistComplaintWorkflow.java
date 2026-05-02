@@ -52,7 +52,7 @@ public class ReceptionistComplaintWorkflow {
             switch (complaintState) {
                 case ComplaintState.NEW ->
                     {
-                        workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, "الشكوى قيد المراجعة", ActionType.OPENED);
+                        workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, null, ActionType.OPENED);
 
                         return complaintMapper.toPerceptionComplaintDto(complaint);
                     }
@@ -264,7 +264,7 @@ public class ReceptionistComplaintWorkflow {
         List<Employee> forwardTO = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),3);
 
         workflowEngine.changeState
-                (complaint,ComplaintState.FORWARDED_TO_MANAGER,employee.getAccount(),null,"تم قبول الشكوى وتحويلها الى المدير", ActionType.ACCEPTED);
+                (complaint,ComplaintState.FORWARDED_TO_MANAGER,employee.getAccount(),null,null, ActionType.ACCEPTED);
 
         List<Account> accounts = new ArrayList<>(List.of());
 

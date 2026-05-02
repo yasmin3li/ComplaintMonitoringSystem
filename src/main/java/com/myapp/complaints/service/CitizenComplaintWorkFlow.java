@@ -283,7 +283,7 @@ public class CitizenComplaintWorkFlow {
             workflowEngine.createActionLog(complaint,account,ActionType.UPDATED);
         }
         else {
-            workflowEngine.changeState(complaint, ComplaintState.NEW, account, null, "تم تحديث الشكوى", ActionType.UPDATED);
+            workflowEngine.changeState(complaint, ComplaintState.NEW, account, null, null, ActionType.UPDATED);
         }
         complaintRepo.save(complaint);
 
