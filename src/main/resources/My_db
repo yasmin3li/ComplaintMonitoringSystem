@@ -186,7 +186,7 @@ CREATE TABLE complaint (
     sector_id BIGINT NOT NULL,
     address_id BIGINT NOT NULL,
     assigned_to bigint default null,
-    priority ENUM('LOW','MEDIUM','HIGH','CRITICAL') default 'No_PRIORITY_Yet',
+    priority ENUM('LOW','MEDIUM','HIGH','CRITICAL','No_PRIORITY_Yet') default 'No_PRIORITY_Yet',
     FOREIGN KEY (assigned_to) REFERENCES employee(id),
     FOREIGN KEY (added_by_account_id) REFERENCES account(id),
     FOREIGN KEY (service_id) REFERENCES service(id),
@@ -244,7 +244,7 @@ foreign key (account_id) references account(id)
 
 create table notification_templates(
     id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    state ENUM('NEW','REJECTED','IN_REVIEW','FORWARDED_TO_MANAGER'),
+    state ENUM('NEW','REJECTED','IN_REVIEW','FORWARDED_TO_MANAGER','ASSIGNED'),
     role_id BIGINT NOT NULL,
     title varchar(50),
     message varchar(100),
@@ -429,17 +429,17 @@ INSERT INTO service (name, institution_id, description, is_active) VALUES
 ('تأهيل أراضي زراعية',13,'تحسين الأراضي',true),
 ('دعم مشاريع زراعية',13,'تمويل ودعم',true);
 
--- Accounts
+-- Accounts YASMEN@bu3li
 INSERT INTO account (id,user_name,password,role_id,email,phone_number,national_number,status,deleted,email_temporary,must_change_password,email_verified,phone_number_verified) VALUES
-(1,'ahmad.alAhmad','$2a$10$Bw6PdefBy8ybhFLIjDfg7.KOOaDpqBisIqTRW3ZFNdULaAQMjIIoe',1,'ahmad@example.com','0999999999','05010565489','ACTIVATED',FALSE,FALSE,true,TRUE,TRUE),
-(2,'sara.mohamed','$2a$10$I8p/LuzVrg0pMZ3j2D6TCegw2P8I3MhecJHMCYCe0PqF0NGUtCx6.',1,'sara@example.com','0999998888','05010565789','PENDING',FALSE,FALSE,FALSE,FALSE,TRUE),
-(3,'reception1','$2a$10$PvOjmBfjgArkJ4U2tdYFKOZiGDfJ.SSDsBAUw0sXRPbmUqtpFqSQG',2,'reception1@example.com','0999977777','05010585489','PENDING',FALSE,FALSE,FALSE,FALSE,TRUE),
-(4,'manager1','$2a$10$IKb9sbyBDqO2LP2T.Uc1N.WStHROH.qiiNIxK8efRalbvGLanoneK',3,'manager1@example.com','0999966666','05010556489','PENDING',FALSE,FALSE,FALSE,FALSE,TRUE),
-(5,'admin1','$2a$10$GiwwFqukfqobyyWbZgdSROHwnhkcS/iSWdLJyY02wlDTtV2mTBDVC',4,'admin1@example.com','0986987048','05010563389','ACTIVATED',FALSE,FALSE,FALSE,TRUE,TRUE);
+(1,'allam.abu.ali','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',1,'allam@example.com','0999999999','05010565489','ACTIVATED',FALSE,FALSE,false,TRUE,TRUE),
+(2,'arab.abu.ali','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',1,'arab@example.com','0999999998','05010565789','ACTIVATED',FALSE,FALSE,FALSE,true,TRUE),
+(3,'reception1','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',2,'reception1@example.com','0999977777','05010585489','ACTIVATED',FALSE,FALSE,FALSE,true,TRUE),
+(4,'manager1','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',3,'manager1@example.com','0999966666','05010556489','ACTIVATED',FALSE,FALSE,FALSE,true,TRUE),
+(5,'admin1','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',4,'admin1@example.com','0986987048','05010563389','ACTIVATED',FALSE,FALSE,FALSE,TRUE,TRUE);
 
 -- Citizen
 INSERT INTO citizen (id,birth_date) VALUES
-(1,'1990-01-01'),(2,'1992-02-02');
+(1,'1991-01-01'),(2,'1992-02-02');
 
 -- Employee
 INSERT INTO employee (id,institution_id,governorate_id,sector_id) VALUES
