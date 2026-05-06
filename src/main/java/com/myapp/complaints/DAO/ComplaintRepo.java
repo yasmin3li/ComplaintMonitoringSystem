@@ -2,10 +2,12 @@ package com.myapp.complaints.DAO;
 
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.enums.ComplaintState;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
@@ -43,6 +45,15 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
 
 
     Optional<Complaint>  findByIdAndDeletedFalse(Long complaintId);
+
+    @Modifying
+    @Query("""
+            UPDATE Complaint c
+            SET c.state = 'IN_REVIEW'
+            WHERE c.id = :id
+            AND c.state = 'NEW'
+            """)
+    int openIfNew(@Param("id") Long id);
 
 //    List<Complaint> findByAddedBy_EmailAndDeletedFalse(String email);
 //    List<Complaint> findByAddedBy_Email(String email);

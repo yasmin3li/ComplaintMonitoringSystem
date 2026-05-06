@@ -51,6 +51,16 @@ public class ReceptionistComplaintWorkflow {
             switch (complaintState) {
                 case ComplaintState.NEW ->
                     {
+
+                        int updated = complaintRepo.openIfNew(complaint.getId());
+
+                        if (updated == 0) {
+                            throw new ApiException(
+                                    "Complaint already taken by another employee",
+                                    HttpStatus.CONFLICT
+                            );
+                        }
+
                         workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, null, ActionType.OPENED);
 
                         return complaintMapper.toPerceptionComplaintDto(complaint);
