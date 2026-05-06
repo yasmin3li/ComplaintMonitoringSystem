@@ -186,7 +186,7 @@ CREATE TABLE complaint (
     sector_id BIGINT NOT NULL,
     address_id BIGINT NOT NULL,
     assigned_to bigint default null,
-    priority ENUM('LOW','MEDIUM','HIGH','CRITICAL') default 'LOW',
+    priority ENUM('LOW','MEDIUM','HIGH','CRITICAL') default 'No_PRIORITY_Yet',
     FOREIGN KEY (assigned_to) REFERENCES employee(id),
     FOREIGN KEY (added_by_account_id) REFERENCES account(id),
     FOREIGN KEY (service_id) REFERENCES service(id),

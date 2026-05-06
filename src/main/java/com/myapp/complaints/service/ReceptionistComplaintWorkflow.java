@@ -9,6 +9,7 @@ import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ActionType;
+import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
@@ -270,7 +271,7 @@ public class ReceptionistComplaintWorkflow {
             throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
         }
 
-        if(complaint.getPriority() == null){
+        if(complaint.getPriority().equals(ComplaintPriority.No_PRIORITY_Yet)){
             throw new ApiException("you must add priority to the complaint before forward it",HttpStatus.BAD_REQUEST);
         }
 

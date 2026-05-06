@@ -4,5 +4,6 @@ public enum ComplaintPriority {
     LOW,
     MEDIUM,
     HIGH,
-    CRITICAL
+    CRITICAL,
+    No_PRIORITY_Yet
 }
