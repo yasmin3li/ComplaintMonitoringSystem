@@ -14,6 +14,6 @@ public record PerceptionComplaintResponseDto(
     String addedByIdentifier,
 
     String complaintNumber,
-    ComplaintPriority priority,
+    String priority,
     String reason
 ) {}

@@ -41,7 +41,7 @@ public class ReceptionistComplaintWorkflow {
     private final AuthorizationService authorizationService;
     private final ComplaintStateValidator validator;
 
-    public PerceptionComplaintResponseDto openComplaint(Complaint complaint, ComplaintState complaintState) {
+    public ReceptionComplaintResponseDto openComplaint(Complaint complaint, ComplaintState complaintState) {
 
         Employee employee = employeeRepo.findByAccount_Email
                 (SecurityContextHolder.getContext().getAuthentication().getName());
