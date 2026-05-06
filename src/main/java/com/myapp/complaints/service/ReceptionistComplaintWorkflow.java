@@ -117,6 +117,10 @@ public class ReceptionistComplaintWorkflow {
 //                        query.distinct(true);
                     }
                 }
+                else {
+                    predicates.add(cb.equal(root.get("state"), ComplaintState.NEW));
+                }
+
                 query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
                 return cb.and(predicates.toArray(new Predicate[0]));
             };

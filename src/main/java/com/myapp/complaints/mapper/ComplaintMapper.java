@@ -3,16 +3,21 @@ package com.myapp.complaints.mapper;
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
+import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Address;
 import com.myapp.complaints.entity.Complaint;
+import com.myapp.complaints.entity.ComplaintTrackingLog;
+import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
-import com.myapp.complaints.service.ApiService;
 import com.myapp.complaints.service.AuthorizationService;
 import com.myapp.complaints.service.Formatter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
@@ -27,6 +32,8 @@ public class ComplaintMapper {
     private final ComplaintImageRepo complaintImageRepo;
     private final AuthorizationService authorizationService;
     private final Formatter formatter;
+    private final ComplaintTracingLogRepo complaintTracingLogRepo;
+    private final AccountRepo accountRepo;
 
     public ComplaintResponseDto toDto(Complaint complaint) {
 
@@ -146,8 +153,29 @@ public class ComplaintMapper {
                 complaint.getAddedBy().getEmail(),
                 formatter.complaintIdFormatter(complaint.getDateTimeOfAdd().getMinute()+complaint.getId()+complaint.getDateTimeOfAdd().getYear()+
                         complaint.getDateTimeOfAdd().getSecond()+complaint.getDateTimeOfAdd().getNano()),
-                complaint.getPriority()
+                complaint.getPriority(),
+                complaint.getState() == ComplaintState.REJECTED
+                        ? getLastRejectReason(complaint)
+                        : null
         );
     }
 
+private String getLastRejectReason(Complaint complaint){
+
+    Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
+
+    if(account.isEmpty()){
+        throw new ApiException("no account found",HttpStatus.NOT_FOUND);
+    }
+
+    Optional<ComplaintTrackingLog> log =
+            complaintTracingLogRepo.findByComplaint_IdAndActionBy_IdAndNewState(complaint.getId(), account.get().getId(),ComplaintState.REJECTED);
+
+    if(log.isEmpty()){
+        throw new ApiException("no log for this complaint !!!",HttpStatus.NOT_FOUND);
+    }
+
+    return log.get().getComments();
+
+}
 }
