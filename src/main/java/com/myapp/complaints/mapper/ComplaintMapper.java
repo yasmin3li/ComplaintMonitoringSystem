@@ -145,15 +145,15 @@ public class ComplaintMapper {
     }
 
 //TODO: replace email with identifier
-    public PerceptionComplaintResponseDto toPerceptionComplaintDto(Complaint complaint) {
+    public ReceptionComplaintResponseDto toPerceptionComplaintDto(Complaint complaint) {
 
-        return new PerceptionComplaintResponseDto(
+        return new ReceptionComplaintResponseDto(
                 toDto(complaint),
                 complaint.getAddedBy().getUserName(),
                 complaint.getAddedBy().getEmail(),
                 formatter.complaintIdFormatter(complaint.getDateTimeOfAdd().getMinute()+complaint.getId()+complaint.getDateTimeOfAdd().getYear()+
                         complaint.getDateTimeOfAdd().getSecond()+complaint.getDateTimeOfAdd().getNano()),
-                complaint.getPriority(),
+                CommonUtils.toArabicSPriority(complaint.getPriority()),
                 complaint.getState() == ComplaintState.REJECTED
                         ? getLastRejectReason(complaint)
                         : null

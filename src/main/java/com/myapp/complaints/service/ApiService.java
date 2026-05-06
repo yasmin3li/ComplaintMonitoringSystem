@@ -1,5 +1,6 @@
 package com.myapp.complaints.service;
 
+import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
@@ -315,7 +316,7 @@ public class ApiService {
             }
         }
 
-        complaint.setPriority(dto.priority());
+        complaint.setPriority(CommonUtils.fromArabicPriority(dto.priority()));
         complaintRepo.save(complaint);
 
         return new ApiResponseDto<>(true,"priority "+complaint.getPriority()+" was added successfully",null);

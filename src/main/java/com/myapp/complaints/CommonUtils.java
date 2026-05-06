@@ -1,5 +1,6 @@
 package com.myapp.complaints;
 
+import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import org.springframework.http.HttpStatus;
@@ -65,5 +66,31 @@ public class CommonUtils {
             throw new ApiException("Password must not contain this special character: $",HttpStatus.BAD_REQUEST);
         }
         return true;
+    }
+
+
+    public static ComplaintPriority fromArabicPriority(String priority) {
+
+        return switch (priority) {
+            case "أولوية منخفضة" -> ComplaintPriority.LOW;
+            case "أولوية متوسطة" -> ComplaintPriority.MEDIUM;
+            case "أولوية عالية" ->  ComplaintPriority.HIGH;
+            case "أولوية حرجة" ->   ComplaintPriority.CRITICAL;
+            case "لم يتم اسناد أولوية بعد" -> ComplaintPriority.No_PRIORITY_Yet;
+            default -> throw new ApiException("Invalid Arabic priority: " + priority, HttpStatus.BAD_REQUEST);
+        };
+
+    }
+
+    public static String toArabicSPriority(ComplaintPriority priority) {
+
+        return switch (priority) {
+            case ComplaintPriority.LOW -> "أولوية منخفضة";
+            case ComplaintPriority.MEDIUM-> "أولوية متوسطة";
+            case ComplaintPriority.HIGH-> "أولوية عالية";
+            case ComplaintPriority.CRITICAL -> "أولوية حرجة";
+            case No_PRIORITY_Yet -> "لم يتم اسناد أولوية بعد";
+            default -> throw new ApiException("Invalid English state: " + priority, HttpStatus.BAD_REQUEST);
+        };
     }
 }
