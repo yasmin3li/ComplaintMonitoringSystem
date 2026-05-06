@@ -4,7 +4,6 @@ import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.entity.Employee;
-import com.myapp.complaints.enums.ComplaintState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -62,7 +61,7 @@ public class AuthorizationService {
 
     public boolean checkAccessibility(Employee employee, Complaint complaint) {
         Optional<ComplaintTrackingLog> log =
-                complaintTracingLogRepo.findByComplaint_IdAndActionBy_IdAndNewState(complaint.getId(),employee.getAccount().getId(),complaint.getState());
+                complaintTracingLogRepo.findTopByComplaint_IdAndActionBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(),employee.getAccount().getId(),complaint.getState());
         return log.isPresent();
     }
 }

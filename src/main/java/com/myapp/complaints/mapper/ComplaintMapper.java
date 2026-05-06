@@ -169,7 +169,7 @@ private String getLastRejectReason(Complaint complaint){
     }
 
     Optional<ComplaintTrackingLog> log =
-            complaintTracingLogRepo.findByComplaint_IdAndActionBy_IdAndNewState(complaint.getId(), account.get().getId(),ComplaintState.REJECTED);
+            complaintTracingLogRepo.findTopByComplaint_IdAndActionBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(), account.get().getId(),ComplaintState.REJECTED);
 
     if(log.isEmpty()){
         throw new ApiException("no log for this complaint !!!",HttpStatus.NOT_FOUND);
