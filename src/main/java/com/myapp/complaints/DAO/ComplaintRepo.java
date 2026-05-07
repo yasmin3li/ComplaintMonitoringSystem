@@ -55,6 +55,35 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
             """)
     int openIfNew(@Param("id") Long id);
 
+    @Query("""
+            SELECT COUNT(c)
+            FROM Complaint c
+            WHERE c.state = :state
+            AND c.id IN (
+                SELECT l.complaint.id
+                FROM ComplaintTrackingLog l
+                WHERE l.newState = :state
+                AND l.actionBy.id = :employeeId
+                AND l.actionDate = (
+                    SELECT MAX(l2.actionDate)
+                    FROM ComplaintTrackingLog l2
+                    WHERE l2.complaint.id = l.complaint.id
+                )
+            )
+            AND c.governorate.id = :govId
+            AND c.institution.id = :instId
+            AND c.sector.id = :sectorId
+            """)
+    long countComplaintsByStateForEmployee(
+            @Param("state") ComplaintState state,
+            @Param("employeeId") Long employeeId,
+            @Param("govId") Long govId,
+            @Param("instId") Long instId,
+            @Param("sectorId") Long sectorId
+    );
+
+    long countByStateAndGovernorate_IdAndInstitution_IdAndSector_Id(ComplaintState complaintState, Long id, Long id1, Long id2);
+
 //    List<Complaint> findByAddedBy_EmailAndDeletedFalse(String email);
 //    List<Complaint> findByAddedBy_Email(String email);
 //    List<Complaint> findTop3ByAddedBy_EmailAndDeletedFalse(String email);

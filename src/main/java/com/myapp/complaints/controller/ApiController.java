@@ -101,6 +101,12 @@ public class ApiController {
         return ResponseEntity.ok(statisticsService.getCitizenDashboardStatistics(email));
     }
 
+    @PreAuthorize("hasAnyRole('RECEPTIONIST','MANAGER')")
+    @GetMapping("/employee/dashboard/statistics")
+    public ResponseEntity<?> getEmployeeDashboardStatistics() {
+        return ResponseEntity.ok(statisticsService.getEmployeeDashboardStatistics());
+    }
+
 //    @GetMapping("/citizen/dashboard/top3Complaints")
 //    public ResponseEntity<?> getTop3CitizenComplaints() {
 //        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
