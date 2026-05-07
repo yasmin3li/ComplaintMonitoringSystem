@@ -9,5 +9,5 @@ public enum ActionType {
     COMMENTED,
     CLOSED,
     REJECTED, DELETED,
-    REVIEW_LATER
+    IN_REVIEW
 }

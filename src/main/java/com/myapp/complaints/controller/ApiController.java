@@ -134,18 +134,18 @@ public class ApiController {
     @PreAuthorize("hasRole('CITIZEN')")
     @GetMapping("/citizen/myComplaints/{complaintId}")
     public ResponseEntity<?> getCitizenComplaint(@PathVariable Long complaintId){
-        return ResponseEntity.ok(apiService.getComplaint(complaintId));
+        return ResponseEntity.ok(apiService.openComplaint(complaintId));
     }
 
     @GetMapping("/homepage/complaints/{complaintId}")
     public ResponseEntity<?> getComplaint(@PathVariable Long complaintId) throws NotFoundException {
-        return ResponseEntity.ok(apiService.getComplaint(complaintId));
+        return ResponseEntity.ok(apiService.openComplaint(complaintId));
     }
 
     @PreAuthorize("hasRole('RECEPTIONIST')")
     @GetMapping("/institutions/complaints/{complaintId}")
     public ResponseEntity<?> getInstitutionComplaint(@PathVariable Long complaintId){
-        return ResponseEntity.ok(apiService.getComplaint(complaintId));
+        return ResponseEntity.ok(apiService.openComplaint(complaintId));
     }
 
     @PreAuthorize("hasRole('RECEPTIONIST')")
@@ -286,9 +286,9 @@ public class ApiController {
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
-    @PostMapping("/employee/complaint/{complaintId}/reviewLater")
-    public ResponseEntity<?> reviewComplaintLater(@PathVariable Long complaintId){
-        return ResponseEntity.ok(receptionistComplaintWorkflow.reviewLater(complaintId));
+    @PostMapping("/employee/complaint/{complaintId}/review")
+    public ResponseEntity<?> reviewComplaint(@PathVariable Long complaintId){
+        return ResponseEntity.ok(receptionistComplaintWorkflow.inReview(complaintId));
     }
 
     @PreAuthorize("hasRole('CITIZEN')")

@@ -81,8 +81,8 @@ public class ComplaintWorkflowEngine {
         return switch (actionType) {
             case DELETED -> "تم حذف الشكوى";
             case UPDATED -> "تم تحديث الشكوى";
-            case OPENED -> "الشكوى قيد المراجعة";
-            case REVIEW_LATER -> "تم تأجيل مراجعة الشكوى";
+            case OPENED -> "تم فتح الشكوى من قبل الموظف";
+            case IN_REVIEW -> "الشكوى قيد المراجعة";
             case CREATED ->  "تم اضافة شكوى جديدة";
             case ACCEPTED -> "تم قبول الشكوى وتحويلها للمدير";
 

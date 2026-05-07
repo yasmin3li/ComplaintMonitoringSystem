@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,17 +52,17 @@ public class ReceptionistComplaintWorkflow {
             switch (complaintState) {
                 case ComplaintState.NEW ->
                     {
-
-                        int updated = complaintRepo.openIfNew(complaint.getId());
-
-                        if (updated == 0) {
-                            throw new ApiException(
-                                    "Complaint already taken by another employee",
-                                    HttpStatus.CONFLICT
-                            );
-                        }
-
-                        workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, null, ActionType.OPENED);
+//
+//                        int updated = complaintRepo.openIfNew(complaint.getId());
+//
+//                        if (updated == 0) {
+//                            throw new ApiException(
+//                                    "Complaint already taken by another employee",
+//                                    HttpStatus.CONFLICT
+//                            );
+//                        }
+//
+                        workflowEngine.createActionLog(complaint, employee.getAccount(), ActionType.OPENED);
 
                         return complaintMapper.toPerceptionComplaintDto(complaint);
                     }
@@ -223,7 +224,8 @@ public class ReceptionistComplaintWorkflow {
         );
     }
 
-    public ApiResponseDto<?> reviewLater(long complaintId) {
+    @Transactional
+    public ApiResponseDto<?> inReview(long complaintId) {
 
         Employee employee = employeeRepo.findByAccount_Email
                 (SecurityContextHolder.getContext().getAuthentication().getName());
@@ -238,10 +240,19 @@ public class ReceptionistComplaintWorkflow {
             switch (complaintState) {
                 case ComplaintState.NEW ->
                 {
-                   // workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), null, "الشكوى قيد المراجعة", ActionType.OPENED);
 
-                    //return new ApiResponseDto<>(true,"تم اضافة الشكوى للشكاوى قيد التحقق",null);
-                    throw  new ApiException("you can;t add this complaint to In_Review you should open it before",HttpStatus.BAD_REQUEST);
+                    int updated = complaintRepo.openIfNew(complaint.getId());
+
+                    if (updated == 0) {
+                        throw new ApiException(
+                                "Complaint already taken by another employee",
+                                HttpStatus.CONFLICT
+                        );
+                    }
+
+                    workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, null, ActionType.IN_REVIEW);
+
+                    return new ApiResponseDto<>(true,"الشكوى الان ضمن مسؤلياتك",null);
                 }
 
                 case ComplaintState.IN_REVIEW ->
@@ -249,8 +260,8 @@ public class ReceptionistComplaintWorkflow {
                     if(!authorizationService.checkResponsibility(employee,complaint)){
                         throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
                     }
-                    workflowEngine.createActionLog(complaint,employee.getAccount(),ActionType.REVIEW_LATER);
-                    return new ApiResponseDto<>(true,"تم تأجيل مراجعة الشكوى",null);
+                    //workflowEngine.createActionLog(complaint,employee.getAccount(),ActionType.IN_REVIEW);
+                    return new ApiResponseDto<>(false,"الشكوى مسندة اليك مسبقا",null);
                 }
                 case ComplaintState.RESOLVED, ComplaintState.REJECTED, ComplaintState.CLOSED, ComplaintState.ASSIGNED,
                      ComplaintState.CANCELLED, ComplaintState.IN_PROGRESS -> {

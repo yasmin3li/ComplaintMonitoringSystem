@@ -2,11 +2,9 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
-import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
-import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
@@ -154,7 +152,7 @@ public class ApiService {
 
 // chose complaint from the ui to interact with it
     @Transactional
-    public Object getComplaint(Long complaintId){
+    public Object openComplaint(Long complaintId){
 
         Complaint complaint = complaintRepo.findByIdAndDeletedFalse(complaintId)
                 .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
