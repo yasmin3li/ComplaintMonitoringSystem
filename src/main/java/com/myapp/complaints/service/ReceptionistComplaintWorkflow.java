@@ -292,7 +292,7 @@ public class ReceptionistComplaintWorkflow {
             throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
         }
 
-        if(complaint.getPriority().equals(ComplaintPriority.No_PRIORITY_Yet)){
+        if(complaint.getPriority() == null){
             throw new ApiException("you must add priority to the complaint before forward it",HttpStatus.BAD_REQUEST);
         }
 

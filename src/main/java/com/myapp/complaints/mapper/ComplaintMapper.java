@@ -7,6 +7,7 @@ import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Address;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
+import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.service.AuthorizationService;
@@ -147,13 +148,20 @@ public class ComplaintMapper {
 //TODO: replace email with identifier
     public ReceptionComplaintResponseDto toPerceptionComplaintDto(Complaint complaint) {
 
+        String priority;
+        if(complaint.getPriority()==null){
+            priority = null;
+        }else{
+            priority = CommonUtils.toArabicSPriority(complaint.getPriority());
+        }
+
         return new ReceptionComplaintResponseDto(
                 toDto(complaint),
                 complaint.getAddedBy().getUserName(),
                 complaint.getAddedBy().getEmail(),
                 formatter.complaintIdFormatter(complaint.getDateTimeOfAdd().getMinute()+complaint.getId()+complaint.getDateTimeOfAdd().getYear()+
                         complaint.getDateTimeOfAdd().getSecond()+complaint.getDateTimeOfAdd().getNano()),
-                CommonUtils.toArabicSPriority(complaint.getPriority()),
+                priority,
                 complaint.getState() == ComplaintState.REJECTED
                         ? getLastRejectReason(complaint)
                         : null

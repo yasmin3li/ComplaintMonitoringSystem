@@ -76,7 +76,6 @@ public class CommonUtils {
             case "أولوية متوسطة" -> ComplaintPriority.MEDIUM;
             case "أولوية عالية" ->  ComplaintPriority.HIGH;
             case "أولوية حرجة" ->   ComplaintPriority.CRITICAL;
-            case "لم يتم اسناد أولوية بعد" -> ComplaintPriority.No_PRIORITY_Yet;
             default -> throw new ApiException("Invalid Arabic priority: " + priority, HttpStatus.BAD_REQUEST);
         };
 
@@ -89,7 +88,6 @@ public class CommonUtils {
             case ComplaintPriority.MEDIUM-> "أولوية متوسطة";
             case ComplaintPriority.HIGH-> "أولوية عالية";
             case ComplaintPriority.CRITICAL -> "أولوية حرجة";
-            case No_PRIORITY_Yet -> "لم يتم اسناد أولوية بعد";
             default -> throw new ApiException("Invalid English state: " + priority, HttpStatus.BAD_REQUEST);
         };
     }
