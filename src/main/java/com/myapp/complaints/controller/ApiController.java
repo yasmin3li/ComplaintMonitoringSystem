@@ -1,7 +1,9 @@
 package com.myapp.complaints.controller;
 
 
+import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.dto.*;
+import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.service.*;
 import jakarta.validation.Valid;
@@ -9,12 +11,20 @@ import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,6 +38,7 @@ public class ApiController {
     private final NotificationService notificationService;
     private final CitizenComplaintWorkFlow citizenComplaintWorkFlow;
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
+    private final AccountRepo accountRepo;
 
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
@@ -102,6 +113,69 @@ public class ApiController {
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST','MANAGER')")
+    @GetMapping("/employee/performance")
+    public ResponseEntity<?> getEmployeePerformance(
+            @RequestParam(required = false) Long accountId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+
+        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        LocalDateTime start = (from == null)
+                ? LocalDate.now().minusDays(30).atStartOfDay()
+                : from.atStartOfDay();
+
+        LocalDateTime end = (to == null)
+                ? LocalDate.now().plusDays(1).atStartOfDay()
+                : to.plusDays(1).atStartOfDay();
+
+        long accountID = (accountId == null)
+                ?account.get().getId() : accountId;
+
+        return ResponseEntity.ok(statisticsService.getEmployeePerformance(accountID,start, end));
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, org.springframework.beans.TypeMismatchException.class})
+    public ResponseEntity<?> handleTypeMismatch(Exception ex) {
+        return ResponseEntity.badRequest().body(Map.of(
+                "error", "Invalid date format. Expected format: yyyy-MM-dd",
+                "details", ex.getMessage()
+        ));
+    }
+
+    @GetMapping("/employees/{accountId}/badges")
+    public ResponseEntity<List<EmployeePerformanceDto>>
+    getEmployeeBadges(@PathVariable Long accountId) {
+
+        return ResponseEntity.ok(
+                statisticsService.getEmployeeBadges(accountId)
+        );
+    }
+
+
+    @PreAuthorize("hasAnyRole('MANAGER')")
+    @PostMapping("/employee/addBadge")
+    public void addEmployeeBadge(
+            @RequestParam(required = false) Long accountId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime to) {
+
+        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        LocalDateTime start = (from == null)
+                ? LocalDate.now().minusDays(30).atStartOfDay()
+                : from;
+
+        LocalDateTime end = (to == null)
+                ? LocalDate.now().plusDays(1).atStartOfDay()
+                : to;
+
+        long accountID = (accountId == null)
+                ?account.get().getId() : accountId;
+
+        statisticsService.createSnapshotForEmployeePerformance(accountID,start, end);
+    }
+
     @GetMapping("/employee/dashboard/statistics")
     public ResponseEntity<?> getEmployeeDashboardStatistics() {
         return ResponseEntity.ok(statisticsService.getEmployeeDashboardStatistics());

@@ -40,6 +40,12 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
             LocalDateTime end
     );
 
+//    @Query("SELECT COUNT(DISTINCT c.id) FROM Complaint c WHERE c.assignedTo.account.id = :accountId AND c.dateTimeOfAdd BETWEEN :start AND :end AND c.deleted = false")
+//    long countAssignedToAccountBetween(
+//            @Param("accountId") Long accountId,
+//            @Param("start") LocalDateTime start,
+//            @Param("end") LocalDateTime end
+//    );
     long countByAddedBy_EmailAndDeletedFalse(String email);
     long countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState state, String email);
 
