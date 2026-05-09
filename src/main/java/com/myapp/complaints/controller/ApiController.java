@@ -143,13 +143,17 @@ public class ApiController {
         ));
     }
 
-    @GetMapping("/employees/{accountId}/badges")
-    public ResponseEntity<List<EmployeePerformanceDto>>
-    getEmployeeBadges(@PathVariable Long accountId) {
+    @GetMapping({"/employees/{accountId}/badges", "/employees/badges"})
+    public ResponseEntity<List<EmployeePerformanceDto>> getEmployeeBadges(
+            @PathVariable(required = false) Long accountId) {
 
-        return ResponseEntity.ok(
-                statisticsService.getEmployeeBadges(accountId)
-        );
+        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(
+                SecurityContextHolder.getContext().getAuthentication().getName());
+
+        long accountID = (accountId == null)
+                ? account.get().getId() : accountId;
+
+        return ResponseEntity.ok(statisticsService.getEmployeeBadges(accountID));
     }
 
 
