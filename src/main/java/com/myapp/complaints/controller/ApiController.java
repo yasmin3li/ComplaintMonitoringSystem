@@ -4,6 +4,7 @@ package com.myapp.complaints.controller;
 import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Account;
+import com.myapp.complaints.enums.SnapshotSource;
 import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.service.*;
 import jakarta.validation.Valid;
@@ -39,6 +40,7 @@ public class ApiController {
     private final CitizenComplaintWorkFlow citizenComplaintWorkFlow;
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
     private final AccountRepo accountRepo;
+    private final SnapshotPerformanceService snapshotPerformanceService;
 
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
@@ -144,7 +146,7 @@ public class ApiController {
     }
 
     @GetMapping({"/employees/{accountId}/badges", "/employees/badges"})
-    public ResponseEntity<List<EmployeePerformanceDto>> getEmployeeBadges(
+    public ResponseEntity<Object> getEmployeeBadges(
             @PathVariable(required = false) Long accountId) {
 
         Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(
@@ -156,13 +158,16 @@ public class ApiController {
         return ResponseEntity.ok(statisticsService.getEmployeeBadges(accountID));
     }
 
-
+    //    TODO: test and refactoring
     @PreAuthorize("hasAnyRole('MANAGER')")
     @PostMapping("/employee/addBadge")
     public void addEmployeeBadge(
             @RequestParam(required = false) Long accountId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime to) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime to,
+            @RequestParam(required = false) String performanceLabel ,
+            @RequestParam(required = false) String badge
+    ) {
 
         Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
 
@@ -177,7 +182,7 @@ public class ApiController {
         long accountID = (accountId == null)
                 ?account.get().getId() : accountId;
 
-        statisticsService.createSnapshotForEmployeePerformance(accountID,start, end);
+        snapshotPerformanceService.manualSnapshotGeneration(accountID,start, end, performanceLabel, badge);
     }
 
     @GetMapping("/employee/dashboard/statistics")
