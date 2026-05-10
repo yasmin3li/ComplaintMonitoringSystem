@@ -1,5 +1,6 @@
 package com.myapp.complaints.entity;
 
+import com.myapp.complaints.enums.SnapshotSource;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -68,6 +69,7 @@ public class EmployeePerformanceSnapshot {
     /**
      * source: e.g. "scheduled", "on_demand", "event"
      */
+    @Enumerated(EnumType.STRING)
     @Column(name = "source", length = 30)
-    private String source;
+    private SnapshotSource source;
 }
