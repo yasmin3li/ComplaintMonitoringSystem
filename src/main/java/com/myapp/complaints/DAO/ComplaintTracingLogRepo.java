@@ -18,27 +18,45 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
 
     Optional<ComplaintTrackingLog> findTopByComplaint_IdOrderByActionDateDesc(Long id);
 
-//    @Query("SELECT COUNT(DISTINCT l.complaint.id) FROM ComplaintTrackingLog l WHERE l.actionBy.id = :accountId AND l.actionDate BETWEEN :start AND :end")
-//    long countDistinctComplaintByActionByIdAndActionDateBetween(@Param("accountId") Long accountId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    @Query("SELECT COUNT(DISTINCT l.complaint.id) FROM ComplaintTrackingLog l WHERE l.assignedTo.account.id = :accountId AND l.actionDate BETWEEN :start AND :end")
+    long countDistinctComplaintAssignedToAccountBetween(@Param("accountId") Long accountId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
-//    @Query("SELECT COUNT(DISTINCT l.complaint.id) FROM ComplaintTrackingLog l WHERE l.assignedTo.account.id = :accountId AND l.actionDate BETWEEN :start AND :end")
-//    long countDistinctComplaintAssignedToAccountBetween(@Param("accountId") Long accountId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT COUNT( l.complaint.id) FROM ComplaintTrackingLog l WHERE l.assignedTo.account.id = :id")
+    long countComplaintAssignedToAccount(Long id);
+
+    @Query("SELECT Min( l.actionDate) FROM ComplaintTrackingLog l WHERE l.assignedTo.account.id = :accountId")
+    LocalDateTime findFirstHandledByEmp(Long accountId);
+
     @Query("SELECT COUNT( l.complaint.id) FROM ComplaintTrackingLog l WHERE l.assignedTo.account.id = :accountId AND l.actionDate BETWEEN :start AND :end")
     long countComplaintAssignedToAccountBetween(@Param("accountId") Long accountId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     @Query("""
-    SELECT COUNT( l.complaint.id)
+    SELECT COUNT(DISTINCT l.complaint.id)
     FROM ComplaintTrackingLog l
-    WHERE l.complaint.institution.id = :instId
-      AND l.complaint.governorate.id = :govId
-      AND l.newState = com.myapp.complaints.enums.ComplaintState.NEW
-      AND l.actionDate BETWEEN :start AND :end
+    WHERE l.actionBy.id = :accountId
+    AND l.newState IN (
+        ComplaintState.FORWARDED_TO_MANAGER,
+        ComplaintState.REJECTED
+    )
+    AND l.actionDate BETWEEN :start AND :end
     """)
-    long countComplaintsWithNewStateByInstitutionAndGovernorateBetween(
-            @Param("instId") Long institutionId,
-            @Param("govId") Long governorateId,
+    long countHandledComplaintsBetween(
+            @Param("accountId") Long accountId,
             @Param("start") LocalDateTime start,
             @Param("end") LocalDateTime end
     );
+    @Query("""
+        SELECT MIN(l.actionDate)
+        FROM ComplaintTrackingLog l
+        WHERE l.complaint.id = :complaintId
+        AND l.actionBy.id = :accountId
+        """)
+    LocalDateTime findFirstActionTime(
+            @Param("complaintId") Long complaintId,
+            @Param("accountId") Long accountId
+    );
+
+
 
 }
