@@ -136,4 +136,18 @@ public class CommonUtils {
         return "danger";
     }
 
+    public static double getScoreForThresholdOfSolve(long number) {
+        // We consider a total of 5000 complaints divided into 5 equal ranges (1000 each).
+        // Assign badges based on the reached threshold (greater-or-equal).
+        final long TOTAL = 5000L;
+        final int BUCKETS = 5;
+        final long bucketSize = TOTAL / BUCKETS; // 1000
+
+        if (number >= 4 * bucketSize) return (double) 85 /100;     // >= 4000
+        if (number >= 3 * bucketSize) return (double) 75 /100;   // >= 3000
+        if (number >= 2 * bucketSize) return (double) 55 /100;   // >= 2000
+        if (number >= bucketSize) return (double) 40 /100;  // >= 1000
+        return (double) 30 /100;                                 // < 1000
+    }
+
 }
