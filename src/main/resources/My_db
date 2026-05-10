@@ -1,6 +1,6 @@
 
 -- ===============================================
--- add notification_templates and edit the inserts
+-- add employee_performance_snapshot and milestone tablels
 -- DROP DATABASE IF EXISTS
 -- ===============================================
 DROP DATABASE IF EXISTS complaint_monitoring_sys;
@@ -38,6 +38,7 @@ DROP TABLE IF EXISTS verification_code;
 DROP TABLE IF EXISTS notification;
 DROP TABLE IF EXISTS notification_receiver;
 DROP TABLE IF EXISTS employee_performance_snapshot;
+DROP TABLE IF EXISTS milestone;
 -- ===============================================
 -- TABLE: Role
 -- ===============================================
@@ -296,6 +297,19 @@ CREATE TABLE employee_performance_snapshot (
 );
 CREATE INDEX idx_perf_employee_period ON employee_performance_snapshot(employee_account_id, period_start, period_end);
 
+CREATE TABLE milestone (
+	id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    employee_id bigint not null,
+
+    next_milestone BIGINT NOT NULL DEFAULT 2,
+
+    start TIMESTAMP NULL,
+
+    CONSTRAINT fk_milestone_employee
+        FOREIGN KEY (employee_id)
+        REFERENCES employee(id)
+        ON DELETE CASCADE
+);
 
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -551,7 +565,8 @@ VALUES
 INSERT INTO employee (id,institution_id,governorate_id,sector_id) VALUES
 
 -- الكهرباء (sector 1)
-(6,1,1,1),(7,1,2,1),(8,1,3,1),(9,1,4,1),
+(6,1,1,1)
+,(7,1,2,1),(8,1,3,1),(9,1,4,1),
 (28,1,1,1),(29,1,1,1),(30,1,1,1),
 (10,1,5,1),(11,1,6,1),(12,1,7,1),(13,1,8,1),
 
