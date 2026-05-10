@@ -4,11 +4,12 @@ import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.CitizenDashBoardStatisticsDto;
 import com.myapp.complaints.dto.EmployeeDashBoardStatisticsDto;
+import com.myapp.complaints.dto.EmployeePerformanceBages;
 import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.entity.EmployeePerformanceSnapshot;
 import com.myapp.complaints.enums.ComplaintState;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,7 @@ public class StatisticsService {
     private final EmployeeRepo employeeRepo;
     private final ComplaintTracingLogRepo complaintTracingLogRepo;
     private final EmployeePerformanceSnapshotRepo snapshotRepo;
+    private final AuthorizationService authorizationService;
 
     public long getTotalComplaints() {
         return complaintRepo.countByDeletedFalse();
@@ -68,28 +70,28 @@ public class StatisticsService {
         );
     }
 
-//Citizen Info
-    public long getTotalCitizenComplaint(String email){
+    //Citizen Info
+    public long getTotalCitizenComplaint(String email) {
         return complaintRepo.countByAddedBy_EmailAndDeletedFalse(email);
     }
 //    countByStateAndDeleteFalseAndAddedBy_Id
 
-    public long getCitizenInProgressComplaints(String email){
-        return complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.IN_PROGRESS,email);
+    public long getCitizenInProgressComplaints(String email) {
+        return complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.IN_PROGRESS, email);
     }
 
-    public long getCitizenSolvedComplaints(String email){
-        return complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.RESOLVED,email);
+    public long getCitizenSolvedComplaints(String email) {
+        return complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.RESOLVED, email);
     }
 
-    public double completionRate(String email){
+    public double completionRate(String email) {
         long completionSum = complaintRepo.countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState.RESOLVED, email);
         long total = complaintRepo.countByAddedBy_EmailAndDeletedFalse(email);
-        if(total == 0) return 0;
-        return  (double) completionSum / total * 100;
+        if (total == 0) return 0;
+        return (double) completionSum / total * 100;
     }
 
-    public CitizenDashBoardStatisticsDto getCitizenDashboardStatistics(String email){
+    public CitizenDashBoardStatisticsDto getCitizenDashboardStatistics(String email) {
 
         return new CitizenDashBoardStatisticsDto(
                 getTotalCitizenComplaint(email),
@@ -112,89 +114,54 @@ public class StatisticsService {
         );
     }
 
-//    TODO: pass source as param/enum
-    @Transactional
-    public void createSnapshotForEmployeePerformance(Long accountId,  LocalDateTime start,  LocalDateTime end) {
-//
-//        Optional<EmployeePerformanceSnapshot> existing =
-//                snapshotRepo.findByEmployeeAccountIdAndPeriodStartAndPeriodEnd(
-//                        accountId,
-//                        start,
-//                        end
-//                );
-//
-//        if (existing.isPresent()) {
-//            return;
-//        }
 
-        EmployeePerformanceDto dto =
-                getEmployeePerformance(accountId, start, end);
-
-        EmployeePerformanceSnapshot snap =
-                EmployeePerformanceSnapshot.builder()
-                        .employeeAccountId(accountId)
-                        .periodStart(start)
-                        .periodEnd(end)
-                        .createdCount((int) dto.createdCount())
-                        .assignedCount((int) dto.assignedCount())
-                        .responseRate(dto.responseRate())
-                        .normalizedHandled(dto.normalizedHandled())
-                        .score(dto.score())
-                        .badge(dto.badge())
-                        .performanceLabel(dto.performanceLabel())
-                        .computedAt(LocalDateTime.now())
-                        .responseLabel(dto.responseLabel())
-                        .source("scheduled")
-                        .build();
-
-        snapshotRepo.save(snap);
-    }
-//احصائيات لحظية فقط اي اننا هنا لا نمنح شارات
-    public EmployeePerformanceDto getEmployeePerformance(long accountId,LocalDateTime start, LocalDateTime end) {
+    //احصائيات لحظية فقط اي اننا هنا لا نمنح شارات
+    public EmployeePerformanceDto getEmployeePerformance(long accountId, LocalDateTime start, LocalDateTime end) {
 
         Optional<Employee> employee = employeeRepo.findById(accountId);
 
-        //created and updated action
-        long createdCount = complaintTracingLogRepo.countComplaintsWithNewStateByInstitutionAndGovernorateBetween(
+        //all coming complaints to the institution at specified period
+        long incomingComplaintsCount = complaintRepo.countCreatedComplaintsBetween(
                 employee.get().getInstitution().getId(),
                 employee.get().getGovernorate().getId(),
                 start,
                 end
         );
 
-        long assignedCount = complaintTracingLogRepo.countComplaintAssignedToAccountBetween(accountId, start, end);
+        long respondedComplaintsCount = complaintTracingLogRepo.countComplaintAssignedToAccountBetween(accountId, start, end);
 
-        double responseRate;
-        if (createdCount <= 0) {
-            responseRate = 100.0;
+        long completedComplaintsCount =  complaintTracingLogRepo.countHandledComplaintsBetween(accountId, start, end);//rejected+forwarded
+
+        double achievementRate,activityCount;
+
+        if (incomingComplaintsCount <= 0) {
+            achievementRate = 100.0;
+            activityCount = 100.0;
         } else {
-            responseRate = (double) assignedCount / createdCount * 100.0;
-            responseRate = Math.min(responseRate, 100.0); // cap at 100%
+            achievementRate = (double) completedComplaintsCount / incomingComplaintsCount * 100.0;
+            activityCount = (double) respondedComplaintsCount / incomingComplaintsCount * 100.0;
         }
 
-        // normalize handled count against a soft target (e.g., 10 per period)
-        // measures how close the employee is to the expected handled volume
+        // normalize completedComplaintsCount count against a soft target (e.g., 10 per period)
+        // measures how close the employee is to the expected completedComplaintsCount volume
         int softTarget = 10;
-        double normalizedHandled;
-        if (createdCount <= 0) {
+        double completionEfficiency;
+        if (incomingComplaintsCount <= 0) {
             // لا شكاوى واردة: نعتبر الموظف غير مسؤول عن تقصير الهدف
-            normalizedHandled = 1; //
+            completionEfficiency = 1; //
         } else {
-            double targetEffective = Math.min((double) softTarget, (double) createdCount);
-            normalizedHandled = Math.min((double) assignedCount / targetEffective, 1.0);
+            double targetEffective = Math.min((double) softTarget, (double) incomingComplaintsCount);
+            completionEfficiency = Math.min((double) completedComplaintsCount / targetEffective, 1.0);
         }
-        // score: combine normalizedHandled (0..1 → 50 pts) and responseRate (0..100% → 50 pts) into a 0–100 score
-        double score = normalizedHandled * 50.0 + (responseRate / 100.0) * 50.0; // 50/50 weighting
+        // score: combine completionEfficiency (0..1 → 50 pts) and achievementRate (0..100% → 50 pts) into a 0–100 score
+        double score = completionEfficiency * 50.0 + (achievementRate / 100.0) * 50.0; // 50/50 weighting
 
         String performanceLabel = CommonUtils.getPerformanceLabel(score);
-        String responseLabel = CommonUtils.getResponseLabel(responseRate);
+        String responseLabel = CommonUtils.getResponseLabel(activityCount);
         String badge = CommonUtils.getBadgeKey(score);
 
-//        return employeePerformanceSnapshotRepo.findByEmployeeAccountIdOrderByPeriodStartDesc(accountId);
-
-        return new EmployeePerformanceDto(accountId, createdCount, assignedCount, responseRate, score,performanceLabel, responseLabel,badge,normalizedHandled);
+        return new EmployeePerformanceDto(accountId, incomingComplaintsCount, respondedComplaintsCount, achievementRate, score, performanceLabel, responseLabel, badge, completionEfficiency);
     }
-
 
 
     private long getTotalNewComplaints(Employee employee) {
@@ -202,7 +169,7 @@ public class StatisticsService {
                 ComplaintState.NEW,
                 employee.getGovernorate().getId(),
                 employee.getInstitution().getId(),
-                employee.getSector().getId() );
+                employee.getSector().getId());
     }
 
     private long getInReviewComplaints(Employee employee) {
@@ -224,6 +191,7 @@ public class StatisticsService {
                 employee.getSector().getId()
         );
     }
+
     private long getForwardedComplaints(Employee employee) {
         return complaintRepo.countComplaintsByStateForEmployee(
                 ComplaintState.FORWARDED_TO_MANAGER,
@@ -234,10 +202,12 @@ public class StatisticsService {
         );
     }
 
-    public List<EmployeePerformanceDto> getEmployeeBadges(Long accountId) {
+    public Object getEmployeeBadges(Long accountId) {
 
         List<EmployeePerformanceSnapshot> snapshots =
                 snapshotRepo.findByEmployeeAccountIdOrderByComputedAtDesc(accountId);
+
+        if (authorizationService.isManager()){
 
         return snapshots.stream()
                 .map(snapshot -> new EmployeePerformanceDto(
@@ -253,6 +223,16 @@ public class StatisticsService {
                 ))
                 .toList();
     }
+        else{
+            return snapshots.stream()
+                    .map(snapshot -> new EmployeePerformanceBages(
+                            snapshot.getPerformanceLabel(),
+                            snapshot.getResponseLabel(),
+                            snapshot.getBadge()
+                    ))
+                    .toList();
+        }
+}
 //
 //    public List<ComplaintResponseDto> getAllComplaintsForCitizen(String email){
 //        return complaintRepo.findByAddedBy_Email(email)
