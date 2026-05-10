@@ -2,13 +2,13 @@ package com.myapp.complaints.DAO;
 
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.enums.ComplaintState;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,35 +17,16 @@ import java.util.Optional;
 //Using Specification Query executor
 public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecificationExecutor<Complaint> {
 
-//    @Query("select c from Complaint c where c.deleted = false")
-//    List<Complaint> findByDeletedFalseOrderByDateTimeOfAddDesc(Pageable pageable);
 
     long countByDeletedFalse(); // All Complaints
-//    List<Complaint> findBySectorIdAndDeletedFalse(Long sectorId);
-//    List<Complaint> findByInstitutionIdAndDeletedFalse(Long institutionId);
-//    List<Complaint> findByGovernorateIdAndDeletedFalse(Long governorateId);
-//    List<Complaint> findByStateAndDeletedFalse(ComplaintState state); //filter
+
     long countByStateAndDeletedFalse(ComplaintState state);
-//
-//    @Query("""
-//        SELECT COUNT(c)
-//        FROM Complaint c
-//        WHERE c.dateTimeOfAdd >= :startOfDay
-//        AND c.deleted = false
-//        """)
-//    long countTodayComplaints(LocalDate startOfDay);
 
     long countByDateTimeOfAddBetween(
             LocalDateTime start,
             LocalDateTime end
     );
 
-//    @Query("SELECT COUNT(DISTINCT c.id) FROM Complaint c WHERE c.assignedTo.account.id = :accountId AND c.dateTimeOfAdd BETWEEN :start AND :end AND c.deleted = false")
-//    long countAssignedToAccountBetween(
-//            @Param("accountId") Long accountId,
-//            @Param("start") LocalDateTime start,
-//            @Param("end") LocalDateTime end
-//    );
     long countByAddedBy_EmailAndDeletedFalse(String email);
     long countByStateAndAddedBy_EmailAndDeletedFalse(ComplaintState state, String email);
 
@@ -90,9 +71,22 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
 
     long countByStateAndGovernorate_IdAndInstitution_IdAndSector_Id(ComplaintState complaintState, Long id, Long id1, Long id2);
 
-//    List<Complaint> findByAddedBy_EmailAndDeletedFalse(String email);
-//    List<Complaint> findByAddedBy_Email(String email);
-//    List<Complaint> findTop3ByAddedBy_EmailAndDeletedFalse(String email);
+    @Query("""
+        SELECT COUNT(c.id)
+        FROM Complaint c
+        WHERE c.institution.id = :instId
+        AND c.governorate.id = :govId
+        AND c.dateTimeOfAdd BETWEEN :start AND :end
+        """)
+    long countCreatedComplaintsBetween(
+            @Param("instId") Long institutionId,
+            @Param("govId") Long governorateId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+
+
 
 
 //Complaints Dynamic Query Filter
