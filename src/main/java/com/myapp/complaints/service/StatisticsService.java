@@ -127,6 +127,7 @@ public class StatisticsService {
                 end
         );
 
+//        TODO: replace later with responseTime
         long respondedComplaintsCount = complaintTracingLogRepo.countComplaintAssignedToAccountBetween(accountId, start, end);
 
         long completedComplaintsCount =  complaintTracingLogRepo.countHandledComplaintsBetween(accountId, start, end);//rejected+forwarded
@@ -143,7 +144,7 @@ public class StatisticsService {
 
         // normalize completedComplaintsCount count against a soft target (e.g., 10 per period)
         // measures how close the employee is to the expected completedComplaintsCount volume
-        int softTarget = 10;
+        int softTarget = 10; //TODO: pass as parameter
         double completionEfficiency;
         if (incomingComplaintsCount <= 0) {
             // لا شكاوى واردة: نعتبر الموظف غير مسؤول عن تقصير الهدف
