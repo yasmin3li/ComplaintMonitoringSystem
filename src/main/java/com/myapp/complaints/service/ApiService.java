@@ -304,9 +304,14 @@ public class ApiService {
                 .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
 
 
-        if(complaint.getState().equals(ComplaintState.NEW) || complaint.getState().equals(ComplaintState.REJECTED))
+        if(complaint.getState().equals(ComplaintState.REJECTED))
         {
             throw new ApiException("not allowed method [add priority] at this state",HttpStatus.BAD_REQUEST);
+        }
+        else if (complaint.getState().equals(ComplaintState.NEW)) {
+            complaint.setPriority(CommonUtils.fromArabicPriority(dto.priority()));
+            complaintRepo.save(complaint);
+            return new ApiResponseDto<>(true,"priority "+complaint.getPriority()+" was added successfully",null);
         }
         else {
             if(!authorizationService.checkResponsibility(employee,complaint)){
