@@ -212,8 +212,8 @@ public class StatisticsService {
         return snapshots.stream()
                 .map(snapshot -> new EmployeePerformanceDto(
                         snapshot.getEmployeeAccountId(),
-                        snapshot.getCreatedCount(),
-                        snapshot.getAssignedCount(),
+                        snapshot.getComingCount(),
+                        snapshot.getHandledCount(),
                         snapshot.getResponseRate(),
                         snapshot.getScore(),
                         snapshot.getPerformanceLabel(),

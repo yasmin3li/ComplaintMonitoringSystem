@@ -21,7 +21,7 @@ public class SnapshotPerformanceService {
         EmployeePerformanceDto dto =
                 statisticsService.getEmployeePerformance(accountId, start, end);
 
-        if(dto.createdCount()==0){
+        if(dto.comingCount()==0){
             //No complaints -> No jop performance -> No snapshot
         }
         else{
@@ -30,8 +30,8 @@ public class SnapshotPerformanceService {
                         .employeeAccountId(accountId)
                         .periodStart(start)
                         .periodEnd(end)
-                        .createdCount((int) dto.createdCount())
-                        .assignedCount((int) dto.assignedCount())
+                        .comingCount((int) dto.comingCount())
+                        .handledCount((int) dto.handledCount())
                         .responseRate(dto.responseRate())
                         .normalizedHandled(dto.normalizedHandled())
                         .score(dto.score())
@@ -57,10 +57,10 @@ public class SnapshotPerformanceService {
                         .responseRate((double)handled/all)
                         //achieve the gol
                         .normalizedHandled(1.0)
-                        .assignedCount(handled)
+                        .handledCount(handled)
                         .badge(badge)
                         .score(CommonUtils.getScoreForThresholdOfSolve(handled))
-                        .createdCount(all)
+                        .comingCount(all)
                         .performanceLabel(performanceLabel)
                         .computedAt(LocalDateTime.now())
                         .source(SnapshotSource.MILESTONE)
