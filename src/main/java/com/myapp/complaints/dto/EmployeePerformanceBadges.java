@@ -1,6 +1,6 @@
 package com.myapp.complaints.dto;
 
-public record EmployeePerformanceBages(
+public record EmployeePerformanceBadges(
         String performanceLabel,
         String responseLabel,
         String badge

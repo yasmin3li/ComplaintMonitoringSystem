@@ -4,12 +4,11 @@ import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.CitizenDashBoardStatisticsDto;
 import com.myapp.complaints.dto.EmployeeDashBoardStatisticsDto;
-import com.myapp.complaints.dto.EmployeePerformanceBages;
+import com.myapp.complaints.dto.EmployeePerformanceBadges;
 import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.entity.EmployeePerformanceSnapshot;
 import com.myapp.complaints.enums.ComplaintState;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -225,7 +224,7 @@ public class StatisticsService {
     }
         else{
             return snapshots.stream()
-                    .map(snapshot -> new EmployeePerformanceBages(
+                    .map(snapshot -> new EmployeePerformanceBadges(
                             snapshot.getPerformanceLabel(),
                             snapshot.getResponseLabel(),
                             snapshot.getBadge()
