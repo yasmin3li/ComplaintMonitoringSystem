@@ -121,7 +121,7 @@ public class EmployeePerformanceScheduler {
                                    (int)assignedCount,
                                    all ,
                                    "Blue",
-                                   "أداء جيد لقد وصلت الى حل "+assignedCount+" شكوى"
+                                   "أداء جيد لقد وصلت الى معالجة "+assignedCount+" شكوى"
                            );
 
                            // Update the next milestone
