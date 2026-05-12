@@ -121,7 +121,7 @@ public class CommonUtils {
         } else if (score >= 50) {
             performanceLabel = "جيد - حافظ على المستوى";
         } else if (score >= 30) {
-            performanceLabel = "بحاجة لتحسين";
+            performanceLabel = "أداء منخفض بحاجة لتحسين";
         } else {
             performanceLabel = "مقصر - متابعة ادارية مطلوبة";
         }
