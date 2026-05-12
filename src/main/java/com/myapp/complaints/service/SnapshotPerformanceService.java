@@ -21,6 +21,10 @@ public class SnapshotPerformanceService {
         EmployeePerformanceDto dto =
                 statisticsService.getEmployeePerformance(accountId, start, end);
 
+        if(dto.createdCount()==0){
+            //No complaints -> No jop performance -> No snapshot
+        }
+        else{
         EmployeePerformanceSnapshot snap =
                 EmployeePerformanceSnapshot.builder()
                         .employeeAccountId(accountId)
@@ -38,7 +42,7 @@ public class SnapshotPerformanceService {
                         .source(SnapshotSource.SCHEDULED)
                         .build();
 
-        snapshotRepo.save(snap);
+        snapshotRepo.save(snap);}
     }
 
     public void milestoneSnapshotGeneration(Long accountId, LocalDateTime start, LocalDateTime end,
