@@ -37,11 +37,11 @@ public class EmployeePerformanceSnapshot {
     @Column(name = "period_end", nullable = false)
     private LocalDateTime periodEnd;
 
-    @Column(name = "created_count", nullable = false)
-    private Integer createdCount;
+    @Column(name = "created_count", nullable = false)//all coming complaints during the period, regardless of assignment status
+    private Integer comingCount;
 
-    @Column(name = "assigned_count", nullable = false)
-    private Integer assignedCount;
+    @Column(name = "assigned_count", nullable = false)//complaints that handled by the employee from assigned complaints
+    private Integer handledCount;
 
     @Column(name = "response_rate")
     private Double responseRate;
@@ -67,7 +67,11 @@ public class EmployeePerformanceSnapshot {
     private LocalDateTime computedAt;
 
     /**
-     * source: e.g. "scheduled", "on_demand", "event"
+     * source: e.g.
+     *     SCHEDULED,
+     *     MANUAL,
+     *     MILESTONE,
+     *     EVENT
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "source", length = 30)
