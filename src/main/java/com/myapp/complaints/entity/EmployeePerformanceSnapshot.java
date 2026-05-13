@@ -1,10 +1,13 @@
 package com.myapp.complaints.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.myapp.complaints.enums.SnapshotSource;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -52,17 +55,6 @@ public class EmployeePerformanceSnapshot {
     @Column(name = "score")
     private Double score;
 
-    @Column(name = "badge", length = 50)
-    private String badge;
-
-
-    @Column(name = "performance_label", length = 100)
-    private String performanceLabel;
-
-    @Column(name = "response_label", length = 100)
-    private String responseLabel;
-
-
     @Column(name = "computed_at", nullable = false)
     private LocalDateTime computedAt;
 
@@ -76,4 +68,12 @@ public class EmployeePerformanceSnapshot {
     @Enumerated(EnumType.STRING)
     @Column(name = "source", length = 30)
     private SnapshotSource source;
+
+
+    @OneToMany(mappedBy = "snapshot",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    @JsonManagedReference
+    private List<EmployeeSnapshotBadge> badges = new ArrayList<>();
+
 }

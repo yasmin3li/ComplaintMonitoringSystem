@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface EmployeePerformanceSnapshotRepo extends JpaRepository<EmployeePerformanceSnapshot, Long> {
-    List<EmployeePerformanceDto> findByEmployeeAccountIdOrderByPeriodStartDesc(Long id);
+    List<EmployeePerformanceSnapshot> findByEmployeeAccountIdOrderByPeriodStartDesc(Long id);
 
     Optional<EmployeePerformanceSnapshot> findByEmployeeAccountIdAndPeriodStartAndPeriodEnd(Long accountId, LocalDateTime start, LocalDateTime end);
 

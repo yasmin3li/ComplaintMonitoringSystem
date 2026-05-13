@@ -20,7 +20,6 @@ import java.util.Optional;
 public class EmployeePerformanceScheduler {
 
     private final EmployeeRepo employeeRepo;
-    private final StatisticsService statisticsService;
     private final ComplaintTracingLogRepo complaintTracingLogRepo;
     private final SnapshotPerformanceService snapshotPerformanceService;
 
@@ -58,7 +57,7 @@ public class EmployeePerformanceScheduler {
         LocalDateTime end = LocalDateTime.now()
                             .withSecond(0)
                             .withNano(0);
-        LocalDateTime start = end.minusMinutes(1);
+        LocalDateTime start = end.minusMonths(1);
 
         List<Employee> employees = employeeRepo.findAll();
         System.out.println("min Scheduler started");
@@ -119,9 +118,8 @@ public class EmployeePerformanceScheduler {
                                    start,
                                    end,
                                    (int)assignedCount,
-                                   all ,
-                                   "Blue",
-                                   "أداء جيد لقد وصلت الى معالجة "+assignedCount+" شكوى"
+                                   all,
+                                   milestone.getNextMilestone()
                            );
 
                            // Update the next milestone

@@ -1,14 +1,18 @@
 package com.myapp.complaints.service;
 
+import com.myapp.complaints.BadgeFactory;
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
-import com.myapp.complaints.dto.CitizenDashBoardStatisticsDto;
-import com.myapp.complaints.dto.EmployeeDashBoardStatisticsDto;
-import com.myapp.complaints.dto.EmployeePerformanceBadges;
+import com.myapp.complaints.dto.*;
+import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.entity.EmployeePerformanceSnapshot;
 import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.http.parser.Authorization;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +20,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import com.myapp.complaints.dto.EmployeePerformanceDto;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class StatisticsService {
     private final ComplaintTracingLogRepo complaintTracingLogRepo;
     private final EmployeePerformanceSnapshotRepo snapshotRepo;
     private final AuthorizationService authorizationService;
+    private final AccountRepo accountRepo;
 
     public long getTotalComplaints() {
         return complaintRepo.countByDeletedFalse();
@@ -118,6 +121,10 @@ public class StatisticsService {
     public EmployeePerformanceDto getEmployeePerformance(long accountId, LocalDateTime start, LocalDateTime end) {
 
         Optional<Employee> employee = employeeRepo.findById(accountId);
+        if(employee.isEmpty())
+        {
+            throw new ApiException("employee not found", HttpStatus.NOT_FOUND);
+        }
 
         //all coming complaints to the institution at specified period
         long incomingComplaintsCount = complaintRepo.countCreatedComplaintsBetween(
@@ -156,12 +163,19 @@ public class StatisticsService {
         // score: combine completionEfficiency (0..1 → 50 pts) and achievementRate (0..100% → 50 pts) into a 0–100 score
         double score = completionEfficiency * 50.0 + (achievementRate / 100.0) * 50.0; // 50/50 weighting
 
-        String performanceLabel = CommonUtils.getPerformanceLabel(score);
-        String responseLabel = CommonUtils.getResponseLabel(activityCount);
-        String badge = CommonUtils.getBadgeKey(score);
-
-        return new EmployeePerformanceDto(accountId, incomingComplaintsCount, respondedComplaintsCount, achievementRate, score, performanceLabel, responseLabel, badge, completionEfficiency);
-    }
+        List<EmployeeBadgeDto> badges = List.of(
+                BadgeFactory.buildPerformanceBadge(score),
+                BadgeFactory.buildResponseBadge(activityCount)
+        );
+        return new EmployeePerformanceDto(
+                accountId,
+                incomingComplaintsCount,
+                respondedComplaintsCount,
+                achievementRate,
+                score,
+                completionEfficiency,
+                badges
+        );    }
 
 
     private long getTotalNewComplaints(Employee employee) {
@@ -202,36 +216,46 @@ public class StatisticsService {
         );
     }
 
-    public Object getEmployeeBadges(Long accountId) {
+    public Object getEmployeeBadges() {
 
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(auth.getName());
+        if(account.isEmpty())
+        {
+            throw new ApiException("account not found", HttpStatus.NOT_FOUND);
+        }
         List<EmployeePerformanceSnapshot> snapshots =
-                snapshotRepo.findByEmployeeAccountIdOrderByComputedAtDesc(accountId);
-
-        if (authorizationService.isManager()){
+                snapshotRepo.findByEmployeeAccountIdOrderByComputedAtDesc(account.get().getId());
 
         return snapshots.stream()
-                .map(snapshot -> new EmployeePerformanceDto(
-                        snapshot.getEmployeeAccountId(),
-                        snapshot.getComingCount(),
-                        snapshot.getHandledCount(),
-                        snapshot.getResponseRate(),
-                        snapshot.getScore(),
-                        snapshot.getPerformanceLabel(),
-                        snapshot.getResponseLabel(),
-                        snapshot.getBadge(),
-                        snapshot.getNormalizedHandled()
-                ))
+                .map(snapshot -> {
+
+                    List<EmployeeBadgeDto> badges =
+
+                            snapshot.getBadges()
+                                    .stream()
+                                    .map(b -> new EmployeeBadgeDto(
+                                            b.getType(),
+                                            b.getTitle(),
+                                            b.getDescription(),
+                                            b.getLevel(),
+                                            b.getIcon()
+                                    ))
+                                    .toList();
+
+                    return new SpecifiedEmployeePerformanceResponseDto(
+//
+//                            snapshot.getEmployeeAccountId(),
+//                            snapshot.getComingCount(),
+//                            snapshot.getHandledCount(),
+//                            snapshot.getResponseRate(),
+//                            snapshot.getScore(),
+//                            snapshot.getNormalizedHandled(),
+                            badges
+                    );
+
+                })
                 .toList();
-    }
-        else{
-            return snapshots.stream()
-                    .map(snapshot -> new EmployeePerformanceBadges(
-                            snapshot.getPerformanceLabel(),
-                            snapshot.getResponseLabel(),
-                            snapshot.getBadge()
-                    ))
-                    .toList();
-        }
 }
 //
 //    public List<ComplaintResponseDto> getAllComplaintsForCitizen(String email){

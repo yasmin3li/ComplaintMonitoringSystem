@@ -145,17 +145,9 @@ public class ApiController {
         ));
     }
 
-    @GetMapping({"/employees/{accountId}/badges", "/employees/badges"})
-    public ResponseEntity<Object> getEmployeeBadges(
-            @PathVariable(required = false) Long accountId) {
-
-        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(
-                SecurityContextHolder.getContext().getAuthentication().getName());
-
-        long accountID = (accountId == null)
-                ? account.get().getId() : accountId;
-
-        return ResponseEntity.ok(statisticsService.getEmployeeBadges(accountID));
+    @GetMapping("/employees/badges")
+    public ResponseEntity<Object> getEmployeeBadges() {
+        return ResponseEntity.ok(statisticsService.getEmployeeBadges());
     }
 
     //    TODO: test and refactoring

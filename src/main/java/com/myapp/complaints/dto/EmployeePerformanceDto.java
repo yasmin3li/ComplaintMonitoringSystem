@@ -1,16 +1,16 @@
 package com.myapp.complaints.dto;
 
-//@JsonInclude(JsonInclude.Include.NON_NULL)
+import java.util.List;
+
 public record EmployeePerformanceDto(
+
         long employeeAccountId,
         long comingCount,
         long handledCount,
         double responseRate,
         double score,
-        String performanceLabel,
-        String responseLabel,
-        String badge,
-        double normalizedHandled
+        double normalizedHandled,
+        List<EmployeeBadgeDto> badges
+
 ) {
 }
-

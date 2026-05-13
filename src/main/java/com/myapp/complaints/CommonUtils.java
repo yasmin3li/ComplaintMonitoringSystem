@@ -92,49 +92,6 @@ public class CommonUtils {
         };
     }
 
-    public static String getPerformanceLabel(double score) {
-
-        // compute label based on score
-        String performanceLabel;
-        if (score >= 90) {
-            performanceLabel = "موظف ممتاز";
-        } else if (score >= 70) {
-            performanceLabel = "جيد جدًا";
-        } else if (score >= 50) {
-            performanceLabel = "جيد";
-        } else if (score >= 30) {
-            performanceLabel = "بحاجة لتحسين";
-        } else {
-            performanceLabel = "مقصر";
-        }
-        return performanceLabel;
-    }
-
-    public static String getResponseLabel(double score) {
-
-        // compute label based on score
-        String performanceLabel;
-        if (score >= 90) {
-            performanceLabel = "ممتاز سرعة عالية في الأداء";
-        } else if (score >= 70) {
-            performanceLabel = "جيد جدًا - أداء قوي";
-        } else if (score >= 50) {
-            performanceLabel = "جيد - حافظ على المستوى";
-        } else if (score >= 30) {
-            performanceLabel = "أداء منخفض بحاجة لتحسين";
-        } else {
-            performanceLabel = "مقصر - متابعة ادارية مطلوبة";
-        }
-        return performanceLabel;
-    }
-
-    public static String getBadgeKey(double score) {
-        if (score >= 90) return "gold";
-        if (score >= 80) return "silver";
-        if (score >= 50) return "bronze";
-        if (score >= 30) return "warning";
-        return "danger";
-    }
 
     public static double getScoreForThresholdOfSolve(long number) {
         // We consider a total of 5000 complaints divided into 5 equal ranges (1000 each).
