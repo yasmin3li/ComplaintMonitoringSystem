@@ -279,23 +279,21 @@ CREATE TABLE voting (
 ) ENGINE=InnoDB;
 
 CREATE TABLE employee_performance_snapshot (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  employee_account_id BIGINT NOT NULL,
-  period_start DATETIME NOT NULL,
-  period_end DATETIME NOT NULL,
-  created_count INT NOT NULL,
-  assigned_count INT NOT NULL,
-  response_rate DOUBLE,
-  normalized_handled DOUBLE,
-  score DOUBLE,
-  badge VARCHAR(50),
-  performance_label VARCHAR(100),
-  response_label VARCHAR(100),
-  computed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  source VARCHAR(20),
-  UNIQUE(employee_account_id, period_start, period_end)
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    employee_account_id BIGINT NOT NULL,
+    period_start DATETIME NOT NULL,
+    period_end DATETIME NOT NULL,
+    created_count INT NOT NULL,
+    assigned_count INT NOT NULL,
+    response_rate DOUBLE,
+    normalized_handled DOUBLE,
+    score DOUBLE,
+    computed_at DATETIME NOT NULL,
+    source VARCHAR(30),
+    CONSTRAINT uk_employee_period UNIQUE (employee_account_id, period_start, period_end)
 );
-CREATE INDEX idx_perf_employee_period ON employee_performance_snapshot(employee_account_id, period_start, period_end);
+CREATE INDEX idx_perf_employee_period
+ON employee_performance_snapshot (employee_account_id, period_start, period_end);
 
 CREATE TABLE milestone (
 	id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -308,6 +306,20 @@ CREATE TABLE milestone (
     CONSTRAINT fk_milestone_employee
         FOREIGN KEY (employee_id)
         REFERENCES employee(id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE employee_snapshot_badge (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255),
+    description VARCHAR(500),
+    icon VARCHAR(255),
+    level VARCHAR(30),
+    type VARCHAR(30),
+    employee_performance_id BIGINT,
+    CONSTRAINT fk_snapshot_badge
+        FOREIGN KEY (employee_performance_id)
+        REFERENCES employee_performance_snapshot(id)
         ON DELETE CASCADE
 );
 
@@ -475,7 +487,8 @@ INSERT INTO account (id,user_name,password,role_id,email,phone_number,national_n
 
 -- Citizen
 INSERT INTO citizen (id,birth_date) VALUES
-(1,'1991-01-01'),(2,'1992-02-02');
+(1,'1991-01-01');
+-- ,(2,'1992-02-02');
 
 -- Employee
 INSERT INTO employee (id,institution_id,governorate_id,sector_id) VALUES
@@ -503,10 +516,10 @@ INSERT INTO complaint (id,title,description,state,deleted,added_by_account_id,se
 (4,'شكوى كهرباء: انقطاع خدمة الانترنت بسبب الكهرباء','انقطاع الانترنت منذ الصباح بسبب مشاكل تغذية كهربائية','NEW',FALSE,1,3,5,1,3,4),
 
 -- Citizen 2
-(5,'شكوى كهرباء: تأثر النفايات بسبب انقطاع الكهرباء','النفايات لم تجمع منذ أسبوع بسبب توقف الخدمات','NEW',FALSE,2,4,11,1,5,5),
-(6,'شكوى كهرباء: ضعف تغذية كهربائية في مشروع زراعي','الأراضي بحاجة لمعالجة عاجلة بسبب ضعف الكهرباء','NEW',FALSE,2,4,13,1,6,6),
-(7,'شكوى كهرباء: توقف مضخات المياه بسبب انقطاع الكهرباء','المياه الساخنة لا تعمل بسبب الكهرباء','NEW',FALSE,2,4,3,2,2,7),
-(8,'شكوى كهرباء: انقطاع متكرر في التيار الكهربائي','انقطاع الكهرباء بشكل متكرر','NEW',FALSE,2,1,1,1,1,8);
+(5,'شكوى كهرباء: تأثر النفايات بسبب انقطاع الكهرباء','النفايات لم تجمع منذ أسبوع بسبب توقف الخدمات','NEW',FALSE,1,4,11,1,5,5),
+(6,'شكوى كهرباء: ضعف تغذية كهربائية في مشروع زراعي','الأراضي بحاجة لمعالجة عاجلة بسبب ضعف الكهرباء','NEW',FALSE,1,4,13,1,6,6),
+(7,'شكوى كهرباء: توقف مضخات المياه بسبب انقطاع الكهرباء','المياه الساخنة لا تعمل بسبب الكهرباء','NEW',FALSE,1,4,3,2,2,7),
+(8,'شكوى كهرباء: انقطاع متكرر في التيار الكهربائي','انقطاع الكهرباء بشكل متكرر','NEW',FALSE,1,1,1,1,1,8);
 
 INSERT INTO complaint_tracking_log (id,previous_status,new_status,action_type,comments,action_date,complaint_id,action_by_account_id,assigned_to_employee_id) VALUES
 (1,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-10 09:30:00',1,1,NULL),
