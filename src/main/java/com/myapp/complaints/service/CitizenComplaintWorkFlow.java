@@ -285,6 +285,8 @@ public class CitizenComplaintWorkFlow {
         else {
             workflowEngine.changeState(complaint, ComplaintState.NEW, account, null, null, ActionType.UPDATED);
         }
+
+        complaint.setDateTimeOfUpdate(LocalDateTime.now());
         complaintRepo.save(complaint);
 
         return new ApiResponseDto<>(

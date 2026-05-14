@@ -14,6 +14,7 @@ public record ComplaintResponseDto(
 
         String status,
         LocalDateTime createdAt,
+        LocalDateTime updatedAt,
 
         LocationDto location,
 

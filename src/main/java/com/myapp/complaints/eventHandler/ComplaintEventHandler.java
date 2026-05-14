@@ -84,7 +84,7 @@ public class ComplaintEventHandler {
 
         if (!old.getState().equals(c.getState())) {
             if (c.getState() == ComplaintState.RESOLVED) {
-                c.setDateTimeOfSolve(LocalDateTime.now());
+                c.setDateTimeOfUpdate(LocalDateTime.now());
             }
 
             // if  state didn't change do not do anything

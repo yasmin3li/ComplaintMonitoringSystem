@@ -24,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -139,6 +140,7 @@ public class ReceptionistComplaintWorkflow {
         }
 
 
+    @Transactional
     public ApiResponseDto<?> rejectComplaint(String email, ComplaintRejectDto dto) {
 
         Optional<Complaint> complaint = complaintRepo.findByIdAndDeletedFalse(dto.complaintId());
@@ -156,6 +158,10 @@ public class ReceptionistComplaintWorkflow {
                 {
                     if((complaint.get().getState().equals(ComplaintState.IN_REVIEW))){
                         workflowEngine.changeState(complaint.get(),ComplaintState.REJECTED,employee.getAccount(),null,dto.reason(),ActionType.REJECTED);
+
+                        complaint.get().setDateTimeOfUpdate(LocalDateTime.now());
+                        complaintRepo.save(complaint.get());
+
                         notificationService.notifyUsers(complaint.get(),dto.reason(),List.of(complaint.get().getAddedBy()));
                     }
                     else{
@@ -172,6 +178,7 @@ public class ReceptionistComplaintWorkflow {
         );
     }
 
+    @Transactional
     public ApiResponseDto<?> updateComplaint(String email, UpdateComplaintDto dto) {
 
         Employee employee = employeeRepo.findByAccount_Email(email);
@@ -217,6 +224,9 @@ public class ReceptionistComplaintWorkflow {
 
         workflowEngine.createActionLog(complaint,employee.getAccount(), ActionType.UPDATED);
 
+        complaint.setDateTimeOfUpdate(LocalDateTime.now());
+        complaintRepo.save(complaint);
+
         return new ApiResponseDto<>(
                 true,
                 "images uploaded and complaint updated  successfully",
@@ -252,6 +262,9 @@ public class ReceptionistComplaintWorkflow {
 
                     workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, null, ActionType.IN_REVIEW);
 
+                    complaint.setDateTimeOfUpdate(LocalDateTime.now());
+                    complaintRepo.save(complaint);
+
                     return new ApiResponseDto<>(true,"الشكوى الان ضمن مسؤلياتك",null);
                 }
 
@@ -275,6 +288,7 @@ public class ReceptionistComplaintWorkflow {
         else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
     }
 
+    @Transactional
     public ApiResponseDto<?> acceptAndForwardToManager(long complaintId) {
 
         // the receptionist employee
@@ -298,6 +312,9 @@ public class ReceptionistComplaintWorkflow {
 
         //receptionist assigns this complaint to the manager by default
         List<Employee> forwardTO = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),3);
+
+        complaint.setDateTimeOfUpdate(LocalDateTime.now());
+        complaintRepo.save(complaint);
 
         workflowEngine.changeState
                 (complaint,ComplaintState.FORWARDED_TO_MANAGER,employee.getAccount(),null,null, ActionType.ACCEPTED);

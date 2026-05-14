@@ -8,7 +8,6 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Entity
 @Table(name = "complaint")
@@ -32,7 +31,8 @@ public class Complaint {
 
     private LocalDateTime dateTimeOfAdd;
 
-    private LocalDateTime dateTimeOfSolve;
+    //update the state of omplaint or the complaint itself
+    private LocalDateTime dateTimeOfUpdate;
 
 // TODO: add this column to db
     private boolean deleted = false;

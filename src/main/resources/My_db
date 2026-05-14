@@ -180,7 +180,7 @@ CREATE TABLE complaint (
     description TEXT,
     state VARCHAR(50) NOT NULL DEFAULT 'NEW',
     date_time_of_add DATETIME DEFAULT CURRENT_TIMESTAMP,
-    date_time_of_solve DATETIME,
+    date_time_of_update DATETIME,
     deleted BOOLEAN NOT NULL DEFAULT FALSE,
     added_by_account_id BIGINT NOT NULL,
     service_id BIGINT NOT NULL,

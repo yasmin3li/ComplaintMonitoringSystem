@@ -48,6 +48,7 @@ public class ComplaintMapper {
 
                 CommonUtils.toArabicState(complaint.getState()),
                 complaint.getDateTimeOfAdd(),
+                complaint.getDateTimeOfUpdate(),
 
                 new LocationDto(
                         complaint.getGovernorate().getId(),
