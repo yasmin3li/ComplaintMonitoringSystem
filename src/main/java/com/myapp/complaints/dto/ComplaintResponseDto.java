@@ -18,6 +18,7 @@ public record ComplaintResponseDto(
 
         LocationDto location,
 
+        String reason,
         boolean owner,
         List<ComplaintImageDto> complaintImageDtoList
 ) {}

@@ -64,6 +64,9 @@ public class ComplaintMapper {
                                 complaint.getAddress().getLatitude()
                         )
                 ),
+                complaint.getState() == ComplaintState.REJECTED
+                        ? getLastRejectReason(complaint)
+                        : null,
                 authorizationService.checkAccess(complaint.getAddedBy().getEmail()),
                 complaintImageRepo.findByComplaint_Id(complaint.getId())
         );
