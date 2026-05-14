@@ -62,7 +62,7 @@ public class BadgeFactory {
 
     public static EmployeeBadgeDto buildResponseBadge(double responseRate) {
 
-        if (responseRate >= 90) {
+        if (responseRate <= 1) {
             return new EmployeeBadgeDto(
                     BadgeType.RESPONSE,
                     "استجابة سريعة",
@@ -72,7 +72,7 @@ public class BadgeFactory {
             );
         }
 
-        if (responseRate >= 70) {
+        if (responseRate <= 2) {
             return new EmployeeBadgeDto(
                     BadgeType.RESPONSE,
                     "استجابة جيدة",
@@ -82,7 +82,7 @@ public class BadgeFactory {
             );
         }
 
-        if (responseRate >= 50) {
+        if (responseRate <= 3) {
             return new EmployeeBadgeDto(
                     BadgeType.RESPONSE,
                     "استجابة مقبولة",

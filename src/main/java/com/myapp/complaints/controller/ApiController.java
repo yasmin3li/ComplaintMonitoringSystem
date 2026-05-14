@@ -4,7 +4,6 @@ package com.myapp.complaints.controller;
 import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Account;
-import com.myapp.complaints.enums.SnapshotSource;
 import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.service.*;
 import jakarta.validation.Valid;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
-import java.util.List;
 import java.util.Map;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +39,7 @@ public class ApiController {
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
     private final AccountRepo accountRepo;
     private final SnapshotPerformanceService snapshotPerformanceService;
+    private final EmployeePerformanceService employeePerformanceService;
 
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
@@ -134,7 +133,7 @@ public class ApiController {
         long accountID = (accountId == null)
                 ?account.get().getId() : accountId;
 
-        return ResponseEntity.ok(statisticsService.getEmployeePerformance(accountID,start, end));
+        return ResponseEntity.ok(employeePerformanceService.getEmployeePerformance(accountID,start, end));
     }
 
     @ExceptionHandler({MethodArgumentTypeMismatchException.class, org.springframework.beans.TypeMismatchException.class})
@@ -147,7 +146,7 @@ public class ApiController {
 
     @GetMapping("/employees/badges")
     public ResponseEntity<Object> getEmployeeBadges() {
-        return ResponseEntity.ok(statisticsService.getEmployeeBadges());
+        return ResponseEntity.ok(employeePerformanceService.getEmployeeBadges());
     }
 
     //    TODO: test and refactoring

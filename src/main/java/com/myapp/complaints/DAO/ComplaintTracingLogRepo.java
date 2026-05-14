@@ -1,5 +1,6 @@
 package com.myapp.complaints.DAO;
 
+import com.myapp.complaints.dto.ComplaintResponseProjection;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.enums.ComplaintState;
 import org.springframework.data.jpa.repository.Query;
@@ -57,6 +58,22 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
             @Param("accountId") Long accountId
     );
 
-
+    @Query("""
+        SELECT
+            c.dateTimeOfAdd AS createdAt,
+            MIN(l.actionDate) AS reviewedAt
+        FROM ComplaintTrackingLog l
+        JOIN l.complaint c
+        WHERE l.assignedTo.account.id = :accountId
+          AND l.newState = :state
+          AND l.actionDate BETWEEN :start AND :end
+        GROUP BY c.id, c.dateTimeOfAdd
+    """)
+    List<ComplaintResponseProjection> findComplaintResponseTimes(
+            @Param("accountId") Long accountId,
+            @Param("state") ComplaintState state,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
 
 }

@@ -21,15 +21,15 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class SnapshotPerformanceService {
 
-    private final StatisticsService statisticsService;
     private final EmployeePerformanceSnapshotRepo snapshotRepo;
+    private final EmployeePerformanceService employeePerformanceService;
 
     public void scheduledSnapshotGeneration(Long accountId,
                                             LocalDateTime start,
                                             LocalDateTime end) {
 
         EmployeePerformanceDto dto =
-                statisticsService.getEmployeePerformance(accountId, start, end);
+                employeePerformanceService.getEmployeePerformance(accountId, start, end);
 
         if (dto.comingCount() == 0) {
             return;
