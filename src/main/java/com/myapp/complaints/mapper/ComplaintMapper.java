@@ -183,11 +183,7 @@ private String getLastRejectReason(Complaint complaint){
     Optional<ComplaintTrackingLog> log =
             complaintTracingLogRepo.findTopByComplaint_IdAndActionBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(), account.get().getId(),ComplaintState.REJECTED);
 
-    if(log.isEmpty()){
-        throw new ApiException("no log for this complaint !!!",HttpStatus.NOT_FOUND);
-    }
-
-    return log.get().getComments();
+    return log.map(ComplaintTrackingLog::getComments).orElse(null);
 
 }
 }
