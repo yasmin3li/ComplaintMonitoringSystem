@@ -76,4 +76,6 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
             @Param("end") LocalDateTime end
     );
 
+    Optional<ComplaintTrackingLog> findTopByComplaint_IdAndComplaint_AddedBy_IdAndNewStateOrderByActionDateDesc(Long id, Long id1, ComplaintState complaintState);
+
 }

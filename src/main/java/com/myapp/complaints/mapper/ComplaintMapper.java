@@ -7,7 +7,6 @@ import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Address;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
-import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.service.AuthorizationService;
@@ -175,13 +174,18 @@ public class ComplaintMapper {
 private String getLastRejectReason(Complaint complaint){
 
     Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
+    Optional<ComplaintTrackingLog> log;
+    if (authorizationService.IsReceptionist()) {
 
-    if(account.isEmpty()){
-        throw new ApiException("no account found",HttpStatus.NOT_FOUND);
+        if (account.isEmpty()) {
+            throw new ApiException("no account found", HttpStatus.NOT_FOUND);
+        }
+
+        log =complaintTracingLogRepo.findTopByComplaint_IdAndActionBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(), account.get().getId(), ComplaintState.REJECTED);
     }
-
-    Optional<ComplaintTrackingLog> log =
-            complaintTracingLogRepo.findTopByComplaint_IdAndActionBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(), account.get().getId(),ComplaintState.REJECTED);
+    else{
+        log =complaintTracingLogRepo.findTopByComplaint_IdAndComplaint_AddedBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(), account.get().getId(), ComplaintState.REJECTED);
+    }
 
     return log.map(ComplaintTrackingLog::getComments).orElse(null);
 
