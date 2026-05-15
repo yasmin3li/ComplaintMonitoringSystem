@@ -47,7 +47,7 @@ public class EmployeePerformanceService {
                 );
 
         if (responses.isEmpty()) {
-            return 0;
+            return 4.0; // default average response time in days when no data is available
         }
 
         double totalDays = 0;
@@ -103,8 +103,8 @@ public class EmployeePerformanceService {
         double achievementRate,responseRate;
 
         if (incomingComplaintsCount <= 0) {
-            achievementRate = 100.0;
-            responseRate = 100.0;
+            achievementRate = 0.0;
+            responseRate = 0.0;
         }
         else {
             achievementRate = (double) completedComplaintsCount / incomingComplaintsCount * 100.0;
