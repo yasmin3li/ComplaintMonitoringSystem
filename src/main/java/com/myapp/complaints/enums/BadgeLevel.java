@@ -4,7 +4,7 @@ public enum BadgeLevel {
     GOLD,
     SILVER,
     BRONZE,
-    WARNING,
-    DANGER,
-    BLUE
+    ORANGE,
+    RED,
+    GREEN, GRAY, YELLOW, ROYAL_BLUE, BLUE
 }

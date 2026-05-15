@@ -15,7 +15,7 @@ public class BadgeFactory {
             return new EmployeeBadgeDto(
                     BadgeType.PERFORMANCE,
                     "موظف متميز",
-                    "أداء ممتاز خلال هذه الفترة",
+                    "محترف _ أداء ممتاز خلال هذه الفترة",
                     BadgeLevel.GOLD,
                     "star"
             );
@@ -25,7 +25,7 @@ public class BadgeFactory {
             return new EmployeeBadgeDto(
                     BadgeType.PERFORMANCE,
                     "جيد جدًا",
-                    "أداء قوي ومستقر",
+                    "أداء قوي",
                     BadgeLevel.SILVER,
                     "award"
             );
@@ -35,9 +35,9 @@ public class BadgeFactory {
             return new EmployeeBadgeDto(
                     BadgeType.PERFORMANCE,
                     "جيد",
-                    "يحافظ على مستوى مقبول",
+                    "يحافظ على مستوى مقبول في الأداء",
                     BadgeLevel.BRONZE,
-                    "shield"
+                    "thumbs-up"
             );
         }
 
@@ -46,17 +46,17 @@ public class BadgeFactory {
                     BadgeType.PERFORMANCE,
                     "بحاجة لتحسين",
                     "الأداء منخفض",
-                    BadgeLevel.WARNING,
-                    "alert"
+                    BadgeLevel.ORANGE,
+                    "trending-down"
             );
         }
 
         return new EmployeeBadgeDto(
                 BadgeType.PERFORMANCE,
                 "مقصر",
-                "متابعة إدارية مطلوبة",
-                BadgeLevel.DANGER,
-                "x"
+                "أداء سيئ _ متابعة إدارية مطلوبة",
+                BadgeLevel.RED,
+                "user-x"
         );
     }
 
@@ -66,8 +66,8 @@ public class BadgeFactory {
             return new EmployeeBadgeDto(
                     BadgeType.RESPONSE,
                     "استجابة سريعة",
-                    "سرعة عالية في معالجة الشكاوى",
-                    BadgeLevel.GOLD,
+                    "سرعة عالية في البدء بمعالجة الشكاوى",
+                    BadgeLevel.BLUE,
                     "zap"
             );
         }
@@ -77,8 +77,8 @@ public class BadgeFactory {
                     BadgeType.RESPONSE,
                     "استجابة جيدة",
                     "زمن استجابة ممتاز",
-                    BadgeLevel.SILVER,
-                    "clock"
+                    BadgeLevel.GREEN,
+                    "timer"
             );
         }
 
@@ -87,8 +87,8 @@ public class BadgeFactory {
                     BadgeType.RESPONSE,
                     "استجابة مقبولة",
                     "الأداء مستقر",
-                    BadgeLevel.BRONZE,
-                    "timer"
+                    BadgeLevel.GRAY,
+                    "clock"
             );
         }
 
@@ -96,19 +96,19 @@ public class BadgeFactory {
                 BadgeType.RESPONSE,
                 "استجابة ضعيفة",
                 "تحسين سرعة المعالجة مطلوب",
-                BadgeLevel.WARNING,
-                "alert"
+                BadgeLevel.YELLOW,
+                "alert-circle"
         );
     }
 
-    public static EmployeeBadgeDto buildMilestoneBadge(long handledCount,long threshold) {
+    public static EmployeeBadgeDto buildMilestoneBadge(long threshold) {
 
             return new EmployeeBadgeDto(
                     BadgeType.MILESTONE,
-                    String.format("شكوى معالجة %d", threshold),
+                    String.format("%d شكوى معالجة", threshold),
                     String.format("لقد وصلت إلى %d شكوى معالجة", threshold),
-                    BadgeLevel.BLUE,
-                    "trophy"
+                    BadgeLevel.ROYAL_BLUE,
+                    "check-circle"
             );
             
     }

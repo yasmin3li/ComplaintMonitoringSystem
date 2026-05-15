@@ -108,7 +108,7 @@ public class SnapshotPerformanceService {
                         .source(SnapshotSource.MILESTONE)
                         .build();
 
-        EmployeeBadgeDto employeeBadgeDto =BadgeFactory.buildMilestoneBadge(handled, milestone);
+        EmployeeBadgeDto employeeBadgeDto =BadgeFactory.buildMilestoneBadge(milestone);
 
         if(snap.getBadges()==null){
             snap.setBadges(List.of(buildBadgeEntity(employeeBadgeDto, snap)));
