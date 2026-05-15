@@ -33,6 +33,7 @@ public class NotificationMapper {
 
             return new NotificationDto(
                     notification.getId(),
+                    notification.getComplaint().getId(),
                     notification.getTitle(),
                     notification.getMessage(),
                     notification.getCreatedAt(),
