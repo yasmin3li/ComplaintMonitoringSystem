@@ -325,6 +325,7 @@ public class ReceptionistComplaintWorkflow {
             accounts.add(assignTo.getAccount());
         }
 
+        accounts.add(complaint.getAddedBy());
         notificationService.notifyUsers(complaint,"priority: "+complaint.getPriority().toString(),accounts);
 
         return new ApiResponseDto<>(true,"تم قبول الشكوى وتحويلها الى المدير",null);
