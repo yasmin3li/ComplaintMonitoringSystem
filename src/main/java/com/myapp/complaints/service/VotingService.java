@@ -11,6 +11,7 @@ import com.myapp.complaints.entity.Voting;
 import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.AllArgsConstructor;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,19 +23,36 @@ import java.util.Optional;
 
 @Service
 @AllArgsConstructor
-@Transactional
 public class VotingService {
     private final AuthorizationService authorizationService;
     private final VotingRepo votingRepo;
     private final ComplaintRepo complaintRepo;
     private final AccountRepo accountRepo;
 
+    @Transactional
     public VotingDto getVotes(Long complaintId) {
         Long likesNumber = likesCount(complaintId);
         Long disLikesNumber = disLikesCount(complaintId);
-        return new VotingDto(likesNumber,
-                disLikesNumber
-        );
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(auth.getName());
+
+        if(account.isEmpty()){
+            throw new ApiException("account not found",HttpStatus.NOT_FOUND);
+        }
+
+        Optional<Voting> voting = votingRepo.findByAccountIdAndComplaintId(complaintId,account.get().getId());
+
+        return voting.map(value -> new VotingDto(likesNumber,
+                disLikesNumber,
+                value.getType().equals(VotingType.LIKE),
+                value.getType().equals(VotingType.DISLIKE)
+        )).orElseGet(() -> new VotingDto(likesNumber,
+                disLikesNumber,
+                false,
+                false
+        ));
+
     }
 
     public Long likesCount(Long complaintId) {
@@ -45,6 +63,7 @@ public class VotingService {
         return votingRepo.countByComplaintIdAndType(complaintId, VotingType.DISLIKE);
     }
 
+    @Transactional
     public ApiResponseDto<?> Voting(Long complaintId, VotingType votingType) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
