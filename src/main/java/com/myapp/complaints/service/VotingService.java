@@ -38,7 +38,7 @@ public class VotingService {
         Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(auth.getName());
 
         if(account.isEmpty()){
-            throw new ApiException("account not found",HttpStatus.NOT_FOUND);
+            return new VotingDto(likesNumber,disLikesNumber,false,false);
         }
 
         Optional<Voting> voting = votingRepo.findByAccountIdAndComplaintId(complaintId,account.get().getId());
