@@ -29,32 +29,64 @@ public class VotingService {
     private final ComplaintRepo complaintRepo;
     private final AccountRepo accountRepo;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public VotingDto getVotes(Long complaintId) {
+
         Long likesNumber = likesCount(complaintId);
         Long disLikesNumber = disLikesCount(complaintId);
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(auth.getName());
+        Authentication auth =
+                SecurityContextHolder.getContext().getAuthentication();
 
-        if(account.isEmpty()){
-            return new VotingDto(likesNumber,disLikesNumber,false,false);
+        boolean isAuthenticated =
+                auth != null
+                        && auth.isAuthenticated()
+                        && !"anonymousUser".equals(auth.getName());
+
+        if (!isAuthenticated) {
+            return new VotingDto(
+                    likesNumber,
+                    disLikesNumber,
+                    false,
+                    false
+            );
         }
 
-        Optional<Voting> voting = votingRepo.findByAccountIdAndComplaintId(complaintId,account.get().getId());
+        Account account = accountRepo
+                .findByEmailAndDeletedFalse(auth.getName())
+                .orElse(null);
 
-        return voting.map(value -> new VotingDto(likesNumber,
-                disLikesNumber,
-                value.getType().equals(VotingType.LIKE),
-                value.getType().equals(VotingType.DISLIKE)
-        )).orElseGet(() -> new VotingDto(likesNumber,
-                disLikesNumber,
-                false,
-                false
-        ));
+        if (account == null) {
+            return new VotingDto(
+                    likesNumber,
+                    disLikesNumber,
+                    false,
+                    false
+            );
+        }
 
+        Optional<Voting> voting =
+                votingRepo.findByAccountIdAndComplaintId(
+                        account.getId(),
+                        complaintId
+                );
+
+        return voting.map(value ->
+                new VotingDto(
+                        likesNumber,
+                        disLikesNumber,
+                        value.getType() == VotingType.LIKE,
+                        value.getType() == VotingType.DISLIKE
+                )
+        ).orElseGet(() ->
+                new VotingDto(
+                        likesNumber,
+                        disLikesNumber,
+                        false,
+                        false
+                )
+        );
     }
-
     public Long likesCount(Long complaintId) {
         return votingRepo.countByComplaintIdAndType(complaintId,VotingType.LIKE);
     }
