@@ -166,6 +166,16 @@ public class ApiService {
 
 // open complaint by citizen
         else {
+            //            TODO: feat(ApiService): add access control for rejected complaints based on ownership
+//            Account account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName())
+//                    .orElseThrow(() -> new ApiException("User not found",HttpStatus.NOT_FOUND));
+//
+//             citizenRepo.findByAccountId(account.getId())
+//                    .orElseThrow(() -> new ApiException("Citizen not found for account "+account.getEmail(),HttpStatus.NOT_FOUND));
+//
+//             if(!complaint.getAddedBy().getId().equals(account.getId()) && complaint.getState().equals(ComplaintState.REJECTED)){
+//                 throw new ApiException("Access denied, you aren't the owner of this complaint",HttpStatus.FORBIDDEN);
+//             }
             return complaintMapper.toDto(complaint);
         }
     }
