@@ -43,12 +43,13 @@ public class JwtTokenGenerator {
         String permissions = getPermissionsFromRoles(roles);
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("YOUR_VOICE")
+                .issuer("BALLIGH")
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(15, ChronoUnit.DAYS))
                 .subject(authentication.getName())
                 .claim("scope", permissions)
                 .claim("role",roles)
+                .claim("mustChangePassword",account.isMustChangePassword())
                 .build();
 
         return jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
