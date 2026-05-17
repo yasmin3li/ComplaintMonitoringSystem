@@ -275,7 +275,9 @@ CREATE TABLE voting (
     complaint_id BIGINT NOT NULL,
     account_id BIGINT NOT NULL,
     FOREIGN KEY (complaint_id) REFERENCES complaint(id),
-    FOREIGN KEY (account_id) REFERENCES account(id)
+    FOREIGN KEY (account_id) REFERENCES account(id),
+	CONSTRAINT uk_voting_account_complaint
+    UNIQUE (complaint_id, account_id)
 ) ENGINE=InnoDB;
 
 CREATE TABLE employee_performance_snapshot (
@@ -548,7 +550,7 @@ VALUES
 -- password Yasminabu3li!
 -- ================== الكهرباء ==================
 (6,'emp_elec1_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',2,'elec1_hama@test.com','0910000001','20000000001','ACTIVATED',false,false,false,true,true),
-(28,'emp_elec2_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',2,'elec2_hama@test.com','0333562','884578','ACTIVATED',false,false,false,true,true),
+(28,'emp_elec2_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',2,'elec2_hama@test.com','0333562','884578','ACTIVATED',false,false,true,true,true),
 (7,'emp_elec_damascus','$2a$10$SVb2gHVdqVAPK5lyv9cKFOd/Z8Ufiyt68dBun2aWGbJOTMaZT026G',2,'elec_damascus@test.com','0910000002','20000000002','ACTIVATED',false,false,false,true,true),
 (8,'emp_elec_homs','$2a$10$kAq.tOA86qqG0/yK5txG6evQde74TmqGr9loTVsrMKV5pvrKD29O6',2,'elec_homs@test.com','0910000003','20000000003','ACTIVATED',false,false,false,true,true),
 (9,'emp_elec_lattakia','$2a$10$myYGZqM0NS42v3qsnLzuGecDo/ybVzRLETJDP0NgvOlgnvyxesjX6',2,'elec_lattakia@test.com','0910000004','20000000004','ACTIVATED',false,false,false,true,true),

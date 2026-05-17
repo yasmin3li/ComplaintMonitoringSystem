@@ -2,15 +2,21 @@ package com.myapp.complaints.entity;
 
 import com.myapp.complaints.enums.VotingType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "voting")
-@Data
+@Table(
+        name = "voting",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"account_id", "complaint_id"}
+                )
+        }
+)
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Voting {
