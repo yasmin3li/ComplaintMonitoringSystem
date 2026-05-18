@@ -145,7 +145,9 @@ public class ApiController {
     }
 
     @GetMapping("/employees/badges")
-    public ResponseEntity<Object> getEmployeeBadges() {
+    public ResponseEntity<Object> getEmployeeBadges(
+//            @RequestParam(name = "onlyLatest", required = false, defaultValue = "false") boolean onlyLatest
+    ) {
         return ResponseEntity.ok(employeePerformanceService.getEmployeeBadges());
     }
 

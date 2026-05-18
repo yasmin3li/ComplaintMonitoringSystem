@@ -9,6 +9,8 @@ import com.myapp.complaints.dto.SpecifiedEmployeePerformanceResponseDto;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.entity.EmployeePerformanceSnapshot;
+import com.myapp.complaints.entity.EmployeeSnapshotBadge;
+import com.myapp.complaints.enums.BadgeType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -171,18 +172,52 @@ public class EmployeePerformanceService {
                                     .toList();
 
                     return new SpecifiedEmployeePerformanceResponseDto(
-//
-//                            snapshot.getEmployeeAccountId(),
-//                            snapshot.getComingCount(),
-//                            snapshot.getHandledCount(),
-//                            snapshot.getResponseRate(),
-//                            snapshot.getScore(),
-//                            snapshot.getNormalizedHandled(),
+
                             badges
                     );
 
                 })
                 .toList();
+
+//
+//        Map<BadgeType, EmployeeBadgeDto> badges = new LinkedHashMap<>();
+//
+//        if (onlyLatest) {
+//
+//            for (EmployeePerformanceSnapshot snapshot : snapshots) {
+//                if (snapshot.getBadges() == null) continue;
+//                for (EmployeeSnapshotBadge b : snapshot.getBadges()) {
+//                    // if we already recorded this type, skip (we want the first/newest)
+//                    if (badges.containsKey(b.getType())) continue;
+//
+//                    EmployeeBadgeDto dto = new EmployeeBadgeDto(
+//                            b.getType(),
+//                            b.getTitle(),
+//                            b.getDescription(),
+//                            b.getLevel(),
+//                            b.getIcon()
+//                    );
+//
+//                    badges.put(b.getType(), dto);
+//
+//                }
+//            }
+//            return badges.values().stream().toList();
+//        } else
+//        {
+//            List<EmployeeBadgeDto> allBadges = new ArrayList<>();
+//
+//            for (EmployeePerformanceSnapshot snapshot : snapshots) {
+//                if (snapshot.getBadges() == null) continue;
+//                for (EmployeeSnapshotBadge b : snapshot.getBadges()) {
+//                    allBadges.add(new EmployeeBadgeDto(
+//                            b.getType(), b.getTitle(), b.getDescription(), b.getLevel(), b.getIcon()
+//                    ));
+//                }
+//            }
+//            return allBadges;
+//        }
+
     }
 
 }
