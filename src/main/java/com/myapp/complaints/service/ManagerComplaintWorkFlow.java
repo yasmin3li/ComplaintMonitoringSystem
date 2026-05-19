@@ -4,6 +4,7 @@ import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.ComplaintRepo;
 import com.myapp.complaints.DAO.EmployeeRepo;
 import com.myapp.complaints.dto.ComplaintFilterRequestDto;
+import com.myapp.complaints.dto.ComplaintResponseDto;
 import com.myapp.complaints.dto.ReceptionComplaintResponseDto;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
@@ -29,7 +30,7 @@ public class ManagerComplaintWorkFlow {
     private final ComplaintRepo complaintRepo;
     private final ComplaintMapper complaintMapper;
 
-    public List<ReceptionComplaintResponseDto> getInstitutionComplaints(ComplaintFilterRequestDto filter) {
+    public List<ComplaintResponseDto> getInstitutionComplaints(ComplaintFilterRequestDto filter) {
 
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Employee employee = employeeRepo.findByAccount_Email(email);
@@ -74,7 +75,7 @@ public class ManagerComplaintWorkFlow {
             return complaintRepo.findAll(
                             spec,
                             PageRequest.of(0, 100)).stream()
-                    .map(complaintMapper::toPerceptionComplaintDto)
+                    .map(complaintMapper::toDto)
                     .toList();
 
         } else {
@@ -82,7 +83,7 @@ public class ManagerComplaintWorkFlow {
                             spec,
                             PageRequest.of(filter.page(), filter.size())
                     ).stream()
-                    .map(complaintMapper::toPerceptionComplaintDto)
+                    .map(complaintMapper::toDto)
                     .toList();
         }
     }
