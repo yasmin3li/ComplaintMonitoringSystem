@@ -85,8 +85,9 @@ public class ComplaintWorkflowEngine {
             case IN_REVIEW -> "الشكوى قيد المراجعة";
             case CREATED ->  "تم اضافة شكوى جديدة";
             case ACCEPTED -> "تم قبول الشكوى وتحويلها للمدير";
-
+            case ASSIGNED -> "تم اسناد الشكوى للموظف المسؤول لمتابعة حلها";
             case REJECTED -> "تم رفض الشكوى";
+            case STARTED -> "تم بدء العمل على الشكوى";
 
             case STATE_CHANGED -> switch (newState) {
                 case IN_REVIEW -> "الشكوى قيد المراجعة";

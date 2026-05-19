@@ -6,6 +6,6 @@ import java.util.List;
 
 public record AssignComplaintDto(
         long complaintId,
-        List<Employee> employees
+        long assignedTo
 ) {
 }

@@ -1,24 +1,28 @@
 package com.myapp.complaints.service;
 
 import com.myapp.complaints.CommonUtils;
+import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.ComplaintRepo;
 import com.myapp.complaints.DAO.EmployeeRepo;
-import com.myapp.complaints.dto.ComplaintFilterRequestDto;
-import com.myapp.complaints.dto.ComplaintResponseDto;
-import com.myapp.complaints.dto.ReceptionComplaintResponseDto;
+import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
+import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
+import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Complaint;
-import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.entity.Employee;
+import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.ComplaintMapper;
-import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,64 +33,301 @@ public class ManagerComplaintWorkFlow {
     private final EmployeeRepo employeeRepo;
     private final ComplaintRepo complaintRepo;
     private final ComplaintMapper complaintMapper;
+    private final ComplaintStateValidator validator;
+    private final ComplaintWorkflowEngine workflowEngine;
+    private final NotificationService notificationService;
+    private final AuthorizationService authorizationService;
+    private final AccountRepo accountRepo;
 
-    public List<ComplaintResponseDto> getInstitutionComplaints(ComplaintFilterRequestDto filter) {
+    public List<ComplaintResponseDto> getInstitutionComplaints(
+            ComplaintFilterRequestDto filter
+    ) {
 
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Employee employee = employeeRepo.findByAccount_Email(email);
+        String email =
+                SecurityContextHolder
+                        .getContext()
+                        .getAuthentication()
+                        .getName();
 
-        Specification<Complaint> spec =  (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("deleted"), false));
-            predicates.add(cb.equal(root.get("governorate").get("id"), employee.getGovernorate().getId()));
-            predicates.add(cb.equal(root.get("institution").get("id"), employee.getInstitution().getId()));
+        Employee employee =
+                employeeRepo.findByAccount_Email(email);
 
-            if (filter.state() != null) {
+        Specification<Complaint> spec =
+                (root, query, cb) -> {
 
-                ComplaintState complaintState = CommonUtils.fromArabicState(filter.state());
-                predicates.add(cb.equal(root.get("state"), complaintState));
+                    List<Predicate> predicates =
+                            new ArrayList<>();
 
-                    if (!(complaintState == ComplaintState.IN_REVIEW) && !(complaintState == ComplaintState.NEW)) {
+                    predicates.add(
+                            cb.equal(
+                                    root.get("deleted"),
+                                    false
+                            )
+                    );
 
-                        Join<Complaint, ComplaintTrackingLog> logJoin = root.join("logs");
+                    predicates.add(
+                            cb.equal(
+                                    root.get("governorate")
+                                            .get("id"),
+                                    employee
+                                            .getGovernorate()
+                                            .getId()
+                            )
+                    );
 
-                        predicates.add(cb.equal(
-                                logJoin.get("actionBy").get("id"),
-                                employee.getAccount().getId()
-                        ));
+                    predicates.add(
+                            cb.equal(
+                                    root.get("institution")
+                                            .get("id"),
+                                    employee
+                                            .getInstitution()
+                                            .getId()
+                            )
+                    );
 
-                        predicates.add(cb.equal(
-                                logJoin.get("newState"),
-                                complaintState
-                        ));
+                    if (filter.state() != null) {
+
+                        ComplaintState complaintState =
+                                CommonUtils.fromArabicState(
+                                        filter.state()
+                                );
+
+                        predicates.add(
+                                cb.equal(
+                                        root.get("state"),
+                                        complaintState
+                                )
+                        );
+
+                    } else {
+
+                        predicates.add(
+                                cb.equal(
+                                        root.get("state"),
+                                        ComplaintState
+                                                .FORWARDED_TO_MANAGER
+                                )
+                        );
                     }
-                }
 
-            else {
-                    predicates.add(cb.equal(root.get("state"), ComplaintState.FORWARDED_TO_MANAGER));
-            }
+                    query.orderBy(
+                            cb.desc(
+                                    root.get(
+                                            "dateTimeOfAdd"
+                                    )
+                            )
+                    );
 
-            query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
+                    return cb.and(
+                            predicates.toArray(
+                                    new Predicate[0]
+                            )
+                    );
+                };
 
-        if (filter.page() == null || filter.size() == null) {
+        int page =
+                filter.page() == null
+                        ? 0
+                        : filter.page();
 
-            return complaintRepo.findAll(
-                            spec,
-                            PageRequest.of(0, 100)).stream()
-                    .map(complaintMapper::toDto)
-                    .toList();
+        int size =
+                filter.size() == null
+                        ? 100
+                        : filter.size();
 
-        } else {
-            return complaintRepo.findAll(
-                            spec,
-                            PageRequest.of(filter.page(), filter.size())
-                    ).stream()
-                    .map(complaintMapper::toDto)
-                    .toList();
-        }
+        return complaintRepo.findAll(
+                        spec,
+                        PageRequest.of(page, size)
+                )
+                .stream()
+                .map(complaintMapper::toDto)
+                .toList();
     }
 
+
+    @Transactional
+    public ComplaintResponseDto openComplaint(long complaintId) {
+
+        Employee employee =
+                employeeRepo.findByAccount_Email(  SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Complaint complaint =
+                complaintRepo
+                        .findByIdAndDeletedFalse(complaintId).orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        if (!complaint.getInstitution().getId().equals(employee.getInstitution().getId()) ||
+                !complaint.getGovernorate().getId().equals(employee.getGovernorate().getId())) {
+
+            throw new ApiException(
+                    "this complaint doesn't belong to your institution",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        if (!authorizationService.checkAccessibility(employee,complaint)) {
+            throw new ApiException(
+                    "Access denied",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+//        workflowEngine.createActionLog(
+//                complaint,
+//                employee.getAccount(),
+//                ActionType.OPENED
+//        );
+
+        return complaintMapper
+                .toDto(complaint);
+
+    }
+
+
+    @Transactional
+    public ApiResponseDto<?> assignComplaintToEmployee(
+            AssignComplaintDto dto
+    ) {
+
+        Employee manager =
+                employeeRepo.findByAccount_Email(
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName()
+                );
+
+        Complaint complaint =
+                complaintRepo
+                        .findByIdAndDeletedFalse(
+                                dto.complaintId()
+                        )
+                        .orElseThrow(() ->
+                                new ApiException(
+                                        "Complaint not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
+
+        validator.validate(
+                complaint.getState(),
+                ComplaintState.ASSIGNED
+        );
+
+        if (!authorizationService
+                .checkAccessibility(
+                        manager,
+                        complaint
+                )) {
+
+            throw new ApiException(
+                    "Access denied",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        Employee assignedEmployee =
+                employeeRepo.findById(
+                                dto.assignedTo()
+                        )
+                        .orElseThrow(() ->
+                                new ApiException(
+                                        "Employee not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
+
+        if (!assignedEmployee.getInstitution().getId().equals(complaint.getInstitution().getId())||
+                !assignedEmployee.getGovernorate().getId().equals(complaint.getGovernorate().getId())
+        ) {
+
+            throw new ApiException(
+                    "Employee does not belong to complaint institution",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        complaint.setDateTimeOfUpdate(
+                LocalDateTime.now()
+        );
+
+        complaintRepo.save(complaint);
+
+        workflowEngine.changeState(
+                complaint,
+                ComplaintState.ASSIGNED,
+                manager.getAccount(),
+                assignedEmployee,
+                null,
+                ActionType.ASSIGNED
+        );
+
+        notificationService.notifyUsers(complaint,"no thing",List.of(assignedEmployee.getAccount()));
+
+        return new ApiResponseDto<>(
+                true,
+                "تم اسناد الشكوى بنجاح",
+                null
+        );
+    }
+
+    @Transactional
+    public ApiResponseDto<?> assignToMyself(long complaintId) {
+
+        Employee manager =
+                employeeRepo.findByAccount_Email(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Complaint complaint =
+                complaintRepo
+                        .findByIdAndDeletedFalse(complaintId) .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+
+        if (!authorizationService.checkAccessibility(manager,complaint)) {
+            throw new ApiException(
+                    "Access denied",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        workflowEngine.changeState(
+                complaint,
+                ComplaintState.ASSIGNED,
+                manager.getAccount(),
+                manager,
+                null,
+                ActionType.ASSIGNED
+        );
+
+        validator.validate(
+                complaint.getState(),
+                ComplaintState.IN_PROGRESS
+        );
+
+        workflowEngine.changeState(
+                complaint,
+                ComplaintState.IN_PROGRESS,
+                manager.getAccount(),
+                manager,
+                "Handled by manager",
+                ActionType.STARTED
+        );
+
+        complaint.setDateTimeOfUpdate(
+                LocalDateTime.now()
+        );
+
+        complaintRepo.save(complaint);
+
+        notificationService.notifyUsers(
+                complaint,
+                "The manager started working on your complaint",
+                List.of(manager.getAccount())
+        );
+
+        return new ApiResponseDto<>(
+                true,
+                "تم إسناد الشكوى لك بنجاح",
+                null
+        );
+    }
 
 }

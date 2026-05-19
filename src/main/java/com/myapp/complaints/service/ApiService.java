@@ -132,6 +132,10 @@ public class ApiService {
 
             return receptionistComplaintWorkflow.openComplaint(complaint,complaint.getState());
 
+        } else if (authorizationService.isManager()) {
+
+            return managerComplaintWorkFlow.openComplaint(complaint.getId());
+
         }
 
 // open complaint by citizen

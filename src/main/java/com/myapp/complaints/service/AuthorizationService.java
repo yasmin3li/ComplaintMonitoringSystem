@@ -4,6 +4,7 @@ import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.entity.Employee;
+import com.myapp.complaints.enums.ComplaintState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -57,11 +58,42 @@ public class AuthorizationService {
 //
 //        return log.isPresent()
 //                && log.get().getAssignedTo().getAccount().getId().equals(employee.getId());
+
     }
 
     public boolean checkAccessibility(Employee employee, Complaint complaint) {
+        // manager can access forwarded complaints
+
+//            boolean isManager =
+//                    employee.getAccount()
+//                            .getRole()
+//                            .getName()
+//                            .equals("MANAGER");
+
+            boolean sameInstitution =
+                    complaint.getInstitution()
+                            .getId()
+                            .equals(employee
+                                    .getInstitution()
+                                    .getId());
+
+            boolean sameGovernorate =
+                    complaint.getGovernorate()
+                            .getId()
+                            .equals(employee
+                                    .getGovernorate()
+                                    .getId());
+
+            if (isManager()
+                    && sameInstitution
+                    && sameGovernorate) {
+
+                return true;
+            }
+
         Optional<ComplaintTrackingLog> log =
-                complaintTracingLogRepo.findTopByComplaint_IdAndActionBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(),employee.getAccount().getId(),complaint.getState());
+                complaintTracingLogRepo.findTopByComplaint_IdAndActionBy_IdAndNewStateOrderByActionDateDesc(
+                        complaint.getId(),employee.getAccount().getId(),complaint.getState());
         return log.isPresent();
     }
 }
