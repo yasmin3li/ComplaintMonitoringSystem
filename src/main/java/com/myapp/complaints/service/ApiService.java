@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -302,6 +303,20 @@ public class ApiService {
         complaintRepo.save(complaint);
 
         return new ApiResponseDto<>(true,"priority "+complaint.getPriority()+" was added successfully",null);
+    }
+
+    public List<Employee> getInstitutionEmployee(){
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        Employee employee = employeeRepo.findByAccount_Email(auth.getName());
+
+        return
+                employeeRepo.findByGovernorate_IdAndInstitution_IdAndAccount_Role_Id(
+                        employee.getGovernorate().getId(),
+                        employee.getInstitution().getId(),
+                        4);
+
     }
 
 }

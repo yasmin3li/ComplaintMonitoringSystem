@@ -34,7 +34,7 @@ public class UserInfoConfig implements UserDetails {
             case "موظف الاستقبال" -> new SimpleGrantedAuthority("ROLE_RECEPTIONIST");
             case "مدير" -> new SimpleGrantedAuthority("ROLE_MANAGER");
             case "أدمن" -> new SimpleGrantedAuthority("ROLE_ADMIN");
-//            case role -> new SimpleGrantedAuthority("ROLE_"+role);
+            case "موظف ميداني" -> new SimpleGrantedAuthority("ROLE_FIELD_EMPLOYEE");
             default -> throw new IllegalArgumentException("Unknown role: " + role);
         };
     }
