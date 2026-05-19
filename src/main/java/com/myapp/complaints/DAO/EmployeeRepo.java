@@ -1,6 +1,8 @@
 package com.myapp.complaints.DAO;
 
 import com.myapp.complaints.entity.Employee;
+import com.myapp.complaints.entity.Governorate;
+import com.myapp.complaints.entity.Institution;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.rest.core.annotation.RestResource;
 
@@ -12,7 +14,8 @@ public interface EmployeeRepo extends JpaRepository<Employee,Long> {
     @RestResource(exported = false)
     Optional<Employee> findByAccountId(Long accountId);
 
-    List<Employee> findByInstitution_IdAndAccount_Role_Id(Long institutionId, long i);
+    List<Employee> findByGovernorate_IdAndInstitution_IdAndAccount_Role_Id(Long governorateId,Long institutionId, long i);
 
     Employee findByAccount_Email(String email);
+
 }

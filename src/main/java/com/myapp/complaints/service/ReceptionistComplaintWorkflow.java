@@ -9,7 +9,6 @@ import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ActionType;
-import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
@@ -329,7 +328,11 @@ public class ReceptionistComplaintWorkflow {
         }
 
         //receptionist assigns this complaint to the manager by default
-        List<Employee> forwardTO = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),3);
+        List<Employee> forwardTO =
+                employeeRepo.findByGovernorate_IdAndInstitution_IdAndAccount_Role_Id(
+                        complaint.getGovernorate().getId()
+                        ,complaint.getInstitution().getId(),
+                        3);
 
         complaint.setDateTimeOfUpdate(LocalDateTime.now());
         complaintRepo.save(complaint);

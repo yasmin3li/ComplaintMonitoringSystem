@@ -5,7 +5,6 @@ import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ActionType;
-import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
@@ -121,7 +120,11 @@ public class CitizenComplaintWorkFlow {
  *  find all employee at institution: complaint-institution name,
  * with role: perception employee, to send new notification with content: "new complaint has been added"
  */
-        List<Employee> employees = employeeRepo.findByInstitution_IdAndAccount_Role_Id(complaint.getInstitution().getId(),2);
+        List<Employee> employees =
+                employeeRepo.findByGovernorate_IdAndInstitution_IdAndAccount_Role_Id(
+                        complaint.getGovernorate().getId(),
+                        complaint.getInstitution().getId(),
+                        2);
 
         List<Account> accounts = new ArrayList<>(List.of());
 
