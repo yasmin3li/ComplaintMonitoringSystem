@@ -18,6 +18,7 @@ import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -96,12 +97,12 @@ public class ReceptionistComplaintWorkflow {
         else throw new ApiException("this complaint doesn't belong to your institution",HttpStatus.FORBIDDEN);
     }
 
-    public Specification<Complaint> getInstitutionComplaints(ComplaintFilterRequestDto filter) {
+    public List<ReceptionComplaintResponseDto> getInstitutionComplaints(ComplaintFilterRequestDto filter) {
 
             String email = SecurityContextHolder.getContext().getAuthentication().getName();
             Employee employee = employeeRepo.findByAccount_Email(email);
 
-            return  (root, query, cb) -> {
+            Specification<Complaint> spec =  (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
                 predicates.add(cb.equal(root.get("deleted"), false));
                 predicates.add(cb.equal(root.get("governorate").get("id"), employee.getGovernorate().getId()));
@@ -137,6 +138,23 @@ public class ReceptionistComplaintWorkflow {
                 query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
                 return cb.and(predicates.toArray(new Predicate[0]));
             };
+
+        if (filter.page() == null || filter.size() == null) {
+
+            return complaintRepo.findAll(
+                            spec,
+                            PageRequest.of(0, 100)).stream()
+                    .map(complaintMapper::toPerceptionComplaintDto)
+                    .toList();
+
+        } else {
+            return complaintRepo.findAll(
+                            spec,
+                            PageRequest.of(filter.page(), filter.size())
+                    ).stream()
+                    .map(complaintMapper::toPerceptionComplaintDto)
+                    .toList();
+        }
         }
 
 

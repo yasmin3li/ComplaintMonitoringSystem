@@ -218,13 +218,13 @@ public class ApiController {
         return ResponseEntity.ok(apiService.openComplaint(complaintId));
     }
 
-    @PreAuthorize("hasRole('RECEPTIONIST')")
+//    @PreAuthorize("hasRole('RECEPTIONIST')")
     @GetMapping("/institutions/complaints/{complaintId}")
     public ResponseEntity<?> getInstitutionComplaint(@PathVariable Long complaintId){
         return ResponseEntity.ok(apiService.openComplaint(complaintId));
     }
 
-    @PreAuthorize("hasRole('RECEPTIONIST')")
+//    @PreAuthorize("hasRole('RECEPTIONIST')")
     @GetMapping("/institutions/complaints")
     public ResponseEntity<?> geNewInstitutionComplaints(ComplaintFilterRequestDto filter){
         return ResponseEntity.ok(apiService.getComplaints(filter,true));

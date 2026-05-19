@@ -2,7 +2,6 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
-import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.enums.ComplaintState;
@@ -12,7 +11,6 @@ import com.myapp.complaints.mapper.ComplaintMapper;
 import com.myapp.complaints.mapper.ComplaintTrackingLogMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -44,7 +42,7 @@ public class ApiService {
     private final NotificationService notificationService;
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
     private final ComplaintTrackingLogMapper trackingLogMapper;
-    private final ComplaintWorkflowEngine workflowEngine;
+    private final ManagerComplaintWorkFlow managerComplaintWorkFlow;
 //Get data for homePage (last complaints)
 //    public List<ComplaintResponseDto> getLast10Complaints() {
 //
@@ -84,51 +82,22 @@ public class ApiService {
 //display list of complaints based on account's role and special filter
     public Object getComplaints(ComplaintFilterRequestDto filter,boolean localUser) {
 
-        Specification<Complaint> spec;
 //TODO :later when dealing with admin_role or manager_role will do like this role_condition and local user will be always true
 
         if (authorizationService.IsReceptionist()) {
 
-            spec = receptionistComplaintWorkflow.getInstitutionComplaints(filter);
+            return receptionistComplaintWorkflow.getInstitutionComplaints(filter);
 
-            if (filter.page() == null || filter.size() == null) {
+        }
 
-                return complaintRepo.findAll(
-                                spec,
-                                PageRequest.of(0, 100)).stream()
-                        .map(complaintMapper::toPerceptionComplaintDto)
-                        .toList();
+        else if (authorizationService.isManager()) {
 
-            } else {
-                return complaintRepo.findAll(
-                                spec,
-                                PageRequest.of(filter.page(), filter.size())
-                        ).stream()
-                        .map(complaintMapper::toPerceptionComplaintDto)
-                        .toList();
-            }
+            return managerComplaintWorkFlow.getInstitutionComplaints(filter);
+
         }
 
         else {
-
-            spec = citizenComplaintWorkFlow.getCitizensComplaints(localUser,filter);
-            if (filter.page() == null || filter.size() == null) {
-
-                return complaintRepo.findAll(
-                                spec,
-                                PageRequest.of(0, 100)).stream()
-                        .map(complaintMapper::toDto)
-                        .toList();
-
-            } else {
-                return complaintRepo.findAll(
-                                spec,
-                                PageRequest.of(filter.page(), filter.size())
-                        ).stream()
-                        .map(complaintMapper::toDto)
-                        .toList();
-            }
-
+            return citizenComplaintWorkFlow.getCitizensComplaints(localUser,filter);
         }
     }
 

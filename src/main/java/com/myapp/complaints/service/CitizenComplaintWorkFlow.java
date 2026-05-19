@@ -14,6 +14,7 @@ import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -139,8 +140,10 @@ public class CitizenComplaintWorkFlow {
         );
     }
 
-    public Specification<Complaint> getCitizensComplaints(boolean localUser, ComplaintFilterRequestDto filter) {
-        return (root, query, cb) -> {
+    public List<ComplaintResponseDto> getCitizensComplaints(boolean localUser, ComplaintFilterRequestDto filter) {
+
+        Specification<Complaint> spec =  (root, query, cb) -> {
+
             List<Predicate> predicates = new ArrayList<>();
 
             // deleted = false
@@ -186,6 +189,24 @@ public class CitizenComplaintWorkFlow {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+
+        if (filter.page() == null || filter.size() == null) {
+
+            return complaintRepo.findAll(
+                            spec,
+                            PageRequest.of(0, 100)).stream()
+                    .map(complaintMapper::toDto)
+                    .toList();
+
+        } else {
+            return complaintRepo.findAll(
+                            spec,
+                            PageRequest.of(filter.page(), filter.size())
+                    ).stream()
+                    .map(complaintMapper::toDto)
+                    .toList();
+        }
+
     }
 
     public ApiResponseDto<?> updateComplaint(String email, UpdateComplaintDto dto) {
