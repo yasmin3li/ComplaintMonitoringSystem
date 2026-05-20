@@ -1,9 +1,8 @@
 package com.myapp.complaints.DAO;
 
+import com.myapp.complaints.dto.DelayedComplaintsProjection;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.enums.ComplaintState;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -85,8 +84,49 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
             @Param("end") LocalDateTime end
     );
 
+    @Query("""
+    SELECT COUNT(c)
+    FROM Complaint c
+    WHERE c.deleted = false
+    AND c.assignedTo.account.id = :accountId
+    AND c.state = ComplaintState.ASSIGNED
+""")
+    long countAssignedComplaints(
+            @Param("accountId") Long accountId
+    );
 
+    @Query("""
+    SELECT COUNT(c)
+    FROM Complaint c
+    WHERE c.deleted = false
+    AND c.assignedTo.account.id = :accountId
+    AND c.state = com.myapp.complaints.enums.ComplaintState.IN_PROGRESS
+""")
+    long countInProgressComplaints(
+            @Param("accountId") Long accountId
+    );
 
+    @Query("""
+SELECT
+    c.id as complaintId,
+    c.title as title,
+    c.priority as priority,
+    c.dateTimeOfUpdate as lastUpdate,
+    c.state as state
+FROM Complaint c
+JOIN c.assignedTo a
+WHERE c.deleted = false
+  AND a.id = :accountId
+  AND c.state IN (
+      com.myapp.complaints.enums.ComplaintState.ASSIGNED,
+      com.myapp.complaints.enums.ComplaintState.IN_PROGRESS
+  )
+  AND c.dateTimeOfUpdate < :threshold
+""")
+    List<DelayedComplaintsProjection> delayedComplaints(
+            @Param("accountId") Long accountId,
+            @Param("threshold") LocalDateTime threshold
+    );
 
 
 //Complaints Dynamic Query Filter

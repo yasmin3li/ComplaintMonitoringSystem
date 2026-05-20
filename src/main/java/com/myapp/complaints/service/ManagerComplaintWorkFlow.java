@@ -1,8 +1,8 @@
 package com.myapp.complaints.service;
 
 import com.myapp.complaints.CommonUtils;
-import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.DAO.ComplaintRepo;
+import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
 import com.myapp.complaints.DAO.EmployeeRepo;
 import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -37,7 +38,8 @@ public class ManagerComplaintWorkFlow {
     private final ComplaintWorkflowEngine workflowEngine;
     private final NotificationService notificationService;
     private final AuthorizationService authorizationService;
-    private final AccountRepo accountRepo;
+    private final ComplaintTracingLogRepo logRepo;
+    private final EmployeePerformanceService performanceService;
 
     public List<ComplaintResponseDto> getInstitutionComplaints(
             ComplaintFilterRequestDto filter
@@ -328,6 +330,109 @@ public class ManagerComplaintWorkFlow {
                 "تم إسناد الشكوى لك بنجاح",
                 null
         );
+    }
+
+    public List<ManagerEmployeeRecommendationDto> getEmployeesRecommendation(
+            ConfigFilterDto dto
+    ) {
+
+        LocalDateTime end,start;
+        long threshold;
+
+        if (dto.start() == null || dto.end() == null) {
+
+            end = LocalDateTime.now();
+            start = end.minusMonths(1);
+
+        }else {
+            start = dto.start();
+            end = dto.end();
+        }
+
+        if(dto.threshold()<=0){
+            threshold = 3;
+        }else {
+            threshold = dto.threshold();
+        }
+
+        Employee manager =
+                employeeRepo.findByAccount_Email(
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName()
+                );
+
+        List<Employee> employees =
+                employeeRepo.findByInstitution_IdAndGovernorate_IdAndAccount_Role_Id(
+                        manager.getInstitution().getId(),
+                        manager.getGovernorate().getId(),
+                        4L
+                );
+
+        List<ManagerEmployeeRecommendationDto> result = new ArrayList<>();
+
+        for (Employee employee : employees) {
+
+            long assignedTasks =
+                    complaintRepo.countAssignedComplaints(
+                            employee.getAccount().getId()
+                    );
+
+            long inProgressTasks =
+                    complaintRepo.countInProgressComplaints(
+                            employee.getAccount().getId()
+                    );
+
+            long resolved =
+                    logRepo.countResolvedComplaintsBetween(
+                            employee.getAccount().getId(),
+                            start,
+                            end
+                    );
+
+            List<DelayedComplaintsProjection> delayed =
+                    complaintRepo.delayedComplaints(
+                            employee.getAccount().getId(),
+                            LocalDateTime.now().minusDays(threshold)
+                    );
+
+
+//            EmployeePerformanceDto performance =
+//                    performanceService.getEmployeePerformance(
+//                            employee.getId(),
+//                            start,
+//                            end
+//                    );
+
+            result.add(
+                    new ManagerEmployeeRecommendationDto(
+                            employee.getId(),
+                            employee.getAccount().getUserName(),
+                            assignedTasks,
+                            inProgressTasks,
+                            resolved,
+                            delayed
+//                            performance.responseRate(),
+//                            performance.score(),
+//                            performance.badges()
+                    )
+            );
+        }
+
+        result.sort(
+                Comparator.comparingLong(
+                        (ManagerEmployeeRecommendationDto e) ->
+                                e.assignedTasks() + e.inProgressTasks()
+                )
+//                        .thenComparing(
+//                        Comparator.comparingDouble(
+//                                ManagerEmployeeRecommendationDto::score
+//                        ).reversed()
+//                )
+        );
+
+        return result;
     }
 
 }

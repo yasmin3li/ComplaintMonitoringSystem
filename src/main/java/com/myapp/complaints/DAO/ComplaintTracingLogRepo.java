@@ -78,4 +78,17 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
 
     Optional<ComplaintTrackingLog> findTopByComplaint_IdAndComplaint_AddedBy_IdAndNewStateOrderByActionDateDesc(Long id, Long id1, ComplaintState complaintState);
 
+    @Query("""
+    SELECT COUNT(DISTINCT l.complaint.id)
+    FROM ComplaintTrackingLog l
+    WHERE l.actionBy.id = :accountId
+    AND l.newState =ComplaintState.RESOLVED
+    AND l.actionDate BETWEEN :start AND :end
+""")
+    long countResolvedComplaintsBetween(
+            @Param("accountId") Long accountId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
 }
