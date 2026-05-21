@@ -11,6 +11,8 @@ import com.myapp.complaints.enums.ComplaintState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class ComplaintWorkflowEngine {
@@ -41,6 +43,7 @@ public class ComplaintWorkflowEngine {
         //  update complaint
         complaint.setState(newState);
         complaint.setAssignedTo(assignedTo);
+        complaint.setDateTimeOfUpdate(LocalDateTime.now());
         complaintRepo.save(complaint);
     }
 
@@ -90,13 +93,8 @@ public class ComplaintWorkflowEngine {
             case STARTED -> "تم بدء العمل على الشكوى";
             case FINISHED -> "تم الانتهاء من العمل على الشكوى";
             case CLOSED -> "تم إغلاق الشكوى";
+            case UPLOAD_IMAGE -> "تم ارفاق صور لحل الشكوى";
 
-//            case STATE_CHANGED -> switch (newState) {
-//                case IN_REVIEW -> "الشكوى قيد المراجعة";
-//                case RESOLVED -> "تم حل الشكوى";
-//                case CLOSED -> "تم إغلاق الشكوى";
-//                default -> "تم تغيير حالة الشكوى";
-//            };
 
             default -> "تم تنفيذ إجراء على الشكوى";
         };

@@ -5,12 +5,12 @@ public enum ActionType {
     OPENED,
     ASSIGNED,
     UPDATED,
-//    STATE_CHANGED,
     ACCEPTED,
     COMMENTED,
     CLOSED,
     REJECTED, DELETED,
     IN_REVIEW,
     STARTED,
-    FINISHED
+    FINISHED,
+    UPLOAD_IMAGE
 }

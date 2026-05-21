@@ -183,8 +183,6 @@ public class ReceptionistComplaintWorkflow {
 
                     workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, null, ActionType.IN_REVIEW);
 
-                    complaint.setDateTimeOfUpdate(LocalDateTime.now());
-                    complaintRepo.save(complaint);
 
                     return new ApiResponseDto<>(true,"الشكوى الان ضمن مسؤلياتك",null);
                 }
@@ -237,9 +235,6 @@ public class ReceptionistComplaintWorkflow {
                         complaint.getGovernorate().getId()
                         ,complaint.getInstitution().getId(),
                         3);
-
-        complaint.setDateTimeOfUpdate(LocalDateTime.now());
-        complaintRepo.save(complaint);
 
         workflowEngine.changeState
                 (complaint,ComplaintState.FORWARDED_TO_MANAGER,employee.getAccount(),null,null, ActionType.ACCEPTED);

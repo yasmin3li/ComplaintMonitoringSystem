@@ -289,7 +289,7 @@ public class ApiController {
     @PostMapping("/employee/complaint/reject")
     public ResponseEntity<?> rejectComplaint(@RequestBody ComplaintRejectDto dto,Authentication auth){
         String email = auth.getName();
-        return ResponseEntity.ok(employeeComplaintWorkFlow.actionOnComplaint(email,dto, ActionType.REJECTED));
+        return ResponseEntity.ok(employeeComplaintWorkFlow.rejectComplaint(email,dto));
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
@@ -328,13 +328,13 @@ public class ApiController {
     @PostMapping("/employee/complaint/close")
     public ResponseEntity<?> closeComplaint(@RequestBody ComplaintRejectDto dto, Authentication auth){
         String email = auth.getName();
-        return ResponseEntity.ok(employeeComplaintWorkFlow.actionOnComplaint(email,dto,ActionType.CLOSED));
+        return ResponseEntity.ok(employeeComplaintWorkFlow.closeComplaint(email,dto));
     }
 
     @PostMapping("/employee/complaint/solve")
     public ResponseEntity<?> solveComplaint(@RequestBody ComplaintRejectDto dto, Authentication auth){
         String email = auth.getName();
-        return ResponseEntity.ok(employeeComplaintWorkFlow.actionOnComplaint(email,dto,ActionType.FINISHED));
+        return ResponseEntity.ok(employeeComplaintWorkFlow.solveComplaint(email,dto));
     }
 
 

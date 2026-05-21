@@ -32,8 +32,9 @@ public class EmployeeComplaintWorkFlow {
     private final AuthorizationService authorizationService;
     private final NotificationService notificationService;
 
+//    we will not use this action/state at this version.
     @Transactional
-    public ApiResponseDto<?> actionOnComplaint(String email, ComplaintRejectDto dto, ActionType actionType) {
+    public ApiResponseDto<?> closeComplaint(String email, ComplaintRejectDto dto) {
 
         Employee employee = employeeRepo.findByAccount_Email(email);
 
@@ -56,37 +57,8 @@ public class EmployeeComplaintWorkFlow {
             }
         }
 
-        return switch (actionType){
-
-            case  CREATED, IN_REVIEW, STARTED, ACCEPTED, COMMENTED, DELETED, ASSIGNED, OPENED, UPDATED -> null;
-
-            case REJECTED -> rejectComplaint(dto,complaint,employee);
-
-//            case STATE_CHANGED -> switch (complaint.getState()) {
-
-            case FINISHED -> solveComplaint(dto,complaint,employee);
-
-            case CLOSED -> closeComplaint(dto,complaint,employee);
-
-//                default ->  new ApiResponseDto<>(
-//                        false,
-//                        "un known err",
-//                        null
-//                );
-//            };
-        };
-
-    }
-
-//    we will not use this action/state at this version.
-    @Transactional
-    private ApiResponseDto<?> closeComplaint(ComplaintRejectDto dto, Complaint complaint, Employee employee) {
-
         workflowEngine.changeState(complaint,ComplaintState.CLOSED,employee.getAccount(),
                 null, dto.reason() == null ? null : dto.reason(), ActionType.CLOSED);
-
-        complaint.setDateTimeOfUpdate(LocalDateTime.now());
-        complaintRepo.save(complaint);
 
         return new ApiResponseDto<>(
                 true,
@@ -133,11 +105,9 @@ public class EmployeeComplaintWorkFlow {
         }
 
         complaintRepo.save(complaint);
-
-        workflowEngine.createActionLog(complaint,employee.getAccount(), ActionType.UPDATED);
-
         complaint.setDateTimeOfUpdate(LocalDateTime.now());
-        complaintRepo.save(complaint);
+
+        workflowEngine.createActionLog(complaint,employee.getAccount(), ActionType.UPLOAD_IMAGE);
 
         return new ApiResponseDto<>(
                 true,
@@ -148,13 +118,31 @@ public class EmployeeComplaintWorkFlow {
     }
 
     @Transactional
-    public ApiResponseDto<?> solveComplaint(ComplaintRejectDto dto,Complaint complaint ,Employee employee){
+    public ApiResponseDto<?> solveComplaint(String email, ComplaintRejectDto dto){
+
+        Employee employee = employeeRepo.findByAccount_Email(email);
+
+        Complaint complaint = complaintRepo
+                .findByIdAndDeletedFalse(dto.complaintId())
+                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        if (complaint.getAssignedTo() == null) {
+            throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!authorizationService.isManager()){
+            if(!authorizationService.checkResponsibility(employee,complaint)){
+                throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
+            }
+        }
+        else {
+            if(!authorizationService.checkAccessibility(employee,complaint)){
+                throw new ApiException("Access denied, you can't access to this complaint",HttpStatus.FORBIDDEN);
+            }
+        }
 
         workflowEngine.changeState(complaint,ComplaintState.RESOLVED,employee.getAccount(),
                 null, dto.reason() == null ? null : dto.reason(), ActionType.FINISHED);
-
-        complaint.setDateTimeOfUpdate(LocalDateTime.now());
-        complaintRepo.save(complaint);
 
         return new ApiResponseDto<>(
                 true,
@@ -165,13 +153,31 @@ public class EmployeeComplaintWorkFlow {
     }
 
     @Transactional
-    public ApiResponseDto<?> rejectComplaint(ComplaintRejectDto dto, Complaint complaint, Employee employee) {
+    public ApiResponseDto<?> rejectComplaint(String email, ComplaintRejectDto dto) {
+
+        Employee employee = employeeRepo.findByAccount_Email(email);
+
+        Complaint complaint = complaintRepo
+                .findByIdAndDeletedFalse(dto.complaintId())
+                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        if (complaint.getAssignedTo() == null) {
+            throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!authorizationService.isManager()){
+            if(!authorizationService.checkResponsibility(employee,complaint)){
+                throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
+            }
+        }
+        else {
+            if(!authorizationService.checkAccessibility(employee,complaint)){
+                throw new ApiException("Access denied, you can't access to this complaint",HttpStatus.FORBIDDEN);
+            }
+        }
 
             if((complaint.getState().equals(ComplaintState.IN_REVIEW)) || (complaint.getState().equals(ComplaintState.FORWARDED_TO_MANAGER))){
                 workflowEngine.changeState(complaint,ComplaintState.REJECTED,employee.getAccount(),null,dto.reason(),ActionType.REJECTED);
-
-                complaint.setDateTimeOfUpdate(LocalDateTime.now());
-                complaintRepo.save(complaint);
 
                 notificationService.notifyUsers(complaint,dto.reason(), List.of(complaint.getAddedBy()));
             }
