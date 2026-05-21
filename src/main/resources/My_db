@@ -247,7 +247,7 @@ foreign key (account_id) references account(id)
 
 create table notification_templates(
     id BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    state ENUM('NEW','REJECTED','IN_REVIEW','FORWARDED_TO_MANAGER','ASSIGNED'),
+    state ENUM('NEW','REJECTED','IN_REVIEW','FORWARDED_TO_MANAGER','ASSIGNED','IN_PROGRESS'),
     role_id BIGINT NOT NULL,
     title varchar(50),
     message varchar(100),
@@ -334,7 +334,8 @@ INSERT INTO role (id,name) VALUES
 (1,'مواطن'),
 (2,'موظف الاستقبال'),
 (3,'مدير'),
-(4,'أدمن');
+(4,'موظف تقني'),
+(5,'أدمن');
 
 -- Governorates
 INSERT INTO governorate (id,name) VALUES
@@ -497,41 +498,41 @@ INSERT INTO employee (id,institution_id,governorate_id,sector_id) VALUES
 (3,1,1,1),(4,3,2,2),(5,11,1,5);
 
 -- Addresses (Hama only)
-INSERT INTO address (id,latitude,longitude,full_address_text) VALUES
-(1,34.7333,36.7167,'حماه - حي العمال'),
-(2,34.7300,36.7000,'حماه - شارع الصناعة'),
-(3,34.7350,36.7150,'حماه - حي العليليات'),
-(4,34.7280,36.7120,'حماه - منطقة القصور'),
-(5,34.7400,36.7200,'حماه - شارع الأربعين'),
-(6,34.7250,36.7050,'الدباغة'),
-(7,34.7320,36.7180,'حماه - شارع حماة القديم'),
-(8,34.7295,36.7095,'حماه - منطقة الصابونية');
+-- INSERT INTO address (id,latitude,longitude,full_address_text) VALUES
+-- (1,34.7333,36.7167,'حماه - حي العمال'),
+-- (2,34.7300,36.7000,'حماه - شارع الصناعة'),
+-- (3,34.7350,36.7150,'حماه - حي العليليات'),
+-- (4,34.7280,36.7120,'حماه - منطقة القصور'),
+-- (5,34.7400,36.7200,'حماه - شارع الأربعين'),
+-- (6,34.7250,36.7050,'الدباغة'),
+-- (7,34.7320,36.7180,'حماه - شارع حماة القديم'),
+-- (8,34.7295,36.7095,'حماه - منطقة الصابونية');
 
 -- Complaints
 -- Complaints
-INSERT INTO complaint (id,title,description,state,deleted,added_by_account_id,service_id,institution_id,governorate_id,sector_id,address_id) VALUES
+-- INSERT INTO complaint (id,title,description,state,deleted,added_by_account_id,service_id,institution_id,governorate_id,sector_id,address_id) VALUES
 
--- Citizen 1
-(1,'شكوى كهرباء: انقطاع التيار الكهربائي','انقطاع الكهرباء في المنزل منذ يومين','NEW',FALSE,1,2,1,1,1,1),
-(2,'شكوى كهرباء: تذبذب الجهد الكهربائي','ضغط غير مستقر في التيار الكهربائي داخل الحي','NEW',FALSE,1,4,3,2,2,2),
-(3,'شكوى كهرباء: أعطال في الشبكة الكهربائية الصناعية','أعطال كهربائية في المصانع','NEW',FALSE,1,1,1,1,1,3),
-(4,'شكوى كهرباء: انقطاع خدمة الانترنت بسبب الكهرباء','انقطاع الانترنت منذ الصباح بسبب مشاكل تغذية كهربائية','NEW',FALSE,1,3,5,1,3,4),
+-- -- Citizen 1
+-- (1,'شكوى كهرباء: انقطاع التيار الكهربائي','انقطاع الكهرباء في المنزل منذ يومين','NEW',FALSE,1,2,1,1,1,1),
+-- (2,'شكوى كهرباء: تذبذب الجهد الكهربائي','ضغط غير مستقر في التيار الكهربائي داخل الحي','NEW',FALSE,1,4,3,2,2,2),
+-- (3,'شكوى كهرباء: أعطال في الشبكة الكهربائية الصناعية','أعطال كهربائية في المصانع','NEW',FALSE,1,1,1,1,1,3),
+-- (4,'شكوى كهرباء: انقطاع خدمة الانترنت بسبب الكهرباء','انقطاع الانترنت منذ الصباح بسبب مشاكل تغذية كهربائية','NEW',FALSE,1,3,5,1,3,4),
 
--- Citizen 2
-(5,'شكوى كهرباء: تأثر النفايات بسبب انقطاع الكهرباء','النفايات لم تجمع منذ أسبوع بسبب توقف الخدمات','NEW',FALSE,1,4,11,1,5,5),
-(6,'شكوى كهرباء: ضعف تغذية كهربائية في مشروع زراعي','الأراضي بحاجة لمعالجة عاجلة بسبب ضعف الكهرباء','NEW',FALSE,1,4,13,1,6,6),
-(7,'شكوى كهرباء: توقف مضخات المياه بسبب انقطاع الكهرباء','المياه الساخنة لا تعمل بسبب الكهرباء','NEW',FALSE,1,4,3,2,2,7),
-(8,'شكوى كهرباء: انقطاع متكرر في التيار الكهربائي','انقطاع الكهرباء بشكل متكرر','NEW',FALSE,1,1,1,1,1,8);
+-- -- Citizen 2
+-- (5,'شكوى كهرباء: تأثر النفايات بسبب انقطاع الكهرباء','النفايات لم تجمع منذ أسبوع بسبب توقف الخدمات','NEW',FALSE,1,4,11,1,5,5),
+-- (6,'شكوى كهرباء: ضعف تغذية كهربائية في مشروع زراعي','الأراضي بحاجة لمعالجة عاجلة بسبب ضعف الكهرباء','NEW',FALSE,1,4,13,1,6,6),
+-- (7,'شكوى كهرباء: توقف مضخات المياه بسبب انقطاع الكهرباء','المياه الساخنة لا تعمل بسبب الكهرباء','NEW',FALSE,1,4,3,2,2,7),
+-- (8,'شكوى كهرباء: انقطاع متكرر في التيار الكهربائي','انقطاع الكهرباء بشكل متكرر','NEW',FALSE,1,1,1,1,1,8);
 
-INSERT INTO complaint_tracking_log (id,previous_status,new_status,action_type,comments,action_date,complaint_id,action_by_account_id,assigned_to_employee_id) VALUES
-(1,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-10 09:30:00',1,1,NULL),
-(2,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-11 14:15:00',2,1,NULL),
-(3,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-12 11:45:00',3,NULL,NULL),
-(4,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-13 08:20:00',4,NULL,NULL),
-(5,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-14 10:10:00',5,NULL,NULL),
-(6,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-14 16:30:00',6,NULL,NULL),
-(7,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-15 09:00:00',7,NULL,NULL),
-(8,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-15 13:45:00',8,NULL,NULL);
+-- INSERT INTO complaint_tracking_log (id,previous_status,new_status,action_type,comments,action_date,complaint_id,action_by_account_id,assigned_to_employee_id) VALUES
+-- (1,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-10 09:30:00',1,1,NULL),
+-- (2,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-11 14:15:00',2,1,NULL),
+-- (3,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-12 11:45:00',3,NULL,NULL),
+-- (4,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-13 08:20:00',4,NULL,NULL),
+-- (5,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-14 10:10:00',5,NULL,NULL),
+-- (6,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-14 16:30:00',6,NULL,NULL),
+-- (7,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-15 09:00:00',7,NULL,NULL),
+-- (8,NULL,'NEW','CREATED','مواطن أضاف شكوى جديدة','2026-03-15 13:45:00',8,NULL,NULL);
 
 
 INSERT INTO notification_templates (id, state, role_id, title, message) VALUES
@@ -540,8 +541,10 @@ INSERT INTO notification_templates (id, state, role_id, title, message) VALUES
 (2, 'NEW', 2, 'شكوى جديدة', 'يوجد شكوى جديدة بعنوان "{title}" تحتاج للمراجعة'),
 
 (3, 'REJECTED', 1, 'تم رفض شكواك', 'تم رفض شكواك "{title}" بسبب: {reason}'),
-(4,'FORWARDED_TO_MANAGER', 1, 'تتم قبول شكواك', 'تم قبول شكواك "{title}" وتحويلها الى المدير'),
-(5,'FORWARDED_TO_MANAGER', 3, 'شكوى جديدة', 'يوجد شكوى جديدة بعنوان "{title}"  بحاجة الى حل');
+(4,'FORWARDED_TO_MANAGER', 1, 'تم قبول شكواك', 'تم قبول شكواك "{title}" وتحويلها الى المدير'),
+(5,'FORWARDED_TO_MANAGER', 3, 'شكوى جديدة', 'يوجد شكوى جديدة بعنوان "{title}"  بحاجة الى حل'),
+(6,'ASSIGNED', 4, 'تم اسناد شكوى جديدة اليك بعنوان: ', '"{title}"'),
+(7,'IN_PROGRESS', 3, 'تم اسناد شكوى جديدة اليك بعنوان: ', '"{title}" وهي الأن قيد التقدم ');
 -- -----------------------------------------------------------------
 
 INSERT INTO account
@@ -551,6 +554,10 @@ VALUES
 -- ================== الكهرباء ==================
 (6,'emp_elec1_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',2,'elec1_hama@test.com','0910000001','20000000001','ACTIVATED',false,false,false,true,true),
 (28,'emp_elec2_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',2,'elec2_hama@test.com','0333562','884578','ACTIVATED',false,false,true,true,true),
+
+(31,'emp_elec3_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',4,'elec3_hama@test.com','0333572','885578','ACTIVATED',false,false,false,true,true),
+(32,'emp_elec4_hama','$2a$10$4DFrOxlFAoHylJ20bAgM/.eACIcyOaSBJNNEvSffYxeckkU80iMeK',4,'elec4_hama@test.com','0339562','884378','ACTIVATED',false,false,false,true,true),
+
 (7,'emp_elec_damascus','$2a$10$SVb2gHVdqVAPK5lyv9cKFOd/Z8Ufiyt68dBun2aWGbJOTMaZT026G',2,'elec_damascus@test.com','0910000002','20000000002','ACTIVATED',false,false,false,true,true),
 (8,'emp_elec_homs','$2a$10$kAq.tOA86qqG0/yK5txG6evQde74TmqGr9loTVsrMKV5pvrKD29O6',2,'elec_homs@test.com','0910000003','20000000003','ACTIVATED',false,false,false,true,true),
 (9,'emp_elec_lattakia','$2a$10$myYGZqM0NS42v3qsnLzuGecDo/ybVzRLETJDP0NgvOlgnvyxesjX6',2,'elec_lattakia@test.com','0910000004','20000000004','ACTIVATED',false,false,false,true,true),
@@ -584,7 +591,8 @@ INSERT INTO employee (id,institution_id,governorate_id,sector_id) VALUES
 ,(7,1,2,1),(8,1,3,1),(9,1,4,1),
 (28,1,1,1),(29,1,1,1),(30,1,1,1),
 (10,1,5,1),(11,1,6,1),(12,1,7,1),(13,1,8,1),
-
+(31,1,1,1),
+(32,1,1,1),
 -- المياه (sector 2) (مافي إدلب)
 (14,3,1,2),(15,3,2,2),(16,3,3,2),(17,3,4,2),
 (18,3,5,2),(19,3,7,2),(20,3,8,2),
