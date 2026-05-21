@@ -4,6 +4,7 @@ import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
+import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
@@ -11,7 +12,6 @@ import com.myapp.complaints.mapper.ComplaintMapper;
 import com.myapp.complaints.mapper.ComplaintTrackingLogMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,6 +43,7 @@ public class ApiService {
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
     private final ComplaintTrackingLogMapper trackingLogMapper;
     private final ManagerComplaintWorkFlow managerComplaintWorkFlow;
+    private final EmployeeComplaintWorkFlow employeeComplaintWorkFlow;
 //Get data for homePage (last complaints)
 //    public List<ComplaintResponseDto> getLast10Complaints() {
 //
@@ -237,7 +237,7 @@ public class ApiService {
 
         //later when employee want to add complaint's images after solve, [only add images]
         else if (authorizationService.IsReceptionist() || authorizationService.isManager()) {
-            return receptionistComplaintWorkflow.updateComplaint(email,dto);
+            return employeeComplaintWorkFlow.updateComplaint(email,dto);
         }
         else {
             throw new ApiException("Unsupported role for this operation yet", HttpStatus.FORBIDDEN);
@@ -263,19 +263,6 @@ public class ApiService {
                 String.format("تم حذف الحساب للمستخدم : \"%s\" بنجاح",account.getUserName()),
                 null
         );
-    }
-
-    public ApiResponseDto<?> rejectComplaint(String email, ComplaintRejectDto dto) {
-
-// open complaint by receptionist employee
-        if (authorizationService.IsReceptionist()){
-            return receptionistComplaintWorkflow.rejectComplaint(email,dto);
-        }
-
-//TODO: later open complaint by manager / employee ...
-        else {
-            throw new ApiException("Unsupported role for this operation yet", HttpStatus.FORBIDDEN);
-        }
     }
 
     @Transactional

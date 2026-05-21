@@ -104,7 +104,7 @@ public class ComplaintEventHandler {
             log.setComplaint(c);
             log.setPreviousState(old.getState());
             log.setNewState(c.getState());
-            log.setActionType(ActionType.STATE_CHANGED);
+            log.setActionType(ActionType.STARTED);
 
 // TODO handling later using jwt
             log.setActionBy(null);

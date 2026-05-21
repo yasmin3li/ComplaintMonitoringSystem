@@ -4,6 +4,7 @@ package com.myapp.complaints.controller;
 import com.myapp.complaints.DAO.AccountRepo;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Account;
+import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.service.*;
 import jakarta.validation.Valid;
@@ -37,9 +38,8 @@ public class ApiController {
     private final NotificationService notificationService;
     private final CitizenComplaintWorkFlow citizenComplaintWorkFlow;
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
-    private final AccountRepo accountRepo;
-    private final SnapshotPerformanceService snapshotPerformanceService;
     private final EmployeePerformanceService employeePerformanceService;
+    private final EmployeeComplaintWorkFlow employeeComplaintWorkFlow;
 
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
@@ -113,69 +113,12 @@ public class ApiController {
         return ResponseEntity.ok(statisticsService.getCitizenDashboardStatistics(email));
     }
 
-    @PreAuthorize("hasAnyRole('RECEPTIONIST','MANAGER')")
-    @GetMapping("/employee/performance")
-    public ResponseEntity<?> getEmployeePerformance(
-            @RequestParam(required = false) Long accountId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
-
-        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
-
-        LocalDateTime start = (from == null)
-                ? LocalDate.now().minusDays(30).atStartOfDay()
-                : from.atStartOfDay();
-
-        LocalDateTime end = (to == null)
-                ? LocalDate.now().plusDays(1).atStartOfDay()
-                : to.plusDays(1).atStartOfDay();
-
-        long accountID = (accountId == null)
-                ?account.get().getId() : accountId;
-
-        return ResponseEntity.ok(employeePerformanceService.getEmployeePerformance(accountID,start, end));
-    }
-
-    @ExceptionHandler({MethodArgumentTypeMismatchException.class, org.springframework.beans.TypeMismatchException.class})
-    public ResponseEntity<?> handleTypeMismatch(Exception ex) {
-        return ResponseEntity.badRequest().body(Map.of(
-                "error", "Invalid date format. Expected format: yyyy-MM-dd",
-                "details", ex.getMessage()
-        ));
-    }
 
     @GetMapping("/employees/badges")
     public ResponseEntity<Object> getEmployeeBadges(
 //            @RequestParam(name = "onlyLatest", required = false, defaultValue = "false") boolean onlyLatest
     ) {
         return ResponseEntity.ok(employeePerformanceService.getEmployeeBadges());
-    }
-
-    //    TODO: test and refactoring
-    @PreAuthorize("hasAnyRole('MANAGER')")
-    @PostMapping("/employee/addBadge")
-    public void addEmployeeBadge(
-            @RequestParam(required = false) Long accountId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDateTime to,
-            @RequestParam(required = false) String performanceLabel ,
-            @RequestParam(required = false) String badge
-    ) {
-
-        Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
-
-        LocalDateTime start = (from == null)
-                ? LocalDate.now().minusDays(30).atStartOfDay()
-                : from;
-
-        LocalDateTime end = (to == null)
-                ? LocalDate.now().plusDays(1).atStartOfDay()
-                : to;
-
-        long accountID = (accountId == null)
-                ?account.get().getId() : accountId;
-
-        snapshotPerformanceService.manualSnapshotGeneration(accountID,start, end, performanceLabel, badge);
     }
 
     @GetMapping("/employee/dashboard/statistics")
@@ -346,7 +289,7 @@ public class ApiController {
     @PostMapping("/employee/complaint/reject")
     public ResponseEntity<?> rejectComplaint(@RequestBody ComplaintRejectDto dto,Authentication auth){
         String email = auth.getName();
-        return ResponseEntity.ok(apiService.rejectComplaint(email,dto));
+        return ResponseEntity.ok(employeeComplaintWorkFlow.actionOnComplaint(email,dto, ActionType.REJECTED));
     }
 
     @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
@@ -367,7 +310,6 @@ public class ApiController {
         return ResponseEntity.ok(receptionistComplaintWorkflow.inReview(complaintId));
     }
 
-    @PreAuthorize("hasRole('CITIZEN')")
     @PatchMapping("/complaint/update")
     public ResponseEntity<?> updateComplaint(@RequestBody UpdateComplaintDto dto, Authentication auth){
         String email = auth.getName();
@@ -380,4 +322,20 @@ public class ApiController {
         String email = auth.getName();
         return ResponseEntity.ok(apiService.deleteComplaint(email,complaintId));
     }
+
+//    we will not use this action/state at this version.
+//    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+    @PostMapping("/employee/complaint/close")
+    public ResponseEntity<?> closeComplaint(@RequestBody ComplaintRejectDto dto, Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(employeeComplaintWorkFlow.actionOnComplaint(email,dto,ActionType.CLOSED));
+    }
+
+    @PostMapping("/employee/complaint/solve")
+    public ResponseEntity<?> solveComplaint(@RequestBody ComplaintRejectDto dto, Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(employeeComplaintWorkFlow.actionOnComplaint(email,dto,ActionType.FINISHED));
+    }
+
+
 }

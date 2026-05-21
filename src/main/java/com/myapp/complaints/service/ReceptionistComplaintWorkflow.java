@@ -34,11 +34,9 @@ import java.util.Optional;
 public class ReceptionistComplaintWorkflow {
 
     private final EmployeeRepo employeeRepo;
-    private final ComplaintTracingLogRepo complaintTracingLogRepo;
     private final ComplaintRepo complaintRepo;
     private final ComplaintMapper complaintMapper;
     private final ComplaintWorkflowEngine workflowEngine;
-    private final AccountRepo accountRepo;
     private final NotificationService notificationService;
     private final AuthorizationService authorizationService;
     private final ComplaintStateValidator validator;
@@ -156,100 +154,6 @@ public class ReceptionistComplaintWorkflow {
         }
         }
 
-
-    @Transactional
-    public ApiResponseDto<?> rejectComplaint(String email, ComplaintRejectDto dto) {
-
-        Optional<Complaint> complaint = complaintRepo.findByIdAndDeletedFalse(dto.complaintId());
-        if(complaint.isEmpty()){
-            throw new ApiException("complaint not found",HttpStatus.NOT_FOUND);
-        }
-
-        Employee employee = employeeRepo.findByAccount_Email(email);
-
-                if (complaint.get().getAssignedTo() == null) {
-                    throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
-                }
-                if(authorizationService.checkResponsibility(employee,complaint.get()))
-
-                {
-                    if((complaint.get().getState().equals(ComplaintState.IN_REVIEW))){
-                        workflowEngine.changeState(complaint.get(),ComplaintState.REJECTED,employee.getAccount(),null,dto.reason(),ActionType.REJECTED);
-
-                        complaint.get().setDateTimeOfUpdate(LocalDateTime.now());
-                        complaintRepo.save(complaint.get());
-
-                        notificationService.notifyUsers(complaint.get(),dto.reason(),List.of(complaint.get().getAddedBy()));
-                    }
-                    else{
-                        throw new ApiException("you can't reject a complaint at this state",HttpStatus.BAD_REQUEST);
-                    }
-                }
-                else{
-                    throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
-                }
-        return new ApiResponseDto<>(
-                true,
-                String.format("تم رفض شكواك: \"%s\" بسبب \"%s\" ",complaint.get().getTitle(),dto.reason()),
-                null
-        );
-    }
-
-    @Transactional
-    public ApiResponseDto<?> updateComplaint(String email, UpdateComplaintDto dto) {
-
-        Employee employee = employeeRepo.findByAccount_Email(email);
-
-        Complaint complaint = complaintRepo
-                .findByIdAndDeletedFalse(dto.complaintId())
-                .orElseThrow(() -> new ApiException("Complaint not found",HttpStatus.NOT_FOUND));
-
-        if (complaint.getAssignedTo() == null) {
-            throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
-        }
-        if(!authorizationService.checkResponsibility(employee,complaint)){
-            throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
-        }
-
-        ComplaintState complaintState = complaint.getState();
-
-        if (!(complaintState.equals(ComplaintState.RESOLVED))) {
-
-            throw new RuntimeException("you can upload complaint's image only at state RESOLVED");
-        }
-
-        if (dto.images() != null) {
-
-            complaint.getImages().clear();
-
-            for (String img : dto.images()) {
-
-                ComplaintImage complaintImage = new ComplaintImage();
-                complaintImage.setImageUrl(img);
-                complaintImage.setType(ImageType.AFTER_SOLVE);
-                complaintImage.setComplaint(complaint);
-                complaintImage.setAddedBy(employee.getAccount());
-
-                complaint.getImages().add(complaintImage);
-            }
-        }
-        else{
-           throw new ApiException("it is not allowed for you to delete images citizen's complaint",HttpStatus.BAD_REQUEST);
-        }
-
-        complaintRepo.save(complaint);
-
-        workflowEngine.createActionLog(complaint,employee.getAccount(), ActionType.UPDATED);
-
-        complaint.setDateTimeOfUpdate(LocalDateTime.now());
-        complaintRepo.save(complaint);
-
-        return new ApiResponseDto<>(
-                true,
-                "images uploaded and complaint updated  successfully",
-                null
-        );
-    }
 
     @Transactional
     public ApiResponseDto<?> inReview(long complaintId) {

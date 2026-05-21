@@ -157,15 +157,6 @@ public class ManagerComplaintWorkFlow {
                 complaintRepo
                         .findByIdAndDeletedFalse(complaintId).orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
 
-        if (!complaint.getInstitution().getId().equals(employee.getInstitution().getId()) ||
-                !complaint.getGovernorate().getId().equals(employee.getGovernorate().getId())) {
-
-            throw new ApiException(
-                    "this complaint doesn't belong to your institution",
-                    HttpStatus.FORBIDDEN
-            );
-        }
-
         if (!authorizationService.checkAccessibility(employee,complaint)) {
             throw new ApiException(
                     "Access denied",
@@ -173,11 +164,7 @@ public class ManagerComplaintWorkFlow {
             );
         }
 
-//        workflowEngine.createActionLog(
-//                complaint,
-//                employee.getAccount(),
-//                ActionType.OPENED
-//        );
+        workflowEngine.createActionLog(complaint, employee.getAccount(), ActionType.OPENED);
 
         return complaintMapper
                 .toDto(complaint);

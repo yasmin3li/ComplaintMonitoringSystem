@@ -88,13 +88,15 @@ public class ComplaintWorkflowEngine {
             case ASSIGNED -> "تم اسناد الشكوى للموظف المسؤول لمتابعة حلها";
             case REJECTED -> "تم رفض الشكوى";
             case STARTED -> "تم بدء العمل على الشكوى";
+            case FINISHED -> "تم الانتهاء من العمل على الشكوى";
+            case CLOSED -> "تم إغلاق الشكوى";
 
-            case STATE_CHANGED -> switch (newState) {
-                case IN_REVIEW -> "الشكوى قيد المراجعة";
-                case RESOLVED -> "تم حل الشكوى";
-                case CLOSED -> "تم إغلاق الشكوى";
-                default -> "تم تغيير حالة الشكوى";
-            };
+//            case STATE_CHANGED -> switch (newState) {
+//                case IN_REVIEW -> "الشكوى قيد المراجعة";
+//                case RESOLVED -> "تم حل الشكوى";
+//                case CLOSED -> "تم إغلاق الشكوى";
+//                default -> "تم تغيير حالة الشكوى";
+//            };
 
             default -> "تم تنفيذ إجراء على الشكوى";
         };
