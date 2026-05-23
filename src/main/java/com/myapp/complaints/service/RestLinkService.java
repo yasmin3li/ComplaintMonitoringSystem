@@ -100,11 +100,11 @@ public class RestLinkService {
                 return new ApiResponseDto<>(
                         true,
                         "reset link sent to your email",
-                        isDevMode() && "SMS".equals(type) ? token : null
+                        isDevMode() && "EMAIL".equals(type) ? token : null
                 );
             }
             else {
-                throw  new ApiException( "failed to send rest link ",HttpStatus.INTERNAL_SERVER_ERROR );
+                return new ApiResponseDto<>(false, "failed to send rest link ",isDevMode() && "EMAIL".equals(type) ? token : null);
             }
         }
         else {

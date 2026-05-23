@@ -68,13 +68,14 @@ public class VerificationCodeService {
             return new ApiResponseDto<>(
                     false,
                     "Account created but verification email could not be sent. Please request resend",
-                    null
+                    verificationCode.getVerificationCode()
             );
         }
         return new ApiResponseDto<>(
                 true,
                 "verification code sent successfully",
-                isDevMode() && "SMS".equals(type)  ? code : null
+                verificationCode.getVerificationCode()
+//                isDevMode() && "SMS".equals(type)  ? code : null
         );
 //        return code; && "SMS".equals(type)
     }
