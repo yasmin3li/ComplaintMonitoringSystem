@@ -50,26 +50,26 @@ public class EmployeePerformanceScheduler {
         }
     }
 
-    //0 0 0 */3 * * every 3Day
-//    @Scheduled(cron = "0 * * * * *")
-//    public void generatePerformanceSnapshots() {
-//
-//        LocalDateTime end = LocalDateTime.now()
-//                            .withSecond(0)
-//                            .withNano(0);
-//        LocalDateTime start = end.minusMonths(1);
-//
-//        List<Employee> employees = employeeRepo.findAll();
-//        System.out.println("min Scheduler started");
-//        for (Employee employee : employees) {
-//
-//            snapshotPerformanceService.scheduledSnapshotGeneration(
-//                    employee.getAccount().getId(),
-//                    start,
-//                    end
-//            );
-//        }
-//    }
+//    0 0 0 */3 * * every 3Day
+    @Scheduled(cron = "0 * * * * *")
+    public void generatePerformanceSnapshots() {
+
+        LocalDateTime end = LocalDateTime.now()
+                            .withSecond(0)
+                            .withNano(0);
+        LocalDateTime start = end.minusMonths(1);
+
+        List<Employee> employees = employeeRepo.findAll();
+        System.out.println("min Scheduler started");
+        for (Employee employee : employees) {
+
+            snapshotPerformanceService.scheduledSnapshotGeneration(
+                    employee.getAccount().getId(),
+                    start,
+                    end
+            );
+        }
+    }
 
     private final ComplaintRepo complaintRepo;
     private final EmployeeMilestoneRepo employeeMilestoneRepo;
