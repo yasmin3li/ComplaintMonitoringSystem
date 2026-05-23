@@ -63,7 +63,7 @@ public class ComplaintMapper {
                                 complaint.getAddress().getLatitude()
                         )
                 ),
-                complaint.getState() == ComplaintState.REJECTED
+                complaint.getState() == ComplaintState.REJECTED || complaint.getState() == ComplaintState.RESOLVED
                         ? getLastRejectReason(complaint)
                         : null,
                 authorizationService.checkAccess(complaint.getAddedBy().getEmail()),
@@ -184,7 +184,7 @@ private String getLastRejectReason(Complaint complaint){
         log =complaintTracingLogRepo.findTopByComplaint_IdAndActionBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(), account.get().getId(), ComplaintState.REJECTED);
     }
     else{
-        log =complaintTracingLogRepo.findTopByComplaint_IdAndComplaint_AddedBy_IdAndNewStateOrderByActionDateDesc(complaint.getId(), account.get().getId(), ComplaintState.REJECTED);
+        log =complaintTracingLogRepo.findTopByComplaint_IdAndNewStateOrderByActionDateDesc(complaint.getId(),complaint.getState());
     }
 
     return log.map(ComplaintTrackingLog::getComments).orElse(null);
