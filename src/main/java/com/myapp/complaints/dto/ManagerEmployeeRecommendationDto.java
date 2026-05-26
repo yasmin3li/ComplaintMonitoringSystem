@@ -9,7 +9,7 @@ public record ManagerEmployeeRecommendationDto(
         long assignedTasks,
         long inProgressTasks,
         long resolvedComplaints,
-        List<DelayedComplaintsProjection> delayedComplaints
+        List<DelayedComplaintDto> delayedComplaints
 //        double averageResponseDays,
 //        double score,
 //        List<EmployeeBadgeDto> badges

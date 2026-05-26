@@ -1,5 +1,6 @@
 package com.myapp.complaints.DAO;
 
+import com.myapp.complaints.dto.DelayedComplaintDto;
 import com.myapp.complaints.dto.DelayedComplaintsProjection;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.enums.ComplaintState;
@@ -107,21 +108,27 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
     );
 
     @Query("""
-SELECT
-    c.id as complaintId,
-    c.title as title,
-    c.priority as priority,
-    c.dateTimeOfUpdate as lastUpdate,
-    c.state as state
-FROM Complaint c
-JOIN c.assignedTo a
-WHERE c.deleted = false
-  AND a.id = :accountId
-  AND c.state IN (
-      com.myapp.complaints.enums.ComplaintState.ASSIGNED,
-      com.myapp.complaints.enums.ComplaintState.IN_PROGRESS
-  )
-  AND c.dateTimeOfUpdate < :threshold
+        SELECT
+            c.id as complaintId,
+            c.title as title,
+            c.priority as priority,
+            MAX(l.actionDate) as lastUpdate,
+            c.state as state
+        FROM Complaint c
+        JOIN c.logs l
+        WHERE c.deleted = false
+          AND l.assignedTo.account.id = :accountId
+          AND c.assignedTo.account.id =:accountId
+          AND c.state IN (
+              com.myapp.complaints.enums.ComplaintState.ASSIGNED,
+              com.myapp.complaints.enums.ComplaintState.IN_PROGRESS
+          )
+        GROUP BY
+            c.id,
+            c.title,
+            c.priority,
+            c.state
+        HAVING MAX(l.actionDate) < :threshold
 """)
     List<DelayedComplaintsProjection> delayedComplaints(
             @Param("accountId") Long accountId,

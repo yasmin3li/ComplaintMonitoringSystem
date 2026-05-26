@@ -22,6 +22,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,7 +40,7 @@ public class ManagerComplaintWorkFlow {
     private final NotificationService notificationService;
     private final AuthorizationService authorizationService;
     private final ComplaintTracingLogRepo logRepo;
-    private final EmployeePerformanceService performanceService;
+    private final ComplaintTracingLogRepo complaintTracingLogRepo;
 
     public List<ComplaintResponseDto> getInstitutionComplaints(
             ComplaintFilterRequestDto filter
@@ -378,12 +379,31 @@ public class ManagerComplaintWorkFlow {
                             end
                     );
 
-            List<DelayedComplaintsProjection> delayed =
+            List<DelayedComplaintDto> delayedComplaintDtoList =
                     complaintRepo.delayedComplaints(
-                            employee.getAccount().getId(),
-                            LocalDateTime.now().minusDays(threshold)
-                    );
+                                    employee.getAccount().getId(),
+                                    LocalDateTime.now().minusDays(threshold)
+                            )
+                            .stream()
+                            .map(dc -> {
 
+                                double delayedDays =
+                                        Math.round(
+                                                Duration.between(
+                                                        dc.getLastUpdate(),
+                                                        LocalDateTime.now()).
+                                                        toHours() / 24.0 * 100) / 100.0;
+
+                                return new DelayedComplaintDto(
+                                        dc.getComplaintId(),
+                                        dc.getTitle(),
+                                        dc.getPriority(),
+                                        dc.getLastUpdate(),
+                                        dc.getState(),
+                                        delayedDays
+                                );
+                            })
+                            .toList();
 
 //            EmployeePerformanceDto performance =
 //                    performanceService.getEmployeePerformance(
@@ -399,7 +419,7 @@ public class ManagerComplaintWorkFlow {
                             assignedTasks,
                             inProgressTasks,
                             resolved,
-                            delayed
+                            delayedComplaintDtoList
 //                            performance.responseRate(),
 //                            performance.score(),
 //                            performance.badges()
