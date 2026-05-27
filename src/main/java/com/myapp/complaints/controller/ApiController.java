@@ -249,7 +249,7 @@ public class ApiController {
         return ResponseEntity.ok(notificationService.marksAsReadAllNotifications(email));
     }
 
-    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+//    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
     @GetMapping("/employee/notifications")
     public ResponseEntity<?> displayEmployeeNotifications(Authentication auth){
         String email = auth.getName();
@@ -326,16 +326,18 @@ public class ApiController {
 //    we will not use this action/state at this version.
 //    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
     @PostMapping("/employee/complaint/close")
-    public ResponseEntity<?> closeComplaint(@RequestBody ComplaintRejectDto dto, Authentication auth){
-        String email = auth.getName();
-        return ResponseEntity.ok(employeeComplaintWorkFlow.closeComplaint(email,dto));
+    public ResponseEntity<?> closeComplaint(@RequestBody ComplaintRejectDto dto){
+        return ResponseEntity.ok(employeeComplaintWorkFlow.closeComplaint(dto));
     }
 
-    @PostMapping("/employee/complaint/solve")
-    public ResponseEntity<?> solveComplaint(@RequestBody ComplaintRejectDto dto, Authentication auth){
-        String email = auth.getName();
-        return ResponseEntity.ok(employeeComplaintWorkFlow.solveComplaint(email,dto));
+    @PostMapping("/employee/complaint/finish")
+    public ResponseEntity<?> finishSolveComplaint(@RequestBody ComplaintRejectDto dto){
+        return ResponseEntity.ok(employeeComplaintWorkFlow.solveComplaint(dto));
     }
 
+    @PostMapping("/employee/complaint/start/{complaintId}")
+    public ResponseEntity<?> startSolveComplaint(@PathVariable Long complaintId){
+        return ResponseEntity.ok(employeeComplaintWorkFlow.startSolveComplaint(complaintId));
+    }
 
 }

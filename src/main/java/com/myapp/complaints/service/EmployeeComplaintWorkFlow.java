@@ -2,6 +2,7 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.ComplaintRepo;
 import com.myapp.complaints.DAO.EmployeeRepo;
+import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.ComplaintRejectDto;
@@ -15,6 +16,7 @@ import com.myapp.complaints.enums.ImageType;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,12 +33,15 @@ public class EmployeeComplaintWorkFlow {
     private final ComplaintWorkflowEngine workflowEngine;
     private final AuthorizationService authorizationService;
     private final NotificationService notificationService;
+    private final ComplaintStateValidator validator;
 
 //    we will not use this action/state at this version.
     @Transactional
-    public ApiResponseDto<?> closeComplaint(String email, ComplaintRejectDto dto) {
+    public ApiResponseDto<?> closeComplaint(ComplaintRejectDto dto) {
 
-        Employee employee = employeeRepo.findByAccount_Email(email);
+        Employee employee = employeeRepo.findByAccount_Email(
+                SecurityContextHolder.getContext().getAuthentication().getName()
+        );
 
         Complaint complaint = complaintRepo
                 .findByIdAndDeletedFalse(dto.complaintId())
@@ -118,9 +123,11 @@ public class EmployeeComplaintWorkFlow {
     }
 
     @Transactional
-    public ApiResponseDto<?> solveComplaint(String email, ComplaintRejectDto dto){
+    public ApiResponseDto<?> solveComplaint(ComplaintRejectDto dto){
 
-        Employee employee = employeeRepo.findByAccount_Email(email);
+        Employee employee = employeeRepo.findByAccount_Email(
+                SecurityContextHolder.getContext().getAuthentication().getName()
+        );
 
         Complaint complaint = complaintRepo
                 .findByIdAndDeletedFalse(dto.complaintId())
@@ -130,19 +137,23 @@ public class EmployeeComplaintWorkFlow {
             throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
         }
 
-        if(!authorizationService.isManager()){
+//        if(!authorizationService.isManager()){
             if(!authorizationService.checkResponsibility(employee,complaint)){
                 throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
             }
-        }
-        else {
-            if(!authorizationService.checkAccessibility(employee,complaint)){
-                throw new ApiException("Access denied, you can't access to this complaint",HttpStatus.FORBIDDEN);
-            }
-        }
+//        }
+//        else {
+//            if(!authorizationService.checkAccessibility(employee,complaint)){
+//                throw new ApiException("Access denied, you can't access to this complaint",HttpStatus.FORBIDDEN);
+//            }
+//        }
 
-        workflowEngine.changeState(complaint,ComplaintState.RESOLVED,employee.getAccount(),
-                null, dto.reason() == null ? null : dto.reason(), ActionType.FINISHED);
+        workflowEngine.changeState(complaint,
+                ComplaintState.RESOLVED,employee.getAccount(),
+                employee,
+                dto.reason() == null ? null : dto.reason(),
+                ActionType.FINISHED
+        );
 
         return new ApiResponseDto<>(
                 true,
@@ -192,4 +203,40 @@ public class EmployeeComplaintWorkFlow {
         );
     }
 
+    public ApiResponseDto<?> startSolveComplaint(long complaintId) {
+
+
+        Employee employee =
+                employeeRepo.findByAccount_Email(
+                        SecurityContextHolder.getContext().getAuthentication().getName()
+                );
+
+        Complaint complaint = complaintRepo
+                .findByIdAndDeletedFalse(complaintId)
+                .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        if (complaint.getAssignedTo() == null) {
+            throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!authorizationService.checkResponsibility(employee,complaint)){
+            throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
+        }
+
+
+        validator.validate(
+                complaint.getState(),
+                ComplaintState.IN_PROGRESS
+        );
+
+        workflowEngine.changeState(
+                complaint,
+                ComplaintState.IN_PROGRESS,
+                employee.getAccount(),
+                employee,
+                null,
+                ActionType.STARTED
+        );
+        return null;
+    }
 }

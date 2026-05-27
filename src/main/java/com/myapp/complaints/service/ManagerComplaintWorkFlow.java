@@ -236,12 +236,6 @@ public class ManagerComplaintWorkFlow {
             );
         }
 
-        complaint.setDateTimeOfUpdate(
-                LocalDateTime.now()
-        );
-
-        complaintRepo.save(complaint);
-
         workflowEngine.changeState(
                 complaint,
                 ComplaintState.ASSIGNED,
@@ -285,32 +279,6 @@ public class ManagerComplaintWorkFlow {
                 manager,
                 null,
                 ActionType.ASSIGNED
-        );
-
-        validator.validate(
-                complaint.getState(),
-                ComplaintState.IN_PROGRESS
-        );
-
-        workflowEngine.changeState(
-                complaint,
-                ComplaintState.IN_PROGRESS,
-                manager.getAccount(),
-                manager,
-                "Handled by manager",
-                ActionType.STARTED
-        );
-
-        complaint.setDateTimeOfUpdate(
-                LocalDateTime.now()
-        );
-
-        complaintRepo.save(complaint);
-
-        notificationService.notifyUsers(
-                complaint,
-                "The manager started working on your complaint",
-                List.of(manager.getAccount())
         );
 
         return new ApiResponseDto<>(
