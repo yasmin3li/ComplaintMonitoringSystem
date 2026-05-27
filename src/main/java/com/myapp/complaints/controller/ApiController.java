@@ -325,17 +325,17 @@ public class ApiController {
 
 //    we will not use this action/state at this version.
 //    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
-    @PostMapping("/employee/complaint/close")
+    @PostMapping("/complaint/closeComplaint")
     public ResponseEntity<?> closeComplaint(@RequestBody ComplaintRejectDto dto){
         return ResponseEntity.ok(employeeComplaintWorkFlow.closeComplaint(dto));
     }
 
-    @PostMapping("/employee/complaint/finish")
+    @PostMapping("/complaint/finishSolve")
     public ResponseEntity<?> finishSolveComplaint(@RequestBody ComplaintRejectDto dto){
         return ResponseEntity.ok(employeeComplaintWorkFlow.solveComplaint(dto));
     }
 
-    @PostMapping("/employee/complaint/start/{complaintId}")
+    @PostMapping("/complaint/startSolve/{complaintId}")
     public ResponseEntity<?> startSolveComplaint(@PathVariable Long complaintId){
         return ResponseEntity.ok(employeeComplaintWorkFlow.startSolveComplaint(complaintId));
     }
