@@ -155,6 +155,8 @@ public class EmployeeComplaintWorkFlow {
                 ActionType.FINISHED
         );
 
+         notificationService.notifyUsers(complaint,dto.reason(), List.of(complaint.getAddedBy()));
+
         return new ApiResponseDto<>(
                 true,
                 "تم اضافة الشكوى الى الشكاوى المحلولة",
@@ -203,6 +205,7 @@ public class EmployeeComplaintWorkFlow {
         );
     }
 
+    @Transactional
     public ApiResponseDto<?> startSolveComplaint(long complaintId) {
 
 
@@ -237,6 +240,10 @@ public class EmployeeComplaintWorkFlow {
                 null,
                 ActionType.STARTED
         );
-        return null;
+        return new ApiResponseDto<>(
+                true,
+                "تم بدء حل الشكوى",
+                null
+        );
     }
 }
