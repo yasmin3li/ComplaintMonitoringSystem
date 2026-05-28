@@ -9,7 +9,7 @@ public record EmployeePerformanceDto(
         long handledCount,
         double responseRate,
         double score,
-        double normalizedHandled,
+//        double normalizedHandled,
         List<EmployeeBadgeDto> badges
 
 ) {

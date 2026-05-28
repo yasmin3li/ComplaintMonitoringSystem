@@ -42,7 +42,7 @@ public class EmployeePerformanceService {
         if(employee.getAccount().getRole().getId() == 2L){
             return getReceptionistAvgResponseTime(employee.getAccount().getId(),start,end);
         }
-        if(employee.getAccount().getRole().getId() == 4L){
+        if(employee.getAccount().getRole().getId() == 4L || employee.getAccount().getRole().getId() == 3L){
             return getTechnicalAvgResponseTime(employee.getAccount().getId(),start,end);
         }
         else {
@@ -153,14 +153,8 @@ public class EmployeePerformanceService {
             completedComplaintsCount =
                     complaintTracingLogRepo.countHandledComplaintsBetween(accountId, start, end);//rejected+forwarded
 
-            avgDays =
-                    getAverageResponseTimeInDays(
-                            employee.get(),
-                            start,
-                            end
-                    );
         }
-        else if (employee.get().getAccount().getRole().getId() == 4L){
+        else if (employee.get().getAccount().getRole().getId() == 4L || employee.get().getAccount().getRole().getId() == 3L){
 
             //all coming complaints to the institution at specified period
             long assignedComplaints = complaintTracingLogRepo.countComplaintAssignedToAccountBetween(
@@ -172,46 +166,46 @@ public class EmployeePerformanceService {
             completedComplaintsCount =
                     complaintTracingLogRepo.countResolvedComplaintsBetween(accountId, start, end);
 
-            avgDays =
-                    getAverageResponseTimeInDays(
-                            employee.get(),
-                            start,
-                            end
-                    );
             incomingComplaintsCount = assignedComplaints;
         }
         else {
             throw new ApiException("not supported statistic yet",HttpStatus.NOT_FOUND);
         }
 
+        avgDays =
+                getAverageResponseTimeInDays(
+                        employee.get(),
+                        start,
+                        end
+                );
 
         double achievementRate,responseRate;
 
         if (incomingComplaintsCount <= 0) {
             achievementRate = 0.0;
-            responseRate = 0.0;
+            responseRate = 4.0;
         }
         else {
             achievementRate = (double) completedComplaintsCount / incomingComplaintsCount * 100.0;
             responseRate = avgDays;
         }
 
-        // normalize completedComplaintsCount count against a soft target (e.g., 10 per period)
-        // measures how close the employee is to the expected completedComplaintsCount volume
-        int softTarget = 10; //TODO: pass as parameter
-
-        double completionEfficiency;
-
-        if (incomingComplaintsCount <= 0) {
-            completionEfficiency = 1; //
-        }
-        else {
-            double targetEffective = Math.min((double) softTarget, (double) incomingComplaintsCount);
-            completionEfficiency = Math.min((double) completedComplaintsCount / targetEffective, 1.0);
-        }
+//        // normalize completedComplaintsCount count against a soft target (e.g., 10 per period)
+//        // measures how close the employee is to the expected completedComplaintsCount volume
+//        long softTarget = incomingComplaintsCount; //TODO: pass as parameter
+//
+//        double completionEfficiency;
+//
+//        if (incomingComplaintsCount <= 0) {
+//            completionEfficiency = 0; //
+//        }
+//        else {
+//            double targetEffective = Math.min((double) softTarget, (double) incomingComplaintsCount);
+//            completionEfficiency = Math.min((double) completedComplaintsCount / targetEffective, 1.0);
+//        }
 
         // score: combine completionEfficiency (0..1 → 50 pts) and achievementRate (0..100% → 50 pts) into a 0–100 score
-        double score = completionEfficiency * 50.0 + (responseRate / 100.0) * 50.0; // 50/50 weighting
+        double score = achievementRate * 50.0 + (responseRate / 100.0) * 50.0; // 50/50 weighting
 
         List<EmployeeBadgeDto> badges = List.of(
                 BadgeFactory.buildPerformanceBadge(score),
@@ -224,7 +218,7 @@ public class EmployeePerformanceService {
                 completedComplaintsCount,
                 achievementRate,
                 score,
-                completionEfficiency,
+//                completionEfficiency,
                 badges
         );    }
 
@@ -234,7 +228,7 @@ public class EmployeePerformanceService {
                 complaintTracingLogRepo.findDistinctComplaintIdsAssignedToAccountBetween(accountId, start, end);
 
         if (complaintIds == null || complaintIds.isEmpty()) {
-            return 0.0;
+            return 4.0;
         }
 
         double totalDays = 0.0;
@@ -243,8 +237,12 @@ public class EmployeePerformanceService {
             LocalDateTime assignedAt = complaintTracingLogRepo.findAssignedAt(complaintId, accountId);
             LocalDateTime startedAt = complaintTracingLogRepo.findStartedAt(complaintId, accountId);
 
-            if (assignedAt == null || startedAt == null) continue;
+//            if (assignedAt == null || startedAt == null) continue;
+            if (assignedAt == null ) continue;
 
+            if(startedAt == null){
+                startedAt = LocalDateTime.now().plusDays(30);
+            }
             long millis = Duration.between(assignedAt, startedAt).toMillis();
 
             totalDays += millis / (1000.0 * 60 * 60 * 24);
@@ -266,7 +264,7 @@ public class EmployeePerformanceService {
                 );
 
         if (responses.isEmpty()) {
-            return 0.0; // default average response time in days when no data is available
+            return 4.0; // default average response time in days when no data is available
         }
 
         double totalDays = 0;

@@ -56,7 +56,7 @@ public class SnapshotPerformanceService {
                 .comingCount((int) dto.comingCount())
                 .handledCount((int) dto.handledCount())
                 .responseRate(dto.responseRate())
-                .normalizedHandled(dto.normalizedHandled())
+//                .normalizedHandled(dto.normalizedHandled())
                 .score(dto.score())
                 .computedAt(LocalDateTime.now())
                 .source(SnapshotSource.SCHEDULED)

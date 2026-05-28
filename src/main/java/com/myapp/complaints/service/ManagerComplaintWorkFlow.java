@@ -40,7 +40,7 @@ public class ManagerComplaintWorkFlow {
     private final NotificationService notificationService;
     private final AuthorizationService authorizationService;
     private final ComplaintTracingLogRepo logRepo;
-    private final ComplaintTracingLogRepo complaintTracingLogRepo;
+    private final EmployeePerformanceService performanceService;
 
     public List<ComplaintResponseDto> getInstitutionComplaints(
             ComplaintFilterRequestDto filter
@@ -373,12 +373,12 @@ public class ManagerComplaintWorkFlow {
                             })
                             .toList();
 
-//            EmployeePerformanceDto performance =
-//                    performanceService.getEmployeePerformance(
-//                            employee.getId(),
-//                            start,
-//                            end
-//                    );
+            EmployeePerformanceDto performance =
+                    performanceService.getEmployeePerformance(
+                            employee.getId(),
+                            start,
+                            end
+                    );
 
             result.add(
                     new ManagerEmployeeRecommendationDto(
@@ -387,10 +387,10 @@ public class ManagerComplaintWorkFlow {
                             assignedTasks,
                             inProgressTasks,
                             resolved,
-                            delayedComplaintDtoList
-//                            performance.responseRate(),
-//                            performance.score(),
-//                            performance.badges()
+                            delayedComplaintDtoList,
+                            performance.responseRate(),
+                            performance.score(),
+                            performance.badges()
                     )
             );
         }
