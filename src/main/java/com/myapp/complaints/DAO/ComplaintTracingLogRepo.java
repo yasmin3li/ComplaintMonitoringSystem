@@ -29,8 +29,14 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
     @Query("SELECT Min( l.actionDate) FROM ComplaintTrackingLog l WHERE l.assignedTo.account.id = :accountId")
     LocalDateTime findFirstHandledByEmp(Long accountId);
 
-    @Query("SELECT COUNT( l.complaint.id) FROM ComplaintTrackingLog l WHERE l.assignedTo.account.id = :accountId AND l.actionDate BETWEEN :start AND :end")
-    long countComplaintAssignedToAccountBetween(@Param("accountId") Long accountId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    @Query("SELECT COUNT( l.complaint.id) " +
+            "FROM ComplaintTrackingLog l " +
+            "WHERE l.assignedTo.account.id = :accountId " +
+            "AND l.actionDate BETWEEN :start AND :end")
+    long countComplaintAssignedToAccountBetween(
+            @Param("accountId") Long accountId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end);
 
     @Query("""
     SELECT COUNT(DISTINCT l.complaint.id)
@@ -92,5 +98,32 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
     );
 
     Optional<ComplaintTrackingLog> findTopByComplaint_IdAndNewStateOrderByActionDateDesc(Long complaintId, ComplaintState state);
+
+
+    @Query("SELECT DISTINCT l.complaint.id FROM" +
+            " ComplaintTrackingLog l" +
+            " WHERE" +
+            " l.assignedTo.account.id = :accountId" +
+            " AND l.actionDate BETWEEN :start AND :end ")
+    List<Long> findDistinctComplaintIdsAssignedToAccountBetween(
+            @Param("accountId") Long accountId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("SELECT MIN(l.actionDate)" +
+            " FROM ComplaintTrackingLog l" +
+            " WHERE l.complaint.id = :complaintId" +
+            " AND l.actionType = com.myapp.complaints.enums.ActionType.ASSIGNED" +
+            " AND l.assignedTo.account.id = :accountId")
+    LocalDateTime findAssignedAt(@Param("complaintId") Long complaintId, @Param("accountId") Long accountId);
+
+    @Query("SELECT MIN(l.actionDate) FROM" +
+            " ComplaintTrackingLog l WHERE" +
+            " l.complaint.id = :complaintId AND" +
+            " l.actionType = com.myapp.complaints.enums.ActionType.STARTED" +
+            " AND l.assignedTo.account.id = :accountId")
+    LocalDateTime findStartedAt(@Param("complaintId") Long complaintId, @Param("accountId") Long accountId);
+
 
 }

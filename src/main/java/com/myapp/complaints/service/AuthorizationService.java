@@ -44,6 +44,10 @@ public class AuthorizationService {
         return hasRole("ROLE_ADMIN");
     }
 
+    public boolean isTechnic() {
+        return hasRole("ROLE_Technical");
+    }
+
     public boolean isManager() {
         return hasRole("ROLE_MANAGER");
     }
