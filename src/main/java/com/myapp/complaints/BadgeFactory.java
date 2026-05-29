@@ -1,6 +1,7 @@
 package com.myapp.complaints;
 
 import com.myapp.complaints.dto.EmployeeBadgeDto;
+import com.myapp.complaints.dto.LoadTagDto;
 import com.myapp.complaints.enums.BadgeLevel;
 import com.myapp.complaints.enums.BadgeType;
 
@@ -111,6 +112,51 @@ public class BadgeFactory {
                     "check-circle"
             );
             
+    }
+
+    public static LoadTagDto buildRecommendationBadge(double avgLoad) {
+
+        if (avgLoad >= 80) {
+            return new LoadTagDto(
+                    BadgeType.LOAD,
+                    "حمل مرتفع",
+                    "الأكثر ازدحاما خلال هذه الفترة",
+                    BadgeLevel.RED,
+                    null,
+                    Math.round(avgLoad*100)/100.0
+            );
+        }
+
+        if (avgLoad >= 50) {
+            return new LoadTagDto(
+                    BadgeType.LOAD,
+                    "حمل متوسط",
+                    null,
+                    BadgeLevel.ORANGE,
+                    null,
+                    Math.round(avgLoad*100)/100.0
+            );
+        }
+
+        if (avgLoad >= 30) {
+            return new LoadTagDto(
+                    BadgeType.LOAD,
+                    "حمل قليل",
+                    "يحتمل اسناد المزيد من الشكاوى له",
+                    BadgeLevel.YELLOW,
+                    null,
+                    Math.round(avgLoad*100)/100.0
+            );
+        }
+
+        return new LoadTagDto(
+                BadgeType.LOAD,
+                "حمل قليل جدا",
+                "الأقل حمل عمل - موصى به بشدة",
+                BadgeLevel.GREEN,
+                null,
+                Math.round(avgLoad*100)/100.0
+        );
     }
 
 }

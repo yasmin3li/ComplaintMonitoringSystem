@@ -1,5 +1,6 @@
 package com.myapp.complaints.service;
 
+import com.myapp.complaints.BadgeFactory;
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.ComplaintRepo;
 import com.myapp.complaints.DAO.ComplaintTracingLogRepo;
@@ -13,6 +14,7 @@ import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.ComplaintMapper;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -41,6 +43,7 @@ public class ManagerComplaintWorkFlow {
     private final AuthorizationService authorizationService;
     private final ComplaintTracingLogRepo logRepo;
     private final EmployeePerformanceService performanceService;
+    private final ComplaintTracingLogRepo tracingLogRepo;
 
     public List<ComplaintResponseDto> getInstitutionComplaints(
             ComplaintFilterRequestDto filter
@@ -372,13 +375,30 @@ public class ManagerComplaintWorkFlow {
                                 );
                             })
                             .toList();
+//
+//            EmployeePerformanceDto performance =
+//                    performanceService.getEmployeePerformance(
+//                            employee.getId(),
+//                            start,
+//                            end
+//                    );
 
-            EmployeePerformanceDto performance =
-                    performanceService.getEmployeePerformance(
-                            employee.getId(),
+            long inComingComplaints =
+                    tracingLogRepo.countIncomingComplaintsBetween(
                             start,
-                            end
+                            end,
+                            employee.getGovernorate().getId(),
+                            employee.getInstitution().getId()
                     );
+
+            double loadRatio =
+                    inComingComplaints == 0
+                            ? 0
+                            : ((double)(inProgressTasks + assignedTasks) * 100)
+                            / inComingComplaints;
+
+
+            LoadTagDto loadTagDto = BadgeFactory.buildRecommendationBadge(loadRatio);
 
             result.add(
                     new ManagerEmployeeRecommendationDto(
@@ -388,26 +408,82 @@ public class ManagerComplaintWorkFlow {
                             inProgressTasks,
                             resolved,
                             delayedComplaintDtoList,
-                            performance.responseRate(),
-                            performance.score(),
-                            performance.badges()
+                            loadTagDto
+//                            performance.responseRate(),
+//                            performance.score(),
+//                            performance.badges()
                     )
             );
         }
 
         result.sort(
-                Comparator.comparingLong(
-                        (ManagerEmployeeRecommendationDto e) ->
-                                e.assignedTasks() + e.inProgressTasks()
-                )
+                Comparator.comparingDouble(
+                                (ManagerEmployeeRecommendationDto e) ->
+                                        e.employeeBadgeDto().loadRatio()
+                        )
 //                        .thenComparing(
-//                        Comparator.comparingDouble(
-//                                ManagerEmployeeRecommendationDto::score
-//                        ).reversed()
-//                )
+//                                Comparator.comparingDouble(
+//                                        ManagerEmployeeRecommendationDto::resolvedComplaints
+//                                ).reversed().reversed()
+//                        )
         );
 
+        if (!result.isEmpty()) {
+
+            ManagerEmployeeRecommendationDto leastLoaded =
+                    result.stream()
+                            .min(
+                                    Comparator
+                                            .comparingDouble(
+                                                    (ManagerEmployeeRecommendationDto e) ->
+                                                            e.employeeBadgeDto().loadRatio()
+                                            )
+                                            .thenComparing(
+                                                    Comparator.comparingLong(
+                                                            ManagerEmployeeRecommendationDto::resolvedComplaints
+                                                    ).reversed().reversed()
+                                            )
+
+                            )
+                            .orElse(null);
+
+            if (leastLoaded != null) {
+
+                int index = result.indexOf(leastLoaded);
+
+                ManagerEmployeeRecommendationDto updatedEmployee = getManagerEmployeeRecommendationDto(leastLoaded);
+
+                result.set(index, updatedEmployee);
+            }
+        }
+
         return result;
+    }
+
+    @Nonnull
+    private static ManagerEmployeeRecommendationDto getManagerEmployeeRecommendationDto(ManagerEmployeeRecommendationDto leastLoaded) {
+        LoadTagDto oldBadge =
+                leastLoaded.employeeBadgeDto();
+
+        LoadTagDto updatedBadge =
+                new LoadTagDto(
+                        oldBadge.type(),
+                        oldBadge.title(),
+                        "الأقل حمل عمل - موصى به بشدة",
+                        oldBadge.level(),
+                        "star",
+                        oldBadge.loadRatio()
+                );
+
+        return new ManagerEmployeeRecommendationDto(
+                leastLoaded.employeeId(),
+                leastLoaded.employeeName(),
+                leastLoaded.assignedTasks(),
+                leastLoaded.inProgressTasks(),
+                leastLoaded.resolvedComplaints(),
+                leastLoaded.delayedComplaints(),
+                updatedBadge
+        );
     }
 
 }

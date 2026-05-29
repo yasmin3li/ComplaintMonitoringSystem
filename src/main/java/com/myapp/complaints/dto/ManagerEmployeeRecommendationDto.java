@@ -10,9 +10,12 @@ public record ManagerEmployeeRecommendationDto(
         long inProgressTasks,
         long resolvedComplaints,
         List<DelayedComplaintDto> delayedComplaints,
-        double averageResponseDays,
-        double score,
-        List<EmployeeBadgeDto> badges
+        LoadTagDto employeeBadgeDto
+
+
+//        double averageResponseDays,
+//        double score,
+//        List<EmployeeBadgeDto> badges
 
 ) {
 }

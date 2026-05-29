@@ -125,5 +125,19 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
             " AND l.assignedTo.account.id = :accountId")
     LocalDateTime findStartedAt(@Param("complaintId") Long complaintId, @Param("accountId") Long accountId);
 
+    @Query("""
+    SELECT COUNT(DISTINCT l.complaint.id)
+    FROM ComplaintTrackingLog l
+    WHERE l.newState =ComplaintState.FORWARDED_TO_MANAGER
+    AND l.actionDate BETWEEN :start AND :end
+    AND l.complaint.governorate.id =:governorateId
+    AND l.complaint.institution.id =:institutionId
+""")
+    long countIncomingComplaintsBetween(
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("governorateId") Long governorateId,
+            @Param("institutionId") Long institutionId
+    );
 
 }
