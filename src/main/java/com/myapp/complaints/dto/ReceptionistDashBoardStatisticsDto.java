@@ -1,6 +1,6 @@
 package com.myapp.complaints.dto;
 
-public record EmployeeDashBoardStatisticsDto(
+public record ReceptionistDashBoardStatisticsDto(
         long NewComplaints,
         long InReviewComplaints,
         long ForwardedComplaints,
