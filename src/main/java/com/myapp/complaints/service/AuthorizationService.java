@@ -66,13 +66,6 @@ public class AuthorizationService {
     }
 
     public boolean checkAccessibility(Employee employee, Complaint complaint) {
-        // manager can access forwarded complaints
-
-//            boolean isManager =
-//                    employee.getAccount()
-//                            .getRole()
-//                            .getName()
-//                            .equals("MANAGER");
 
             boolean sameInstitution =
                     complaint.getInstitution()
@@ -92,6 +85,11 @@ public class AuthorizationService {
                     && sameInstitution
                     && sameGovernorate) {
 
+                return true;
+            }
+
+            if(isTechnic()
+                    && checkResponsibility(employee, complaint)) {
                 return true;
             }
 

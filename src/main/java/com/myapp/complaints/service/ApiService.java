@@ -39,7 +39,7 @@ public class ApiService {
     private final ComplaintImageRepo complaintImageRepo;
     private final AuthorizationService authorizationService;
     private final CitizenComplaintWorkFlow citizenComplaintWorkFlow;
-    private final NotificationService notificationService;
+    private final TechnicComplaintWorkFlow technicComplaintWorkFlow;
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
     private final ComplaintTrackingLogMapper trackingLogMapper;
     private final ManagerComplaintWorkFlow managerComplaintWorkFlow;
@@ -97,6 +97,10 @@ public class ApiService {
 
         }
 
+        else if(authorizationService.isTechnic()) {
+            return technicComplaintWorkFlow.getInstitutionComplaints(filter);
+        }
+
         else {
             return citizenComplaintWorkFlow.getCitizensComplaints(localUser,filter);
         }
@@ -137,7 +141,11 @@ public class ApiService {
             return managerComplaintWorkFlow.openComplaint(complaint.getId());
 
         }
+    else if (authorizationService.isTechnic()) {
 
+        return technicComplaintWorkFlow.openComplaint(complaint.getId());
+
+    }
 // open complaint by citizen
         else {
             //            TODO: feat(ApiService): add access control for rejected complaints based on ownership
