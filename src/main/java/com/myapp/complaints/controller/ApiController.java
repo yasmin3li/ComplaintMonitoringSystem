@@ -242,7 +242,7 @@ public class ApiController {
         return ResponseEntity.ok(notificationService.marksAsReadAllNotifications(email));
     }
 
-    @PreAuthorize("hasRole('RECEPTIONIST')")
+//    @PreAuthorize("hasRole('RECEPTIONIST')")
     @PostMapping("/employee/notifications/mark")
     public ResponseEntity<?> marksAsReadAllEmployeeNotification(Authentication auth){
         String email = auth.getName();
@@ -314,6 +314,12 @@ public class ApiController {
     public ResponseEntity<?> updateComplaint(@RequestBody UpdateComplaintDto dto, Authentication auth){
         String email = auth.getName();
         return ResponseEntity.ok(apiService.updateComplaint(email,dto));
+    }
+
+    @PostMapping("/complaint/uploadImages")
+    public ResponseEntity<?> uploadComplaintImages(@RequestBody UpdateComplaintDto dto, Authentication auth){
+        String email = auth.getName();
+        return ResponseEntity.ok(employeeComplaintWorkFlow.updateComplaint(email,dto));
     }
 
     //@PreAuthorize("hasAnyRole('CITIZEN','ADMIN')")

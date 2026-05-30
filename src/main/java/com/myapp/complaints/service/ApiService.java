@@ -234,11 +234,11 @@ public class ApiService {
         if(authorizationService.isCitizen()){
             return citizenComplaintWorkFlow.updateComplaint(email,dto);
         }
-
-        //later when employee want to add complaint's images after solve, [only add images]
-        else if (authorizationService.IsReceptionist() || authorizationService.isManager()) {
-            return employeeComplaintWorkFlow.updateComplaint(email,dto);
-        }
+//
+//        //later when employee want to add complaint's images after solve, [only add images]
+//        else if (authorizationService.IsReceptionist() || authorizationService.isManager()) {
+//            return employeeComplaintWorkFlow.updateComplaint(email,dto);
+//        }
         else {
             throw new ApiException("Unsupported role for this operation yet", HttpStatus.FORBIDDEN);
         }
