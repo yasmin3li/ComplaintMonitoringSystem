@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -105,7 +107,7 @@ public class StatisticsService {
         else if (authorizationService.isManager()) {
 
             return new ManagerDashBoardStatisticsDto(
-                    getDelayedComplaints(employee),
+                    getDelayedComplaints(employee).size(),
                     getCountComplaintsByState(employee,ComplaintState.FORWARDED_TO_MANAGER),
                     getCountComplaintsByState(employee,ComplaintState.ASSIGNED),
                     getCountComplaintsByState(employee,ComplaintState.IN_PROGRESS),
@@ -122,27 +124,45 @@ public class StatisticsService {
             );
     }
 
-    private long getDelayedComplaints(Employee manager) {
+    public List<DelayedComplaintDto> getDelayedComplaints(Employee employee) {
 
-        long threshold =3;
-        long delayedComplaintCount =0;
-        List<Employee> employees =
-                employeeRepo.findByInstitution_IdAndGovernorate_IdAndAccount_Role_Id(
-                        manager.getInstitution().getId(),
-                        manager.getGovernorate().getId(),
-                        4L
-                );
+        return complaintRepo.delayedComplaints(employee.getAccount().getId())
+                .stream()
+                .filter(dc -> {
+                    
 
-        for (Employee employee : employees) {
+                    int slaDays = dc.getPriority().getSlaDays();
 
-             delayedComplaintCount =delayedComplaintCount+
-                    complaintRepo.delayedComplaints(
-                                    employee.getAccount().getId(),
-                                    LocalDateTime.now().minusDays(threshold)
-                            )
-                            .size();
-        }
-        return delayedComplaintCount;
+                    LocalDateTime deadline =
+                            dc.getLastUpdate().plusDays(slaDays);
+
+                    return LocalDateTime.now().isAfter(deadline);
+                })
+                .map(dc -> {
+
+                    int slaDays = dc.getPriority().getSlaDays();
+
+                    LocalDateTime deadline =
+                            dc.getLastUpdate().plusDays(slaDays);
+
+                    double delayedDays =
+                            Math.max(0,
+                                    Math.round(
+                                            Duration.between(deadline, LocalDateTime.now())
+                                                    .toHours() / 24.0 * 100
+                                    ) / 100.0
+                            );
+
+                    return new DelayedComplaintDto(
+                            dc.getComplaintId(),
+                            dc.getTitle(),
+                            dc.getPriority(),
+                            dc.getLastUpdate(),
+                            dc.getState(),
+                            delayedDays
+                    );
+                })
+                .toList();
     }
 
 

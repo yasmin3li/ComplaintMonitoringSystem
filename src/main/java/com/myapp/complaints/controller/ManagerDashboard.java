@@ -181,9 +181,7 @@ public Object getEmployeePerformance(
 
             List<DelayedComplaintDto> delayedComplaintDtoList =
                     complaintRepo.delayedComplaints(
-                                    employee.getAccount().getId(),
-                                    LocalDateTime.now().minusDays(lateThreshold)
-                            )
+                                    employee.getAccount().getId())
                             .stream()
                             .map(dc -> {
 

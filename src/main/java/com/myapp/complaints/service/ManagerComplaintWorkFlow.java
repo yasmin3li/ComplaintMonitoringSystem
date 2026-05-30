@@ -42,7 +42,7 @@ public class ManagerComplaintWorkFlow {
     private final NotificationService notificationService;
     private final AuthorizationService authorizationService;
     private final ComplaintTracingLogRepo logRepo;
-    private final EmployeePerformanceService performanceService;
+    private final StatisticsService statisticsService;
     private final ComplaintTracingLogRepo tracingLogRepo;
 
     public List<ManagerComplaintResponseDto> getInstitutionComplaints(
@@ -303,7 +303,6 @@ public class ManagerComplaintWorkFlow {
     ) {
 
         LocalDateTime end,start;
-        long threshold;
 
         if (dto.start() == null || dto.end() == null) {
 
@@ -313,12 +312,6 @@ public class ManagerComplaintWorkFlow {
         }else {
             start = dto.start();
             end = dto.end();
-        }
-
-        if(dto.threshold()<=0){
-            threshold = 3;
-        }else {
-            threshold = dto.threshold();
         }
 
         Employee manager =
@@ -357,32 +350,7 @@ public class ManagerComplaintWorkFlow {
                             end
                     );
 
-            List<DelayedComplaintDto> delayedComplaintDtoList =
-                    complaintRepo.delayedComplaints(
-                                    employee.getAccount().getId(),
-                                    LocalDateTime.now().minusDays(threshold)
-                            )
-                            .stream()
-                            .map(dc -> {
-
-                                double delayedDays =
-                                        Math.round(
-                                                Duration.between(
-                                                        dc.getLastUpdate(),
-                                                        LocalDateTime.now()).
-                                                        toHours() / 24.0 * 100) / 100.0;
-
-                                return new DelayedComplaintDto(
-                                        dc.getComplaintId(),
-                                        dc.getTitle(),
-                                        dc.getPriority(),
-                                        dc.getLastUpdate(),
-                                        dc.getState(),
-                                        delayedDays
-                                );
-                            })
-                            .toList();
-//
+            List<DelayedComplaintDto> delayedComplaintDtoList = statisticsService.getDelayedComplaints(employee);
 //            EmployeePerformanceDto performance =
 //                    performanceService.getEmployeePerformance(
 //                            employee.getId(),

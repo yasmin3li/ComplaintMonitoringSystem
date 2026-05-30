@@ -128,12 +128,9 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
             c.title,
             c.priority,
             c.state
-        HAVING MAX(l.actionDate) < :threshold
 """)
     List<DelayedComplaintsProjection> delayedComplaints(
-            @Param("accountId") Long accountId,
-            @Param("threshold") LocalDateTime threshold
-    );
+            @Param("accountId") Long accountId);
 
 
 //Complaints Dynamic Query Filter
