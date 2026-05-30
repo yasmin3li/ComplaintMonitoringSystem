@@ -52,7 +52,7 @@ public class ManagerDashboard {
         return ResponseEntity.ok(managerComplaintWorkFlow.assignToMyself(complaintId));
     }
 
-    @GetMapping("/employeses/recommendation")
+    @GetMapping("/employees/recommendation")
     public ResponseEntity<?> getEmployeesRecommendation(ConfigFilterDto dto){
         return ResponseEntity.ok(managerComplaintWorkFlow.getEmployeesRecommendation(dto));
     }
