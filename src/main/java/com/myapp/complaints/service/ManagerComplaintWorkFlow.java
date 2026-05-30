@@ -45,7 +45,7 @@ public class ManagerComplaintWorkFlow {
     private final EmployeePerformanceService performanceService;
     private final ComplaintTracingLogRepo tracingLogRepo;
 
-    public List<ComplaintResponseDto> getInstitutionComplaints(
+    public List<ReceptionComplaintResponseDto> getInstitutionComplaints(
             ComplaintFilterRequestDto filter
     ) {
 
@@ -146,7 +146,7 @@ public class ManagerComplaintWorkFlow {
                         PageRequest.of(page, size)
                 )
                 .stream()
-                .map(complaintMapper::toDto)
+                .map(complaintMapper::toPerceptionComplaintDto)
                 .toList();
     }
 
