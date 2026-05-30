@@ -1,0 +1,1961 @@
+{
+  "info": {
+    "_postman_id": "30c7b997-0cb5-47ea-9aee-5ef73fdccb62",
+    "name": "ComplaintMonSysCollection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "50950100",
+    "_collection_link": "https://go.postman.co/collection/50950100-30c7b997-0cb5-47ea-9aee-5ef73fdccb62?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Sign Up Citizen",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userName\":\"yasmin\",\r\n    \"phoneNumber\":\"0977289555\",\r\n    \"nationalNumber\":\"050548100658\",\r\n    \"password\":\"yasminAbu3l!\",\r\n    \"birthDate\":\"1988-10-5\",\r\n        \"images\":[\r\n        \"http://cloud/img1.png\",\r\n        \"http://cloud/img2.png\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/sign-up/citizen",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "sign-up",
+                "citizen"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sign Up Employee",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"userName\": \"allam\",\r\n  \"email\": \"allam963@gmail.com\",\r\n  \"password\": \"AllamAbu3li!\",\r\n  \"phoneNumber\": \"0949228787\",\r\n  \"nationalNumber\": \"05050462987\",\r\n  \"roleId\": 2,\r\n  \"institutionId\":2,\r\n  \"governorateId\":1,\r\n  \"sectorId\":1\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/sign-up/employee",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "sign-up",
+                "employee"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"identifier\":\"0977289555\",\r\n    \"code\":\"544981\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/verify",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "verify"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verification Codes",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/verificationCodes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "verificationCodes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sign In",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "admin1@example.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "YASMEN@bu3li5",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/sign-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "sign-in"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Forget pw",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"emailOrPhone\": \"mohammed76754@example.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/forgot-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "forgot-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"emailOrPhone\": \"mohammed76754@example.com\",\r\n  \"token\":\"d3b55921-c9be-43e1-b9fd-786d2d1edd1d\",\r\n  \"newPassword\":\"Mohmoh123!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/reset-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "reset-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change pw",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsImV4cCI6MTc2ODU5NTE4MCwiaWF0IjoxNzY4NTk0MjgwLCJzY29wZSI6IlJFQUQifQ.aXMqIZngt41W-PFnF_IRBW4ypTRu58wDOU4CFW8rHYUzhjSYViOJpRKkJZWPJi8pYwOKKWB1MZoJ3f0yNpl3VAvmKeEV-YDlb2j7RtNPndZU1b7XKt3iCCnyT48wG3O-Qc8hPF6zfKeSTNzjdMQUhzGwQMHBWH4HIEUaU42I6J982DFShaL4uoI-JOLO9cLNGuM7HtCj5NJZDOQt_VIzAaaHP3kglZFD3A5ZMF7OQwd-ii92nJfGX9aB3io4_BzCbAzuYOZ_NtZB0X7SiDT0Z-YrrjGjupvyOriRQLkYpRHkdqLNqYF7mD_sLY0jsXIDsB9hE9pq4AltAzQpOLt0ng",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"currentPassword\":\"Mohmoh123!\",\r\n    \"newPassword\":\"Mohmoh1234!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "password Reset Tokens",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/passwordResetTokens",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "passwordResetTokens"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsImV4cCI6MTc2OTg5NDQ5NywiaWF0IjoxNzY4NTk4NDk3LCJzY29wZSI6IlJFRlJFU0hfVE9LRU4ifQ.QU7oD75dUUWISqD77pUpcLjM8XQ1LsyisPFRvzYrcqbV_Amc44yicIE_Od6K60hxXA7lkbamE3eTI10jkYozxLoIlBJSiWb6F59BFHf0do2bkunO--8diXcm0-6HkGoviUxEZ7eKH9uZc43n30uPTbxF3YOGpZIeG70RyZmoLcKWD9DkGpTOtXuXnHa73QVG_8fwAVEVayNDcX_N866dCv-4yHEYMh8OTCXQCSibTy_Fv-WPIxbhQEOPO-v7qvaaMAEA6spJFMxZA3dQL5zMjSt1lOtFgVn2MO5lywY3Y-LiHdm7g6RL93R-hfQDfEk2QLIQ-mZg8g2zbT2OU1UgHw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh-token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh-token"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "resend code",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"emailOrPhone\":\"0333225645\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/resend/code",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "resend",
+                "code"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "resend reset link",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"emailOrPhone\":\"mohammed76754@example.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/resend/link",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "resend",
+                "link"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "edit citizen profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDU1MTgsImlhdCI6MTc3NDkwOTUxOCwic2NvcGUiOiJSRUFEIn0.WGZvWkp89-oFkiv868yxnZ07OdtQQIuKaKMB_K-n7N11KsmazSBmXVOvrWznSUT5dd3OA-BMjZwsc_L9l08SwWCiWrZ_iOl3ReAlWQ2FdO7YojUKSyNZ6bOkjD2jjLc0YGNjf6vJPjXVaRISfSWk00H3Q_j1TrUjThngSgsCxLBnJWRP6mvGiFjyDmdW7W7jgXHoT7zbV6eDJpP2IxRAR_IIuit9SC68wVAixp5rlar7eARtdpjtuIHvGGfIfij38YoompgjOPjS_AlLwMRz943FehI_pxEibVv6iTiRzlYARV5GOJCU6No15F4CgEz3OwUUfbyJ_RC8c6ZTX6Zahg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/citizen/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "citizen",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Complaints-Statistics-Filters-...",
+      "item": [
+        {
+          "name": "Add Complaint",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTA3OCwiaWF0IjoxNzc3NDc5MDc4LCJzY29wZSI6IlJFQUQifQ.w8YOVMG3ZnN9CPiukQwV-DGSFh4KSpXxiboMP6Xldzt28FC80B8OCihoMfstruGvJIajDZdZEhjx7VctZzwpsf-ZOZXNHm8F9YMGtT4co7ldxj9nrRX_xA2e_uBul7nE2zwZmtLha8SvvE49Yp-kpoSBCE2qgpWyWHHSehJgI0W3GhlgnpWFBHDWVDWvU_MMs6V_IM_yvXRcOYLFwZ8lmc6QHLPM_1QNV1kt8vrkehp9n1AIXPUPDSWE_w-eXcTsuqdXcR66f7UcOx29w1fCrLOJ01y2FWXx24a0SPts0FOK2C7iZ8h-GT8hPVqDTGo3q_CEi5MZE1KiGVNyD5MR0g",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"title\": \"شكوى عن سرقة  الكهرباء\",\r\n  \"description\": \"تم سرقة أكبال الكهرباء والتي تمد الشارع الثاني من القرية بالطاقة وذلك منذ أسبوع\",\r\n  \"serviceId\": 1,\r\n  \"institutionId\":1,\r\n  \"governorateId\": 1,\r\n  \"sectorId\": 1,\r\n  \"latitude\": 33.5146,\r\n  \"longitude\": 36.2777,\r\n  \"fullAddressText\": \"حماه - غور العاصي\",\r\n  \"images\": [\r\n    \"https://cloud.com/img9.jpg\",\r\n    \"https://cloud.com/img7.jpg\",\r\n    \"https://cloud.com/img8.jpg\"\r\n  ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/complaint",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Governorates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/governorates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "governorates"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "sector Governorates",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/sectorGovernorates/search/findByGovernorateId?governorateId=1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "sectorGovernorates",
+                "search",
+                "findByGovernorateId"
+              ],
+              "query": [
+                {
+                  "key": "governorateId",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Institution Sector Governorates",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutionSectorGovernorates/search/findBySectorGovernorateIdAndIsActiveTrue?sectorGovernorateId=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutionSectorGovernorates",
+                "search",
+                "findBySectorGovernorateIdAndIsActiveTrue"
+              ],
+              "query": [
+                {
+                  "key": "sectorGovernorateId",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Home Page TopComplaints",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/homepage/complaints?page=0&size=10",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "homepage",
+                "complaints"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Home Page Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/dashboard/homepage/statistics",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "dashboard",
+                "homepage",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Citizen Complaints",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDM2MTQsImlhdCI6MTc3NDkwNzYxNCwic2NvcGUiOiJSRUFEIn0.TqN2kR4VyxH9tLuLs0SKqaKS7G07KNe-8FVXQ7bZ6oa-KtjwmjHLKaFcVX22gk-XkuAJ3ERh9LxfcffQdYrz5Y2iacug5HxPyBovbCSzt-K6JBTVdetSWWtc4wsaiHc8cKlBpAS3qIbCA14wJxI4dllEPfvyzq9owKw77M-GWqGWzp3WVH2Vws24rz8hdcE0vBTizdeO5-G7PFDOC88N8Dc_XpHJ9Q0PSc40qqFMC6-xWCa3GoBIWedqN-LXZpdmbnnbrUZ0M-FQ0fp14IL4_L4ibbwDJWGLBC8qCGSrT3atjaXhqYCY0vDQxV1-epXMj8gaT7_kfj4kGazNWZsIbA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/citizen/myComplaints?page=0&size=3",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "citizen",
+                "myComplaints"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "3"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Citizen Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDM2MTQsImlhdCI6MTc3NDkwNzYxNCwic2NvcGUiOiJSRUFEIn0.TqN2kR4VyxH9tLuLs0SKqaKS7G07KNe-8FVXQ7bZ6oa-KtjwmjHLKaFcVX22gk-XkuAJ3ERh9LxfcffQdYrz5Y2iacug5HxPyBovbCSzt-K6JBTVdetSWWtc4wsaiHc8cKlBpAS3qIbCA14wJxI4dllEPfvyzq9owKw77M-GWqGWzp3WVH2Vws24rz8hdcE0vBTizdeO5-G7PFDOC88N8Dc_XpHJ9Q0PSc40qqFMC6-xWCa3GoBIWedqN-LXZpdmbnnbrUZ0M-FQ0fp14IL4_L4ibbwDJWGLBC8qCGSrT3atjaXhqYCY0vDQxV1-epXMj8gaT7_kfj4kGazNWZsIbA",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/citizen/dashboard/statistics",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "citizen",
+                "dashboard",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "timeline",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDQ3MTYsImlhdCI6MTc3NDkwODcxNiwic2NvcGUiOiJSRUFEIn0.BE9o2rnNiu-d7g-5SyQbVaMNX13tRkft9xywZMaaij7ZjdSwVbWYhNWmdSrF539NUifbe-I7yRmA-4gxnovEKin0-e8rbB8XmDHm2LVlR_qcdpqlZFE3dX-1oTw1RlGTfhug7P5FXfXtEoxpPZwlRXMOEjN2dbSKvkENDFkiLyjlI2hCC27r9pAgaXEe_cqiFgBYJDFV0YZtlW5KBm07EdJfOB0Z4cXmNeRGhEH2tUxOjgfeeMFB9R61ZCjFOaQarbKZCqosUmu2QMQjLlG_nVkj28kQdbF_04puwJEnsdTW8dVjY8exzN3wJxI4OFBpGSnfE3fPJwVsFNtjhbuSvg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/citizen/complaints/10/timeline",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "citizen",
+                "complaints",
+                "10",
+                "timeline"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open homepage complaint",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDQ3MTYsImlhdCI6MTc3NDkwODcxNiwic2NvcGUiOiJSRUFEIn0.BE9o2rnNiu-d7g-5SyQbVaMNX13tRkft9xywZMaaij7ZjdSwVbWYhNWmdSrF539NUifbe-I7yRmA-4gxnovEKin0-e8rbB8XmDHm2LVlR_qcdpqlZFE3dX-1oTw1RlGTfhug7P5FXfXtEoxpPZwlRXMOEjN2dbSKvkENDFkiLyjlI2hCC27r9pAgaXEe_cqiFgBYJDFV0YZtlW5KBm07EdJfOB0Z4cXmNeRGhEH2tUxOjgfeeMFB9R61ZCjFOaQarbKZCqosUmu2QMQjLlG_nVkj28kQdbF_04puwJEnsdTW8dVjY8exzN3wJxI4OFBpGSnfE3fPJwVsFNtjhbuSvg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/homepage/complaints/1",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "homepage",
+                "complaints",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "complaint votes",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/homepage/complaint/2/votes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "homepage",
+                "complaint",
+                "2",
+                "votes"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "like",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDQ3MTYsImlhdCI6MTc3NDkwODcxNiwic2NvcGUiOiJSRUFEIn0.BE9o2rnNiu-d7g-5SyQbVaMNX13tRkft9xywZMaaij7ZjdSwVbWYhNWmdSrF539NUifbe-I7yRmA-4gxnovEKin0-e8rbB8XmDHm2LVlR_qcdpqlZFE3dX-1oTw1RlGTfhug7P5FXfXtEoxpPZwlRXMOEjN2dbSKvkENDFkiLyjlI2hCC27r9pAgaXEe_cqiFgBYJDFV0YZtlW5KBm07EdJfOB0Z4cXmNeRGhEH2tUxOjgfeeMFB9R61ZCjFOaQarbKZCqosUmu2QMQjLlG_nVkj28kQdbF_04puwJEnsdTW8dVjY8exzN3wJxI4OFBpGSnfE3fPJwVsFNtjhbuSvg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/homepage/complaint/2/like",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "homepage",
+                "complaint",
+                "2",
+                "like"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "disLike",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDQ3MTYsImlhdCI6MTc3NDkwODcxNiwic2NvcGUiOiJSRUFEIn0.BE9o2rnNiu-d7g-5SyQbVaMNX13tRkft9xywZMaaij7ZjdSwVbWYhNWmdSrF539NUifbe-I7yRmA-4gxnovEKin0-e8rbB8XmDHm2LVlR_qcdpqlZFE3dX-1oTw1RlGTfhug7P5FXfXtEoxpPZwlRXMOEjN2dbSKvkENDFkiLyjlI2hCC27r9pAgaXEe_cqiFgBYJDFV0YZtlW5KBm07EdJfOB0Z4cXmNeRGhEH2tUxOjgfeeMFB9R61ZCjFOaQarbKZCqosUmu2QMQjLlG_nVkj28kQdbF_04puwJEnsdTW8dVjY8exzN3wJxI4OFBpGSnfE3fPJwVsFNtjhbuSvg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/homepage/complaint/2/disLike",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "homepage",
+                "complaint",
+                "2",
+                "disLike"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "citizen profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDQ3MTYsImlhdCI6MTc3NDkwODcxNiwic2NvcGUiOiJSRUFEIn0.BE9o2rnNiu-d7g-5SyQbVaMNX13tRkft9xywZMaaij7ZjdSwVbWYhNWmdSrF539NUifbe-I7yRmA-4gxnovEKin0-e8rbB8XmDHm2LVlR_qcdpqlZFE3dX-1oTw1RlGTfhug7P5FXfXtEoxpPZwlRXMOEjN2dbSKvkENDFkiLyjlI2hCC27r9pAgaXEe_cqiFgBYJDFV0YZtlW5KBm07EdJfOB0Z4cXmNeRGhEH2tUxOjgfeeMFB9R61ZCjFOaQarbKZCqosUmu2QMQjLlG_nVkj28kQdbF_04puwJEnsdTW8dVjY8exzN3wJxI4OFBpGSnfE3fPJwVsFNtjhbuSvg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/citizen/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "citizen",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "citizen notifications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDQ3MTYsImlhdCI6MTc3NDkwODcxNiwic2NvcGUiOiJSRUFEIn0.BE9o2rnNiu-d7g-5SyQbVaMNX13tRkft9xywZMaaij7ZjdSwVbWYhNWmdSrF539NUifbe-I7yRmA-4gxnovEKin0-e8rbB8XmDHm2LVlR_qcdpqlZFE3dX-1oTw1RlGTfhug7P5FXfXtEoxpPZwlRXMOEjN2dbSKvkENDFkiLyjlI2hCC27r9pAgaXEe_cqiFgBYJDFV0YZtlW5KBm07EdJfOB0Z4cXmNeRGhEH2tUxOjgfeeMFB9R61ZCjFOaQarbKZCqosUmu2QMQjLlG_nVkj28kQdbF_04puwJEnsdTW8dVjY8exzN3wJxI4OFBpGSnfE3fPJwVsFNtjhbuSvg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/citizen/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "citizen",
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open citizen notification",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDU1MTgsImlhdCI6MTc3NDkwOTUxOCwic2NvcGUiOiJSRUFEIn0.WGZvWkp89-oFkiv868yxnZ07OdtQQIuKaKMB_K-n7N11KsmazSBmXVOvrWznSUT5dd3OA-BMjZwsc_L9l08SwWCiWrZ_iOl3ReAlWQ2FdO7YojUKSyNZ6bOkjD2jjLc0YGNjf6vJPjXVaRISfSWk00H3Q_j1TrUjThngSgsCxLBnJWRP6mvGiFjyDmdW7W7jgXHoT7zbV6eDJpP2IxRAR_IIuit9SC68wVAixp5rlar7eARtdpjtuIHvGGfIfij38YoompgjOPjS_AlLwMRz943FehI_pxEibVv6iTiRzlYARV5GOJCU6No15F4CgEz3OwUUfbyJ_RC8c6ZTX6Zahg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/citizen/notifications/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "citizen",
+                "notifications",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "mark citizen notifications as read",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDU1MTgsImlhdCI6MTc3NDkwOTUxOCwic2NvcGUiOiJSRUFEIn0.WGZvWkp89-oFkiv868yxnZ07OdtQQIuKaKMB_K-n7N11KsmazSBmXVOvrWznSUT5dd3OA-BMjZwsc_L9l08SwWCiWrZ_iOl3ReAlWQ2FdO7YojUKSyNZ6bOkjD2jjLc0YGNjf6vJPjXVaRISfSWk00H3Q_j1TrUjThngSgsCxLBnJWRP6mvGiFjyDmdW7W7jgXHoT7zbV6eDJpP2IxRAR_IIuit9SC68wVAixp5rlar7eARtdpjtuIHvGGfIfij38YoompgjOPjS_AlLwMRz943FehI_pxEibVv6iTiRzlYARV5GOJCU6No15F4CgEz3OwUUfbyJ_RC8c6ZTX6Zahg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/citizen/notifications/mark",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "citizen",
+                "notifications",
+                "mark"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "complaint's images",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/images/complaint/10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "images",
+                "complaint",
+                "10"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Receptionist",
+      "item": [
+        {
+          "name": "sign-in",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/sign-in",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "sign-in"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "sign-up",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"userName\": \"allam\",\r\n    \"phoneNumber\": \"0949228787\",\r\n    \"email\": \"allam963@gmail.com\",\r\n    \"nationalNumber\": \"05050462987\",\r\n    \"password\": \"Yasminabu3li!\",\r\n    \"governorateId\": 1,\r\n    \"institutionId\": 1,\r\n    \"sectorId\": 1,\r\n    \"roleId\": 2\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/sign-up/employee",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "sign-up",
+                "employee"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "change-pw",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTA3OCwiaWF0IjoxNzc3NDc5MDc4LCJzY29wZSI6IlJFQUQifQ.w8YOVMG3ZnN9CPiukQwV-DGSFh4KSpXxiboMP6Xldzt28FC80B8OCihoMfstruGvJIajDZdZEhjx7VctZzwpsf-ZOZXNHm8F9YMGtT4co7ldxj9nrRX_xA2e_uBul7nE2zwZmtLha8SvvE49Yp-kpoSBCE2qgpWyWHHSehJgI0W3GhlgnpWFBHDWVDWvU_MMs6V_IM_yvXRcOYLFwZ8lmc6QHLPM_1QNV1kt8vrkehp9n1AIXPUPDSWE_w-eXcTsuqdXcR66f7UcOx29w1fCrLOJ01y2FWXx24a0SPts0FOK2C7iZ8h-GT8hPVqDTGo3q_CEi5MZE1KiGVNyD5MR0g",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"currentPassword\": \"Yasminabu3li!\",\r\n    \"newPassword\": \"Yasminabu3li!\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/change-password",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "change-password"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "all-complaints",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTA3OCwiaWF0IjoxNzc3NDc5MDc4LCJzY29wZSI6IlJFQUQifQ.w8YOVMG3ZnN9CPiukQwV-DGSFh4KSpXxiboMP6Xldzt28FC80B8OCihoMfstruGvJIajDZdZEhjx7VctZzwpsf-ZOZXNHm8F9YMGtT4co7ldxj9nrRX_xA2e_uBul7nE2zwZmtLha8SvvE49Yp-kpoSBCE2qgpWyWHHSehJgI0W3GhlgnpWFBHDWVDWvU_MMs6V_IM_yvXRcOYLFwZ8lmc6QHLPM_1QNV1kt8vrkehp9n1AIXPUPDSWE_w-eXcTsuqdXcR66f7UcOx29w1fCrLOJ01y2FWXx24a0SPts0FOK2C7iZ8h-GT8hPVqDTGo3q_CEi5MZE1KiGVNyD5MR0g",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutions/complaints",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                "complaints"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open-complaint-for-verify",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTk2NiwiaWF0IjoxNzc3NDc5OTY2LCJzY29wZSI6IlJFQUQifQ.nxEAphcKhCIBnILBykMT9_dAPiR832WLjhPjnzD-WUo538_LrcArOP5nXz12R7cz0rPCWJuqf-_nXV3TupDuhuo9d-WMkRr5RdzsRkVIsJWijLO5vTOnX7j_RX1eV0JW49Y2xdcKnSLa6OHt9pqlIvpsd1aX6atx9ME4kyS53JowWN6xtndDPgm7YeBHx8yFbL_ILHaDVPtvQU6lVm_dR60F16kCnL0rl6ZENXHA4Kz1dDrjUcsQ-7UDxmFhXx7EmBO9o32eTTs9-i98ItupasKuzSVR9E0O63qOalHbzf2R5DwYv1CZJ_Z43b34XvjNuqtT05PPd0mlhX10piYS5A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutions/complaints/9",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                "complaints",
+                "9"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open-complaint-state-NEW",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzFfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTc3OSwiaWF0IjoxNzc3NDc5Nzc5LCJzY29wZSI6IlJFQUQifQ.QKbRwVRW_vPaWkWseYqyCn1gz-Kp2Ew0BrvFLTN1UavZ2Vj16pXIu1FgWuZwFAt5pQ9ZHQ6Ui7MNsi7oW5GttMMd_CtgKioFUARnhfXh4L2XQxiof58d6TAqsJtGIHAfsiLTq94yxuJ02BS4Enlp3Pg6TAOTtpGdH-DxpmsGXHJP7otBUwie2xBTRf1VAG9PDXrzBMIiqGNrQHxG0gSqYWQfhbocoNyanIJW4JAA8GOx_Dh113rkweWm9xrRXruxam-BsPRfdu9lVsPSTqsCTq87lT1PvEFA1QwRVKe9Sb4n-dY0_Hxi-xqBvrSryVNlfoIoFGZm_NTY2vaRw9w3PQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutions/complaints?state=جديدة",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                "complaints"
+              ],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "جديدة"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open-complaint-state-REJECTED",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzFfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTc3OSwiaWF0IjoxNzc3NDc5Nzc5LCJzY29wZSI6IlJFQUQifQ.QKbRwVRW_vPaWkWseYqyCn1gz-Kp2Ew0BrvFLTN1UavZ2Vj16pXIu1FgWuZwFAt5pQ9ZHQ6Ui7MNsi7oW5GttMMd_CtgKioFUARnhfXh4L2XQxiof58d6TAqsJtGIHAfsiLTq94yxuJ02BS4Enlp3Pg6TAOTtpGdH-DxpmsGXHJP7otBUwie2xBTRf1VAG9PDXrzBMIiqGNrQHxG0gSqYWQfhbocoNyanIJW4JAA8GOx_Dh113rkweWm9xrRXruxam-BsPRfdu9lVsPSTqsCTq87lT1PvEFA1QwRVKe9Sb4n-dY0_Hxi-xqBvrSryVNlfoIoFGZm_NTY2vaRw9w3PQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutions/complaints?state=مرفوضة",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                "complaints"
+              ],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "مرفوضة"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open-complaint-state-IN_REVIEW",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzFfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTc3OSwiaWF0IjoxNzc3NDc5Nzc5LCJzY29wZSI6IlJFQUQifQ.QKbRwVRW_vPaWkWseYqyCn1gz-Kp2Ew0BrvFLTN1UavZ2Vj16pXIu1FgWuZwFAt5pQ9ZHQ6Ui7MNsi7oW5GttMMd_CtgKioFUARnhfXh4L2XQxiof58d6TAqsJtGIHAfsiLTq94yxuJ02BS4Enlp3Pg6TAOTtpGdH-DxpmsGXHJP7otBUwie2xBTRf1VAG9PDXrzBMIiqGNrQHxG0gSqYWQfhbocoNyanIJW4JAA8GOx_Dh113rkweWm9xrRXruxam-BsPRfdu9lVsPSTqsCTq87lT1PvEFA1QwRVKe9Sb4n-dY0_Hxi-xqBvrSryVNlfoIoFGZm_NTY2vaRw9w3PQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutions/complaints?state=مرفوضة",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                "complaints"
+              ],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "مرفوضة"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Review Later",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzFfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTc3OSwiaWF0IjoxNzc3NDc5Nzc5LCJzY29wZSI6IlJFQUQifQ.QKbRwVRW_vPaWkWseYqyCn1gz-Kp2Ew0BrvFLTN1UavZ2Vj16pXIu1FgWuZwFAt5pQ9ZHQ6Ui7MNsi7oW5GttMMd_CtgKioFUARnhfXh4L2XQxiof58d6TAqsJtGIHAfsiLTq94yxuJ02BS4Enlp3Pg6TAOTtpGdH-DxpmsGXHJP7otBUwie2xBTRf1VAG9PDXrzBMIiqGNrQHxG0gSqYWQfhbocoNyanIJW4JAA8GOx_Dh113rkweWm9xrRXruxam-BsPRfdu9lVsPSTqsCTq87lT1PvEFA1QwRVKe9Sb4n-dY0_Hxi-xqBvrSryVNlfoIoFGZm_NTY2vaRw9w3PQ",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employee/complaint/1/reviewLater",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employee",
+                "complaint",
+                "1",
+                "reviewLater"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "reject complaint",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTk2NiwiaWF0IjoxNzc3NDc5OTY2LCJzY29wZSI6IlJFQUQifQ.nxEAphcKhCIBnILBykMT9_dAPiR832WLjhPjnzD-WUo538_LrcArOP5nXz12R7cz0rPCWJuqf-_nXV3TupDuhuo9d-WMkRr5RdzsRkVIsJWijLO5vTOnX7j_RX1eV0JW49Y2xdcKnSLa6OHt9pqlIvpsd1aX6atx9ME4kyS53JowWN6xtndDPgm7YeBHx8yFbL_ILHaDVPtvQU6lVm_dR60F16kCnL0rl6ZENXHA4Kz1dDrjUcsQ-7UDxmFhXx7EmBO9o32eTTs9-i98ItupasKuzSVR9E0O63qOalHbzf2R5DwYv1CZJ_Z43b34XvjNuqtT05PPd0mlhX10piYS5A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"complaintId\":9,\r\n    \"reason\":\"الصور ليست واضحة\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employee/complaint/reject",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employee",
+                "complaint",
+                "reject"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoieWFzbWluODk1NTVAZXhhbXBsZS5jb20iLCJyb2xlIjoiUk9MRV9DSVRJWkVOIiwiZXhwIjoxNzc4Nzc2MzQ1LCJpYXQiOjE3Nzc0ODAzNDUsInNjb3BlIjoiUkVBRCJ9.Vty1y7AJk0U6QtlVHLKkgGH4_im8ZyhA_lHwAHGQz7sYU75qmZL8YuJjRIoicFagqL_P9Qmx7pc7naxiKatPhPjgN4wKudCDjrxuhJ8eO6knSU40qQ2jm3YZ4C7o60Kjs_j1lApaWf0z-owNLUqPoq7VSgX8IYiJtMN7GRydrvmVrdGT_fhi7ROka6SUST7S0Elt_B4DeIpfYs_PTqRCflhQXhr3CCQdVwxwTucOmCcaHJjQnmF8CUh-Ek9TI0eOtAf0hkY-XeRrEfiy6AA1czldge1pHifmaPcHodXKiHHL-V1SqUUfUtVJ5hTnzztxn5HQXCYGqwwFXM-5JX5kbw",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"complaintId\":10,\r\n    \"images\":[\r\n        \"//cloud.com/img7.jpg\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/complaint/update",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint",
+                "update"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "timeline Copy",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoibW9oYW1tZWQ3Njc1NEBleGFtcGxlLmNvbSIsInJvbGUiOiJST0xFX0NJVElaRU4iLCJleHAiOjE3NzYyMDQ3MTYsImlhdCI6MTc3NDkwODcxNiwic2NvcGUiOiJSRUFEIn0.BE9o2rnNiu-d7g-5SyQbVaMNX13tRkft9xywZMaaij7ZjdSwVbWYhNWmdSrF539NUifbe-I7yRmA-4gxnovEKin0-e8rbB8XmDHm2LVlR_qcdpqlZFE3dX-1oTw1RlGTfhug7P5FXfXtEoxpPZwlRXMOEjN2dbSKvkENDFkiLyjlI2hCC27r9pAgaXEe_cqiFgBYJDFV0YZtlW5KBm07EdJfOB0Z4cXmNeRGhEH2tUxOjgfeeMFB9R61ZCjFOaQarbKZCqosUmu2QMQjLlG_nVkj28kQdbF_04puwJEnsdTW8dVjY8exzN3wJxI4OFBpGSnfE3fPJwVsFNtjhbuSvg",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/citizen/complaints/10/timeline",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "citizen",
+                "complaints",
+                "10",
+                "timeline"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "all notifications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTk2NiwiaWF0IjoxNzc3NDc5OTY2LCJzY29wZSI6IlJFQUQifQ.nxEAphcKhCIBnILBykMT9_dAPiR832WLjhPjnzD-WUo538_LrcArOP5nXz12R7cz0rPCWJuqf-_nXV3TupDuhuo9d-WMkRr5RdzsRkVIsJWijLO5vTOnX7j_RX1eV0JW49Y2xdcKnSLa6OHt9pqlIvpsd1aX6atx9ME4kyS53JowWN6xtndDPgm7YeBHx8yFbL_ILHaDVPtvQU6lVm_dR60F16kCnL0rl6ZENXHA4Kz1dDrjUcsQ-7UDxmFhXx7EmBO9o32eTTs9-i98ItupasKuzSVR9E0O63qOalHbzf2R5DwYv1CZJ_Z43b34XvjNuqtT05PPd0mlhX10piYS5A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/employee/notifications",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "employee",
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "open notifications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTk2NiwiaWF0IjoxNzc3NDc5OTY2LCJzY29wZSI6IlJFQUQifQ.nxEAphcKhCIBnILBykMT9_dAPiR832WLjhPjnzD-WUo538_LrcArOP5nXz12R7cz0rPCWJuqf-_nXV3TupDuhuo9d-WMkRr5RdzsRkVIsJWijLO5vTOnX7j_RX1eV0JW49Y2xdcKnSLa6OHt9pqlIvpsd1aX6atx9ME4kyS53JowWN6xtndDPgm7YeBHx8yFbL_ILHaDVPtvQU6lVm_dR60F16kCnL0rl6ZENXHA4Kz1dDrjUcsQ-7UDxmFhXx7EmBO9o32eTTs9-i98ItupasKuzSVR9E0O63qOalHbzf2R5DwYv1CZJ_Z43b34XvjNuqtT05PPd0mlhX10piYS5A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/employee/notifications/118",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "employee",
+                "notifications",
+                "118"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "marks as read",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTk2NiwiaWF0IjoxNzc3NDc5OTY2LCJzY29wZSI6IlJFQUQifQ.nxEAphcKhCIBnILBykMT9_dAPiR832WLjhPjnzD-WUo538_LrcArOP5nXz12R7cz0rPCWJuqf-_nXV3TupDuhuo9d-WMkRr5RdzsRkVIsJWijLO5vTOnX7j_RX1eV0JW49Y2xdcKnSLa6OHt9pqlIvpsd1aX6atx9ME4kyS53JowWN6xtndDPgm7YeBHx8yFbL_ILHaDVPtvQU6lVm_dR60F16kCnL0rl6ZENXHA4Kz1dDrjUcsQ-7UDxmFhXx7EmBO9o32eTTs9-i98ItupasKuzSVR9E0O63qOalHbzf2R5DwYv1CZJ_Z43b34XvjNuqtT05PPd0mlhX10piYS5A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/employee/notifications/mark",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "employee",
+                "notifications",
+                "mark"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "notifications-statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTk2NiwiaWF0IjoxNzc3NDc5OTY2LCJzY29wZSI6IlJFQUQifQ.nxEAphcKhCIBnILBykMT9_dAPiR832WLjhPjnzD-WUo538_LrcArOP5nXz12R7cz0rPCWJuqf-_nXV3TupDuhuo9d-WMkRr5RdzsRkVIsJWijLO5vTOnX7j_RX1eV0JW49Y2xdcKnSLa6OHt9pqlIvpsd1aX6atx9ME4kyS53JowWN6xtndDPgm7YeBHx8yFbL_ILHaDVPtvQU6lVm_dR60F16kCnL0rl6ZENXHA4Kz1dDrjUcsQ-7UDxmFhXx7EmBO9o32eTTs9-i98ItupasKuzSVR9E0O63qOalHbzf2R5DwYv1CZJ_Z43b34XvjNuqtT05PPd0mlhX10piYS5A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/notifications/statistics",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "notifications",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "employee profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTk2NiwiaWF0IjoxNzc3NDc5OTY2LCJzY29wZSI6IlJFQUQifQ.nxEAphcKhCIBnILBykMT9_dAPiR832WLjhPjnzD-WUo538_LrcArOP5nXz12R7cz0rPCWJuqf-_nXV3TupDuhuo9d-WMkRr5RdzsRkVIsJWijLO5vTOnX7j_RX1eV0JW49Y2xdcKnSLa6OHt9pqlIvpsd1aX6atx9ME4kyS53JowWN6xtndDPgm7YeBHx8yFbL_ILHaDVPtvQU6lVm_dR60F16kCnL0rl6ZENXHA4Kz1dDrjUcsQ-7UDxmFhXx7EmBO9o32eTTs9-i98ItupasKuzSVR9E0O63qOalHbzf2R5DwYv1CZJ_Z43b34XvjNuqtT05PPd0mlhX10piYS5A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/employee/profile",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "employee",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "employee profile edit",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJZT1VSX1ZPSUNFIiwic3ViIjoiZWxlYzJfaGFtYUB0ZXN0LmNvbSIsInJvbGUiOiJST0xFX1JFQ0VQVElPTklTVCIsImV4cCI6MTc3ODc3NTk2NiwiaWF0IjoxNzc3NDc5OTY2LCJzY29wZSI6IlJFQUQifQ.nxEAphcKhCIBnILBykMT9_dAPiR832WLjhPjnzD-WUo538_LrcArOP5nXz12R7cz0rPCWJuqf-_nXV3TupDuhuo9d-WMkRr5RdzsRkVIsJWijLO5vTOnX7j_RX1eV0JW49Y2xdcKnSLa6OHt9pqlIvpsd1aX6atx9ME4kyS53JowWN6xtndDPgm7YeBHx8yFbL_ILHaDVPtvQU6lVm_dR60F16kCnL0rl6ZENXHA4Kz1dDrjUcsQ-7UDxmFhXx7EmBO9o32eTTs9-i98ItupasKuzSVR9E0O63qOalHbzf2R5DwYv1CZJ_Z43b34XvjNuqtT05PPd0mlhX10piYS5A",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"profileImageUrl\":\"//cloud/img1.png\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/employee/profile",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "employee",
+                "profile"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Priority",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employee/complaint/priority ",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employee",
+                "complaint",
+                "priority "
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Manager",
+      "item": [
+        {
+          "name": "الشكاوي المحولة للمدير (غير مسندة بعد)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutions/complaints",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                "complaints"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "اختيار شكوى وفتحها",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/institutions/complaints",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "institutions",
+                "complaints"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "احصائيات الاشعارات نفسها للكل",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/notifications/statistics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "notifications",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "جلب كل الاشعارات(نفسه)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employee/notifications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employee",
+                "notifications"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تعليم الكل كمقروء(نفسه)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employee/notifications/mark",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employee",
+                "notifications",
+                "mark"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "فتح اشعار(نفسه)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employee/notifications/10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employee",
+                "notifications",
+                "10"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تعديل الاولوية (نفسه)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"complaintId\":25,\r\n    \"priority\":\"أولوية منخفضة\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/employee/complaint/priority",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employee",
+                "complaint",
+                "priority"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "رفع صور للحل",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"complaintId\":6,\r\n    \"images\":[\r\n        \"solved.png\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/complaint/uploadImages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint",
+                "uploadImages"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "اسناد شكوى لموظف",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"complaintId\":22,\r\n    \"assignedTo\":32\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/complaint/assign",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint",
+                "assign"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "اختيار الموظف الذي سيتم اسناد الشكوى له",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employeses/recommendation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employees",
+                "recommendation"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
