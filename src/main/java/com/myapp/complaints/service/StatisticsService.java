@@ -1,25 +1,16 @@
 package com.myapp.complaints.service;
 
-import com.myapp.complaints.BadgeFactory;
-import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
-import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Employee;
-import com.myapp.complaints.entity.EmployeePerformanceSnapshot;
 import com.myapp.complaints.enums.ComplaintState;
-import com.myapp.complaints.exceptionHandller.ApiException;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.http.parser.Authorization;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +19,7 @@ public class StatisticsService {
     private final ComplaintRepo complaintRepo;
     private final InstitutionRepo institutionRepo;
     private final EmployeeRepo employeeRepo;
+    private final AuthorizationService authorizationService;
 
     public long getTotalComplaints() {
         return complaintRepo.countByDeletedFalse();
@@ -99,23 +91,64 @@ public class StatisticsService {
         );
     }
 
-    public EmployeeDashBoardStatisticsDto getEmployeeDashboardStatistics() {
+    public Object getEmployeeDashboardStatistics() {
 
         Employee employee = employeeRepo.findByAccount_Email(
                 SecurityContextHolder.getContext().getAuthentication().getName());
 
-        return new EmployeeDashBoardStatisticsDto(
-                getTotalNewComplaints(employee),
-                getInReviewComplaints(employee),
-                getForwardedComplaints(employee),
-                getRejected(employee)
-        );
+        if(authorizationService.isTechnic()){
+
+//            TODO: correct logic
+            return new ApiResponseDto<>(false,"Not supported Yet",null);
+
+        }
+        else if (authorizationService.isManager()) {
+
+            return new ManagerDashBoardStatisticsDto(
+                    getDelayedComplaints(employee),
+                    getCountComplaintsByState(employee,ComplaintState.FORWARDED_TO_MANAGER),
+                    getCountComplaintsByState(employee,ComplaintState.ASSIGNED),
+                    getCountComplaintsByState(employee,ComplaintState.IN_PROGRESS),
+                    getCountComplaintsByState(employee,ComplaintState.RESOLVED)
+            );
+
+        }
+        else
+            return new ReceptionistDashBoardStatisticsDto(
+                    getCountComplaintsByState(employee,ComplaintState.NEW),
+                    getInReviewComplaints(employee),
+                    getForwardedComplaints(employee),
+                    getRejected(employee)
+            );
+    }
+
+    private long getDelayedComplaints(Employee manager) {
+
+        long threshold =3;
+        long delayedComplaintCount =0;
+        List<Employee> employees =
+                employeeRepo.findByInstitution_IdAndGovernorate_IdAndAccount_Role_Id(
+                        manager.getInstitution().getId(),
+                        manager.getGovernorate().getId(),
+                        4L
+                );
+
+        for (Employee employee : employees) {
+
+             delayedComplaintCount =delayedComplaintCount+
+                    complaintRepo.delayedComplaints(
+                                    employee.getAccount().getId(),
+                                    LocalDateTime.now().minusDays(threshold)
+                            )
+                            .size();
+        }
+        return delayedComplaintCount;
     }
 
 
-    private long getTotalNewComplaints(Employee employee) {
+    private long getCountComplaintsByState(Employee employee, ComplaintState state) {
         return complaintRepo.countByStateAndGovernorate_IdAndInstitution_IdAndSector_Id(
-                ComplaintState.NEW,
+                state,
                 employee.getGovernorate().getId(),
                 employee.getInstitution().getId(),
                 employee.getSector().getId());
