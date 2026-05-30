@@ -394,7 +394,7 @@ public class ManagerComplaintWorkFlow {
             double loadRatio =
                     inComingComplaints == 0
                             ? 0
-                            : ((double)(inProgressTasks + assignedTasks) * 100)
+                            : ((double)(inProgressTasks + assignedTasks * 1.5) * 100)
                             / inComingComplaints;
 
 
@@ -417,51 +417,33 @@ public class ManagerComplaintWorkFlow {
         }
 
         result.sort(
-                Comparator.comparingDouble(
+                Comparator
+                        .comparingDouble(
                                 (ManagerEmployeeRecommendationDto e) ->
                                         e.employeeBadgeDto().loadRatio()
                         )
-//                        .thenComparing(
-//                                Comparator.comparingDouble(
-//                                        ManagerEmployeeRecommendationDto::resolvedComplaints
-//                                ).reversed().reversed()
-//                        )
+                        .thenComparing(
+                                Comparator.comparingLong(
+                                        ManagerEmployeeRecommendationDto::resolvedComplaints
+                                ).reversed()
+                        )
         );
 
         if (!result.isEmpty()) {
 
-            ManagerEmployeeRecommendationDto leastLoaded =
-                    result.stream()
-                            .min(
-                                    Comparator
-                                            .comparingDouble(
-                                                    (ManagerEmployeeRecommendationDto e) ->
-                                                            e.employeeBadgeDto().loadRatio()
-                                            )
-                                            .thenComparing(
-                                                    Comparator.comparingLong(
-                                                            ManagerEmployeeRecommendationDto::resolvedComplaints
-                                                    ).reversed().reversed()
-                                            )
+            ManagerEmployeeRecommendationDto updatedEmployee = getManagerEmployeeRecommendationDto(result);
 
-                            )
-                            .orElse(null);
-
-            if (leastLoaded != null) {
-
-                int index = result.indexOf(leastLoaded);
-
-                ManagerEmployeeRecommendationDto updatedEmployee = getManagerEmployeeRecommendationDto(leastLoaded);
-
-                result.set(index, updatedEmployee);
-            }
+            result.set(0, updatedEmployee);
         }
 
         return result;
     }
 
     @Nonnull
-    private static ManagerEmployeeRecommendationDto getManagerEmployeeRecommendationDto(ManagerEmployeeRecommendationDto leastLoaded) {
+    private static ManagerEmployeeRecommendationDto getManagerEmployeeRecommendationDto(List<ManagerEmployeeRecommendationDto> result) {
+        ManagerEmployeeRecommendationDto leastLoaded =
+                result.get(0);
+
         LoadTagDto oldBadge =
                 leastLoaded.employeeBadgeDto();
 
@@ -475,15 +457,17 @@ public class ManagerComplaintWorkFlow {
                         oldBadge.loadRatio()
                 );
 
-        return new ManagerEmployeeRecommendationDto(
-                leastLoaded.employeeId(),
-                leastLoaded.employeeName(),
-                leastLoaded.assignedTasks(),
-                leastLoaded.inProgressTasks(),
-                leastLoaded.resolvedComplaints(),
-                leastLoaded.delayedComplaints(),
-                updatedBadge
-        );
+        ManagerEmployeeRecommendationDto updatedEmployee =
+                new ManagerEmployeeRecommendationDto(
+                        leastLoaded.employeeId(),
+                        leastLoaded.employeeName(),
+                        leastLoaded.assignedTasks(),
+                        leastLoaded.inProgressTasks(),
+                        leastLoaded.resolvedComplaints(),
+                        leastLoaded.delayedComplaints(),
+                        updatedBadge
+                );
+        return updatedEmployee;
     }
 
 }
