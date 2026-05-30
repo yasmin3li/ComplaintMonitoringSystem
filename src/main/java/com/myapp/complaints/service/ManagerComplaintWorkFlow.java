@@ -152,7 +152,7 @@ public class ManagerComplaintWorkFlow {
 
 
     @Transactional
-    public ComplaintResponseDto openComplaint(long complaintId) {
+    public ManagerComplaintResponseDto openComplaint(long complaintId) {
 
         Employee employee =
                 employeeRepo.findByAccount_Email(  SecurityContextHolder.getContext().getAuthentication().getName());
@@ -160,6 +160,13 @@ public class ManagerComplaintWorkFlow {
         Complaint complaint =
                 complaintRepo
                         .findByIdAndDeletedFalse(complaintId).orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
+
+        ComplaintState complaintState = complaint.getState();
+        if(complaintState.equals(ComplaintState.NEW) ||
+                complaintState.equals(ComplaintState.IN_REVIEW)
+        ){
+            throw new ApiException("this complaint is not in your responsibility",HttpStatus.FORBIDDEN);
+        }
 
         if (!authorizationService.checkAccessibility(employee,complaint)) {
             throw new ApiException(
@@ -171,7 +178,7 @@ public class ManagerComplaintWorkFlow {
         workflowEngine.createActionLog(complaint, employee.getAccount(), ActionType.OPENED);
 
         return complaintMapper
-                .toDto(complaint);
+                .toManagerComplaintDto(complaint);
 
     }
 
@@ -394,7 +401,7 @@ public class ManagerComplaintWorkFlow {
             double loadRatio =
                     inComingComplaints == 0
                             ? 0
-                            : ((double)(inProgressTasks + assignedTasks * 1.5) * 100)
+                            : ((double)(inProgressTasks * 1.5 + assignedTasks) * 100)
                             / inComingComplaints;
 
 
@@ -425,7 +432,7 @@ public class ManagerComplaintWorkFlow {
                         .thenComparing(
                                 Comparator.comparingLong(
                                         ManagerEmployeeRecommendationDto::resolvedComplaints
-                                ).reversed()
+                                )
                         )
         );
 
