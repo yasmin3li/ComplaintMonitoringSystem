@@ -193,9 +193,7 @@ public class ComplaintMapper {
 
     public ManagerComplaintResponseDto toManagerComplaintDto(Complaint complaint) {
 
-        if(complaint.getState().equals(ComplaintState.ASSIGNED) || complaint.getState().equals(ComplaintState.IN_PROGRESS)
-        || complaint.getState().equals(ComplaintState.RESOLVED)
-        ){
+        if(!(complaint.getAssignedTo() == null)){
             return new ManagerComplaintResponseDto(
                     toPerceptionComplaintDto(complaint),
                     complaint.getAssignedTo().getId(),
