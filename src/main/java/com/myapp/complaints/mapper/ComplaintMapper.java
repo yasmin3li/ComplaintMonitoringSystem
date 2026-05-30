@@ -171,7 +171,7 @@ public class ComplaintMapper {
         );
     }
 
-private String getLastRejectReason(Complaint complaint){
+    private String getLastRejectReason(Complaint complaint){
 
     Optional<Account> account = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
     Optional<ComplaintTrackingLog> log;
@@ -190,4 +190,28 @@ private String getLastRejectReason(Complaint complaint){
     return log.map(ComplaintTrackingLog::getComments).orElse(null);
 
 }
+
+    public ManagerComplaintResponseDto toManagerComplaintDto(Complaint complaint) {
+
+        if(complaint.getState().equals(ComplaintState.ASSIGNED) || complaint.getState().equals(ComplaintState.IN_PROGRESS)
+        || complaint.getState().equals(ComplaintState.RESOLVED)
+        ){
+            return new ManagerComplaintResponseDto(
+                    toPerceptionComplaintDto(complaint),
+                    complaint.getAssignedTo().getId(),
+                    complaint.getAssignedTo().getAccount().getUserName(),
+                    complaint.getAssignedTo().getAccount().getEmail()
+            );
+        }
+        else{
+            return new ManagerComplaintResponseDto(
+                    toPerceptionComplaintDto(complaint),
+                    null,
+                    null,
+                    null
+            );
+        }
+    }
+
+
 }
