@@ -131,7 +131,7 @@ public class BadgeFactory {
             return new LoadTagDto(
                     BadgeType.LOAD,
                     "حمل متوسط",
-                    null,
+                    "الحمل مقبول, يفضل عدم اسناد المزيد له",
                     BadgeLevel.ORANGE,
                     null,
                     Math.round(avgLoad*100)/100.0
