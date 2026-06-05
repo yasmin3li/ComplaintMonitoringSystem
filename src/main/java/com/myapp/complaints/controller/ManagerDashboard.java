@@ -57,7 +57,12 @@ public class ManagerDashboard {
         return ResponseEntity.ok(managerComplaintWorkFlow.getEmployeesRecommendation(dto));
     }
 
-
+    @PostMapping("/complaint/reAssign")
+    public ResponseEntity<?> reAssignComplaint(
+            @RequestBody AssignComplaintDto assignComplaintDto
+    ){
+        return ResponseEntity.ok(managerComplaintWorkFlow.reAssignComplaintToEmployee(assignComplaintDto));
+    }
 
 
 

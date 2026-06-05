@@ -94,7 +94,7 @@ public class ComplaintWorkflowEngine {
             case FINISHED -> "تم الانتهاء من العمل على الشكوى";
             case CLOSED -> "تم إغلاق الشكوى";
             case UPLOAD_IMAGE -> "تم ارفاق صور لحل الشكوى";
-
+            case REASSIGNED -> "تم إعادة اسناد الشكوى لموظف آخر";
 
             default -> "تم تنفيذ إجراء على الشكوى";
         };

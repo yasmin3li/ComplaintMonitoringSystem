@@ -12,5 +12,6 @@ public enum ActionType {
     IN_REVIEW,
     STARTED,
     FINISHED,
-    UPLOAD_IMAGE
+    UPLOAD_IMAGE,
+    REASSIGNED
 }

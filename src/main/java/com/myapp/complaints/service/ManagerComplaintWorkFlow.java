@@ -189,18 +189,11 @@ public class ManagerComplaintWorkFlow {
     ) {
 
         Employee manager =
-                employeeRepo.findByAccount_Email(
-                        SecurityContextHolder
-                                .getContext()
-                                .getAuthentication()
-                                .getName()
-                );
+                employeeRepo.findByAccount_Email(SecurityContextHolder.getContext().getAuthentication().getName());
 
         Complaint complaint =
                 complaintRepo
-                        .findByIdAndDeletedFalse(
-                                dto.complaintId()
-                        )
+                        .findByIdAndDeletedFalse(dto.complaintId())
                         .orElseThrow(() ->
                                 new ApiException(
                                         "Complaint not found",
@@ -214,11 +207,8 @@ public class ManagerComplaintWorkFlow {
         );
 
         if (!authorizationService
-                .checkAccessibility(
-                        manager,
-                        complaint
-                )) {
-
+                .checkAccessibility(manager, complaint))
+        {
             throw new ApiException(
                     "Access denied",
                     HttpStatus.FORBIDDEN
@@ -226,9 +216,7 @@ public class ManagerComplaintWorkFlow {
         }
 
         Employee assignedEmployee =
-                employeeRepo.findById(
-                                dto.assignedTo()
-                        )
+                employeeRepo.findById(dto.assignedTo())
                         .orElseThrow(() ->
                                 new ApiException(
                                         "Employee not found",
@@ -259,7 +247,7 @@ public class ManagerComplaintWorkFlow {
 
         return new ApiResponseDto<>(
                 true,
-                "تم اسناد الشكوى بنجاح",
+                "Complaint assigned successfully",
                 null
         );
     }
@@ -443,6 +431,83 @@ public class ManagerComplaintWorkFlow {
                         updatedBadge
                 );
         return updatedEmployee;
+    }
+
+    @Transactional
+    public ApiResponseDto<?> reAssignComplaintToEmployee(
+            AssignComplaintDto dto
+    ) {
+
+        Employee manager =
+                employeeRepo.findByAccount_Email(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        Complaint complaint =
+                complaintRepo
+                        .findByIdAndDeletedFalse(dto.complaintId())
+                        .orElseThrow(() ->
+                                new ApiException(
+                                        "Complaint not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
+
+        validator.validate(
+                complaint.getState(),
+                ComplaintState.ASSIGNED
+        );
+
+        if (!authorizationService
+                .checkAccessibility(manager, complaint))
+        {
+            throw new ApiException(
+                    "Access denied",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        Employee assignedEmployee =
+                employeeRepo.findById(dto.assignedTo())
+                        .orElseThrow(() ->
+                                new ApiException(
+                                        "Employee not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
+
+        if (!assignedEmployee.getInstitution().getId().equals(complaint.getInstitution().getId())||
+                !assignedEmployee.getGovernorate().getId().equals(complaint.getGovernorate().getId())
+        ) {
+
+            throw new ApiException(
+                    "Employee does not belong to complaint institution",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if(complaint.getAssignedTo() != null && complaint.getAssignedTo().getId().equals(assignedEmployee.getId())
+        ){
+            throw new ApiException(
+                    "Complaint is already assigned to this employee",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        complaint.setAssignedTo(assignedEmployee);
+        complaint.setDateTimeOfUpdate(LocalDateTime.now());
+        complaintRepo.save(complaint);
+
+        workflowEngine.createActionLog(
+                complaint,
+                manager.getAccount(),
+                ActionType.REASSIGNED);
+
+        notificationService.notifyUsers(complaint,"no thing",List.of(assignedEmployee.getAccount()));
+
+        return new ApiResponseDto<>(
+                true,
+                "Complaint reassigned successfully",
+                null
+        );
     }
 
 }
