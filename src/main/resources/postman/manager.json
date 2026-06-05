@@ -1948,8 +1948,202 @@
               ],
               "path": [
                 "api",
-                "employees",
+                "employeses",
                 "recommendation"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "اسناد الشكوى لنفسه(المدير يسندها لنفسه)",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/complaint/assignToMi/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint",
+                "assignToMi",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "الانتهاء من حل الشكوى",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"complaintId\":19,\r\n    \"reason\":\"yasmin solved it\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/complaint/finishSolve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint",
+                "finishSolve"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "البدء بحل الشكوى",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/complaint/startSolve/2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint",
+                "startSolve",
+                "2"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "اعادة اسناد شكوى من قبل المدير",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/employee/dashboard/statistics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "employee",
+                "dashboard",
+                "statistics"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "تحميل صورة من قبل الموظف",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "elec2_hama@test.com",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "Yasminabu3li!",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"complaintId\":25,\r\n    \"images\":[\r\n        \"solved.png\"\r\n    ]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/complaint/uploadImages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "complaint",
+                "uploadImages"
               ]
             }
           },
