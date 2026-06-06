@@ -71,6 +71,13 @@ public class TechnicComplaintWorkFlow {
 
 //                        query.distinct(true);
                 }
+
+                else if(complaintState == ComplaintState.ASSIGNED){
+
+                predicates.add(cb.equal(root.get("state"), ComplaintState.ASSIGNED));
+                predicates.add(cb.equal(root.get("assignedTo"), employee));
+
+                }
             }
             else {
                 predicates.add(cb.equal(root.get("state"), ComplaintState.ASSIGNED));
