@@ -140,4 +140,13 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
             @Param("institutionId") Long institutionId
     );
 
+    @Query("""
+    SELECT COUNT(DISTINCT l.complaint.id)
+    FROM ComplaintTrackingLog l
+    WHERE l.actionBy.id = :accountId
+    AND l.newState =ComplaintState.RESOLVED
+""")
+    long countResolvedComplaints(
+            @Param("accountId") Long accountId
+    );
 }
