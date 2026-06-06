@@ -81,6 +81,16 @@ public class ManagerComplaintWorkFlow {
                             )
                     );
 
+                    if(filter.employeeId() != null){
+                        predicates.add(
+                                cb.equal(
+                                        root.get("assignedTo")
+                                                .get("id"),
+                                        filter.employeeId()
+                                )
+                        );
+                    }
+
                     predicates.add(
                             cb.equal(
                                     root.get("institution")
