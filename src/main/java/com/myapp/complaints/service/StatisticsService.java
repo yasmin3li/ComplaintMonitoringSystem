@@ -161,6 +161,7 @@ public class StatisticsService {
                             );
 
                     return new DelayedComplaintDto(
+                            employee.getId(),
                             dc.getComplaintId(),
                             dc.getTitle(),
                             dc.getPriority(),

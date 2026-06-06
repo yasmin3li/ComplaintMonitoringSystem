@@ -198,6 +198,7 @@ public Object getEmployeePerformance(
                                                         toHours() / 24.0 * 100) / 100.0;
 
                                 return new DelayedComplaintDto(
+                                        employee.getId(),
                                         dc.getComplaintId(),
                                         dc.getTitle(),
                                         dc.getPriority(),

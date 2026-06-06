@@ -2,14 +2,18 @@ package com.myapp.complaints.controller;
 
 
 import com.myapp.complaints.DAO.AccountRepo;
+import com.myapp.complaints.DAO.EmployeeRepo;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Account;
+import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.VotingType;
+import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.service.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.javassist.NotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,6 +44,7 @@ public class ApiController {
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
     private final EmployeePerformanceService employeePerformanceService;
     private final EmployeeComplaintWorkFlow employeeComplaintWorkFlow;
+    private final EmployeeRepo employeeRepo;
 
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
@@ -344,6 +349,26 @@ public class ApiController {
     @PostMapping("/complaint/startSolve/{complaintId}")
     public ResponseEntity<?> startSolveComplaint(@PathVariable Long complaintId){
         return ResponseEntity.ok(employeeComplaintWorkFlow.startSolveComplaint(complaintId));
+    }
+
+    @GetMapping("/delayedComplaints")
+    public ResponseEntity<?> getDelayedComplaints(
+            @RequestParam(required = false) Long employeeId) {
+
+        if (employeeId != null) {
+
+            Optional<Employee> employee = employeeRepo.findByAccountId(employeeId);
+
+            if(employee.isEmpty()){
+
+                throw new ApiException("Employee not found",HttpStatus.NOT_FOUND);
+
+            }
+            return ResponseEntity.ok(statisticsService.getDelayedComplaints(employee.get()));
+
+        } else {
+            return ResponseEntity.ok(apiService.getDelayedComplaints());
+        }
     }
 
 }

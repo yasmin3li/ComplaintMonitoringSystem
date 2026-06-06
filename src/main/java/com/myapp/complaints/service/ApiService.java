@@ -1,5 +1,6 @@
 package com.myapp.complaints.service;
 
+import com.myapp.complaints.BadgeFactory;
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
@@ -43,7 +44,7 @@ public class ApiService {
     private final ReceptionistComplaintWorkflow receptionistComplaintWorkflow;
     private final ComplaintTrackingLogMapper trackingLogMapper;
     private final ManagerComplaintWorkFlow managerComplaintWorkFlow;
-    private final EmployeeComplaintWorkFlow employeeComplaintWorkFlow;
+    private final StatisticsService statisticsService;
 //Get data for homePage (last complaints)
 //    public List<ComplaintResponseDto> getLast10Complaints() {
 //
@@ -318,4 +319,30 @@ public class ApiService {
 
     }
 
+    //جلب الشكاوى المتاخرة في مؤسسة المدير الحالي
+    public List<DelayedComplaintDto> getDelayedComplaints() {
+
+        Employee currentEmployee =
+                employeeRepo.findByAccount_Email(SecurityContextHolder.getContext().getAuthentication().getName());
+
+        List<Employee> employees =
+                employeeRepo.findByInstitution_IdAndGovernorate_IdAndAccount_Role_Id(
+                        currentEmployee.getInstitution().getId(),
+                        currentEmployee.getGovernorate().getId(),
+                        4L
+                );
+
+        List<List<DelayedComplaintDto>> allDelayedComplaints = new ArrayList<>();
+
+        for (Employee employee : employees) {
+
+           allDelayedComplaints.add(statisticsService.getDelayedComplaints(employee));
+
+        }
+
+        return allDelayedComplaints.stream()
+                .flatMap(List::stream)
+                .toList();
+
+    }
 }

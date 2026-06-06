@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 public record DelayedComplaintDto(
 
+        Long employeeId,
         Long complaintId,
         String title,
         ComplaintPriority priority,
