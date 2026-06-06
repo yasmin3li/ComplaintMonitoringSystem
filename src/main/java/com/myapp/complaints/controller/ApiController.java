@@ -141,12 +141,12 @@ public class ApiController {
     @GetMapping("/citizen/myComplaints")
     public ResponseEntity<?> getMyComplaints(ComplaintFilterRequestDto filter) {
 
-        return ResponseEntity.ok(apiService.getComplaints(filter,true));
+        return ResponseEntity.ok(apiService.getComplaints(filter));
     }
 
     @GetMapping("/homepage/complaints")
     public ResponseEntity<?> getComplaints(ComplaintFilterRequestDto filter) {
-        return ResponseEntity.ok(apiService.getComplaints(filter,false));
+        return ResponseEntity.ok(apiService.getComplaints(filter));
     }
 
     @PreAuthorize("hasRole('CITIZEN')")
@@ -175,7 +175,7 @@ public class ApiController {
 //    @PreAuthorize("hasRole('RECEPTIONIST')")
     @GetMapping("/institutions/complaints")
     public ResponseEntity<?> geNewInstitutionComplaints(ComplaintFilterRequestDto filter){
-        return ResponseEntity.ok(apiService.getComplaints(filter,true));
+        return ResponseEntity.ok(apiService.getComplaints(filter));
     }
 
     @GetMapping("/images/complaint/{complaintId}")
@@ -353,7 +353,9 @@ public class ApiController {
 
     @GetMapping("/delayedComplaints")
     public ResponseEntity<?> getDelayedComplaints(
-            @RequestParam(required = false) Long employeeId) {
+            @RequestParam(required = false) Long employeeId,
+            @RequestParam(required = false) Boolean myComplaints
+            ) {
 
         if (employeeId != null) {
 
@@ -367,7 +369,7 @@ public class ApiController {
             return ResponseEntity.ok(statisticsService.getDelayedComplaints(employee.get()));
 
         } else {
-            return ResponseEntity.ok(apiService.getDelayedComplaints());
+            return ResponseEntity.ok(apiService.getDelayedComplaints(myComplaints));
         }
     }
 

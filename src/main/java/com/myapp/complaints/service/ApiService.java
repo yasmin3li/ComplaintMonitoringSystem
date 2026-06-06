@@ -82,7 +82,7 @@ public class ApiService {
 
 
 //display list of complaints based on account's role and special filter
-    public Object getComplaints(ComplaintFilterRequestDto filter,boolean localUser) {
+    public Object getComplaints(ComplaintFilterRequestDto filter) {
 
 //TODO :later when dealing with admin_role or manager_role will do like this role_condition and local user will be always true
 
@@ -94,6 +94,11 @@ public class ApiService {
 
         else if (authorizationService.isManager()) {
 
+            if(filter.myComplaints()!=null && filter.myComplaints().equals(true))
+            {
+                return technicComplaintWorkFlow.getInstitutionComplaints(filter);
+
+            }
             return managerComplaintWorkFlow.getInstitutionComplaints(filter);
 
         }
@@ -103,7 +108,7 @@ public class ApiService {
         }
 
         else {
-            return citizenComplaintWorkFlow.getCitizensComplaints(localUser,filter);
+            return citizenComplaintWorkFlow.getCitizensComplaints(filter);
         }
     }
 
@@ -320,29 +325,41 @@ public class ApiService {
     }
 
     //جلب الشكاوى المتاخرة في مؤسسة المدير الحالي
-    public List<DelayedComplaintDto> getDelayedComplaints() {
+    public List<DelayedComplaintDto> getDelayedComplaints(boolean myComplaints) {
 
         Employee currentEmployee =
                 employeeRepo.findByAccount_Email(SecurityContextHolder.getContext().getAuthentication().getName());
 
-        List<Employee> employees =
-                employeeRepo.findByInstitution_IdAndGovernorate_IdAndAccount_Role_Id(
-                        currentEmployee.getInstitution().getId(),
-                        currentEmployee.getGovernorate().getId(),
-                        4L
-                );
+        if(!myComplaints && authorizationService.isManager()){
 
-        List<List<DelayedComplaintDto>> allDelayedComplaints = new ArrayList<>();
+            List<Employee> employees =
+                    employeeRepo.findByInstitution_IdAndGovernorate_IdAndAccount_Role_Id(
+                            currentEmployee.getInstitution().getId(),
+                            currentEmployee.getGovernorate().getId()
+                            ,
+                            4L
+                    );
 
-        for (Employee employee : employees) {
+            employees.addAll(employeeRepo.findByInstitution_IdAndGovernorate_IdAndAccount_Role_Id(
+                    currentEmployee.getInstitution().getId(),
+                    currentEmployee.getGovernorate().getId(),
+                    3L
+            ));
 
-           allDelayedComplaints.add(statisticsService.getDelayedComplaints(employee));
+            List<List<DelayedComplaintDto>> allDelayedComplaints = new ArrayList<>();
+
+            for (Employee employee : employees) {
+
+                allDelayedComplaints.add(statisticsService.getDelayedComplaints(employee));
+
+            }
+
+            return allDelayedComplaints.stream()
+                    .flatMap(List::stream)
+                    .toList();
 
         }
-
-        return allDelayedComplaints.stream()
-                .flatMap(List::stream)
-                .toList();
+        else return statisticsService.getDelayedComplaints(currentEmployee);
 
     }
 }

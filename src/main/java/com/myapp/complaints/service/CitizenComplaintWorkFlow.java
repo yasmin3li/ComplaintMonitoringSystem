@@ -143,7 +143,7 @@ public class CitizenComplaintWorkFlow {
         );
     }
 
-    public List<ComplaintResponseDto> getCitizensComplaints(boolean localUser, ComplaintFilterRequestDto filter) {
+    public List<ComplaintResponseDto> getCitizensComplaints(ComplaintFilterRequestDto filter) {
 
         Specification<Complaint> spec =  (root, query, cb) -> {
 
@@ -173,7 +173,7 @@ public class CitizenComplaintWorkFlow {
             }
 
             // citizen only
-            if (localUser) {
+            if (filter.myComplaints() != null && filter.myComplaints().equals(true)) {
                 String email = SecurityContextHolder.getContext().getAuthentication().getName();
                 predicates.add(cb.equal(root.get("addedBy").get("email"), email));
             }
