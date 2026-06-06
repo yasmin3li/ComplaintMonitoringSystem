@@ -22,6 +22,7 @@ public class StatisticsService {
     private final InstitutionRepo institutionRepo;
     private final EmployeeRepo employeeRepo;
     private final AuthorizationService authorizationService;
+    private final ComplaintTracingLogRepo complaintTracingLogRepo;
 
     public long getTotalComplaints() {
         return complaintRepo.countByDeletedFalse();
@@ -101,7 +102,13 @@ public class StatisticsService {
         if(authorizationService.isTechnic()){
 
 //            TODO: correct logic
-            return new ApiResponseDto<>(false,"Not supported Yet",null);
+//            return new ApiResponseDto<>(false,"Not supported Yet",null);
+            return new TechnicDashBoardStatisticsDto(
+                    complaintRepo.countAssignedComplaints(employee.getId()),
+                    complaintRepo.countInProgressComplaints(employee.getId()),
+                    getDelayedComplaints(employee).size(),
+                    complaintTracingLogRepo.countResolvedComplaints(employee.getId())
+            );
 
         }
         else if (authorizationService.isManager()) {
