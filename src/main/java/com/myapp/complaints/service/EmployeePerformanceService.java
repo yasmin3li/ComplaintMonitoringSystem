@@ -131,6 +131,7 @@ public class EmployeePerformanceService {
     public EmployeePerformanceDto getEmployeePerformance(long accountId, LocalDateTime start, LocalDateTime end) {
 
         Optional<Employee> employee = employeeRepo.findById(accountId);
+
         if(employee.isEmpty())
         {
             throw new ApiException("employee not found", HttpStatus.NOT_FOUND);
@@ -205,7 +206,8 @@ public class EmployeePerformanceService {
 //        }
 
         // score: combine completionEfficiency (0..1 → 50 pts) and achievementRate (0..100% → 50 pts) into a 0–100 score
-        double score = achievementRate * 50.0 + (responseRate / 100.0) * 50.0; // 50/50 weighting
+        double score = achievementRate * 2 + (responseRate / 100.0) * 5; // 50/50 weighting
+        score = Math.round(score * 100.0) / 100.0; // round to 2 decimals
 
         List<EmployeeBadgeDto> badges = List.of(
                 BadgeFactory.buildPerformanceBadge(score),
@@ -216,7 +218,7 @@ public class EmployeePerformanceService {
                 accountId,
                 incomingComplaintsCount,
                 completedComplaintsCount,
-                achievementRate,
+                Math.round(responseRate * 100.0) / 100.0,
                 score,
 //                completionEfficiency,
                 badges
