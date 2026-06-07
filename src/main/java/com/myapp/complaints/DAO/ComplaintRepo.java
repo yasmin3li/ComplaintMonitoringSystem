@@ -1,8 +1,8 @@
 package com.myapp.complaints.DAO;
 
-import com.myapp.complaints.dto.DelayedComplaintDto;
 import com.myapp.complaints.dto.DelayedComplaintsProjection;
 import com.myapp.complaints.entity.Complaint;
+import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -131,6 +131,11 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
 """)
     List<DelayedComplaintsProjection> delayedComplaints(
             @Param("accountId") Long accountId);
+
+    List<Complaint> findByPriorityAndStateAndGovernorateIdAndInstitutionId(
+            ComplaintPriority complaintPriority, ComplaintState state,
+            Long governorateId, Long institutionId
+            );
 
 
 //Complaints Dynamic Query Filter

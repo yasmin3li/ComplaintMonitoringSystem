@@ -11,6 +11,7 @@ import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.enums.ActionType;
+import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.ComplaintMapper;
@@ -24,7 +25,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -520,4 +520,25 @@ public class ManagerComplaintWorkFlow {
         );
     }
 
+    public List<ManagerComplaintResponseDto> getUrgentComplaints() {
+
+        Employee manager =
+                employeeRepo.findByAccount_Email(
+                        SecurityContextHolder
+                                .getContext()
+                                .getAuthentication()
+                                .getName()
+                );
+
+        return
+                complaintRepo.findByPriorityAndStateAndGovernorateIdAndInstitutionId(
+                        ComplaintPriority.CRITICAL,
+                        ComplaintState.FORWARDED_TO_MANAGER,
+                        manager.getGovernorate().getId(),
+                        manager.getInstitution().getId()
+                        )
+                        .stream()
+                        .map(complaintMapper::toManagerComplaintDto)
+                        .toList();
+    }
 }

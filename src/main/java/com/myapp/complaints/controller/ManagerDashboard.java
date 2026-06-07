@@ -132,5 +132,9 @@ public Object getEmployeePerformance(
         ));
     }
 
+    @GetMapping("/urgentComplaints")
+    public ResponseEntity<?> getUrgentComplaints(){
+        return ResponseEntity.ok(managerComplaintWorkFlow.getUrgentComplaints());
+    }
 
 }
