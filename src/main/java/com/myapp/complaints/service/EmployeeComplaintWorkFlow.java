@@ -174,11 +174,12 @@ public class EmployeeComplaintWorkFlow {
                 .findByIdAndDeletedFalse(dto.complaintId())
                 .orElseThrow(() -> new ApiException("Complaint not found", HttpStatus.NOT_FOUND));
 
-        if (complaint.getAssignedTo() == null) {
-            throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
-        }
-
         if(!authorizationService.isManager()){
+
+            if (complaint.getAssignedTo() == null) {
+                throw new ApiException("Not assigned yet", HttpStatus.BAD_REQUEST);
+            }
+
             if(!authorizationService.checkResponsibility(employee,complaint)){
                 throw new ApiException("Access denied, you aren't the responsible of this complaint",HttpStatus.FORBIDDEN);
             }
