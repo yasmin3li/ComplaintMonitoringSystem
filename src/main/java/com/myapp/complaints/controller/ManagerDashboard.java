@@ -109,8 +109,8 @@ public Object getEmployeePerformance(
             employeePerformanceDtoList.addAll(
                     List.of(
                             new EmployeePerformanceForManager(
-                                    delayedComplaintDtoList,
-                                    performanceDto
+                                    performanceDto,
+                                    delayedComplaintDtoList
                             )
                     )
             );
