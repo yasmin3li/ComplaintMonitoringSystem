@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,21 +65,21 @@ public class SnapshotPerformanceService {
                 .source(SnapshotSource.SCHEDULED)
                 .build();
 
+        List<EmployeeSnapshotBadge> list = new ArrayList<>();
+        if(performanceBadge!=null ){
+            list.add(Objects.requireNonNull(buildBadgeEntity(performanceBadge, snap)));
+        }
+
+        if(responseBadge!=null ){
+            list.add(Objects.requireNonNull(buildBadgeEntity(responseBadge, snap)));
+        }
+
         if(snap.getBadges()==null){
-            snap.setBadges(List.of(
-                    Objects.requireNonNull(buildBadgeEntity(performanceBadge, snap)),
-                    Objects.requireNonNull(buildBadgeEntity(responseBadge, snap))
-            ));
+
+            snap.setBadges(list);
         }
         else {
-            snap.getBadges().addAll(
-                    Stream.of(
-                                    Objects.requireNonNull(buildBadgeEntity(performanceBadge, snap)),
-                                    Objects.requireNonNull(buildBadgeEntity(responseBadge, snap))
-                            )
-                            .filter(b -> b != null)
-                            .toList()
-            );
+            snap.getBadges().addAll(list);
         }
 
         Optional<EmployeePerformanceSnapshot> existing =
