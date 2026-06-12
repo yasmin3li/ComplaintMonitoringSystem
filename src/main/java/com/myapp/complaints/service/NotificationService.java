@@ -146,11 +146,7 @@ public class NotificationService {
 
         Account currentAccount =
                 accountRepo.findByEmailAndDeletedFalse(auth.getName())
-                        .orElseThrow(() ->
-                                new ApiException(
-                                        "account not found",
-                                        HttpStatus.NOT_FOUND
-                                ));
+                        .orElseThrow(() -> new ApiException("account not found", HttpStatus.NOT_FOUND));
 
         if(authorizationService.isTechnic() && dto.accountId()==null){
             account = complaintTracingLogRepo.findAssignedByForComplaint(dto.complaintId(), currentAccount.getId());
@@ -169,7 +165,7 @@ public class NotificationService {
 
         Notification notification = new Notification();
 
-        notification.setTitle(dto.title());
+        notification.setTitle("اشعار مخصص");
         notification.setMessage(dto.message());
 
         // optional
