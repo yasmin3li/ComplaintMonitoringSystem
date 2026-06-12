@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -64,16 +66,16 @@ public class SnapshotPerformanceService {
 
         if(snap.getBadges()==null){
             snap.setBadges(List.of(
-                    buildBadgeEntity(performanceBadge, snap),
-                    buildBadgeEntity(responseBadge, snap)
+                    Objects.requireNonNull(buildBadgeEntity(performanceBadge, snap)),
+                    Objects.requireNonNull(buildBadgeEntity(responseBadge, snap))
             ));
         }
         else {
             snap.getBadges().addAll(
-                    List.of(
-                                    buildBadgeEntity(performanceBadge, snap),
-                                    buildBadgeEntity(responseBadge, snap)
-                            ).stream()
+                    Stream.of(
+                                    Objects.requireNonNull(buildBadgeEntity(performanceBadge, snap)),
+                                    Objects.requireNonNull(buildBadgeEntity(responseBadge, snap))
+                            )
                             .filter(b -> b != null)
                             .toList()
             );
