@@ -28,15 +28,17 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
 
     @Query("SELECT Min( l.actionDate) FROM ComplaintTrackingLog l WHERE l.assignedTo.account.id = :accountId")
     LocalDateTime findFirstHandledByEmp(Long accountId);
-
-    @Query("SELECT COUNT( l.complaint.id) " +
-            "FROM ComplaintTrackingLog l " +
-            "WHERE l.assignedTo.account.id = :accountId " +
-            "AND l.actionDate BETWEEN :start AND :end")
-    long countComplaintAssignedToAccountBetween(
-            @Param("accountId") Long accountId,
-            @Param("start") LocalDateTime start,
-            @Param("end") LocalDateTime end);
+//
+//    @Query("SELECT COUNT( l.complaint.id) " +
+//            "FROM ComplaintTrackingLog l " +
+//            "WHERE l.assignedTo.account.id = :accountId " +
+//            "AND l.newState = :state " +
+//            "AND l.actionDate BETWEEN :start AND :end")
+//    long countComplaintAssignedToAccountBetweenWithState(
+//            @Param("accountId") Long accountId,
+//            @Param("state") ComplaintState state,
+//            @Param("start") LocalDateTime start,
+//            @Param("end") LocalDateTime end);
 
     @Query("""
     SELECT COUNT(DISTINCT l.complaint.id)
