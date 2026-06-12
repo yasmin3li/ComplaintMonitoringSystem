@@ -4,12 +4,15 @@ import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.NotificationDto;
 import com.myapp.complaints.dto.NotificationStatisticsDto;
+import com.myapp.complaints.dto.SendManualNotificationDto;
 import com.myapp.complaints.entity.*;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.NotificationMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,7 +30,8 @@ public class NotificationService {
     private final ComplaintRepo complaintRepo;
     private final NotificationTemplateRepo notificationTemplateRepo;
     private final NotificationRepo notificationRepo;
-
+    private final AuthorizationService authorizationService;
+    private final ComplaintTracingLogRepo complaintTracingLogRepo;
 
 
     @Transactional
@@ -129,4 +133,57 @@ public class NotificationService {
                 notificationReceiverRepo.countByAccount_EmailAndIsReadFalse(email)
         );
     }
+
+    @Transactional
+    public ApiResponseDto<Object> sendManualNotification(
+            SendManualNotificationDto dto
+    ) {
+
+        Account account;
+
+        Authentication auth =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        Account currentAccount =
+                accountRepo.findByEmailAndDeletedFalse(auth.getName())
+                        .orElseThrow(() ->
+                                new ApiException(
+                                        "account not found",
+                                        HttpStatus.NOT_FOUND
+                                ));
+
+        if(authorizationService.isTechnic() && dto.accountId()==null){
+            account = complaintTracingLogRepo.findAssignedByForComplaint(dto.complaintId(), currentAccount.getId());
+        }
+        else{
+            account =
+                    accountRepo.findById(dto.accountId()).orElseThrow(() -> new ApiException("account not found", HttpStatus.NOT_FOUND));
+        }
+
+        Complaint complaint = null;
+
+        if (dto.complaintId() != null) {
+
+            complaint = complaintRepo.findById(dto.complaintId()).orElseThrow(() -> new ApiException("complaint not found", HttpStatus.NOT_FOUND));
+        }
+
+        Notification notification = new Notification();
+
+        notification.setTitle(dto.title());
+        notification.setMessage(dto.message());
+
+        // optional
+        notification.setComplaint(complaint);
+
+        notificationRepo.save(notification);
+
+        sendNotification(notification, account);
+
+        return new ApiResponseDto<>(
+                true,
+                "تم ارسال الاشعار بنجاح",
+                null
+        );
+    }
+
 }

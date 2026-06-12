@@ -373,4 +373,15 @@ public class ApiController {
         }
     }
 
+    @PostMapping("/sendNotification/manual")
+    public ResponseEntity<ApiResponseDto<Object>>
+    sendManualNotification(
+            @RequestBody SendManualNotificationDto dto
+    ) {
+
+        return ResponseEntity.ok(
+                notificationService.sendManualNotification(dto)
+        );
+    }
+
 }

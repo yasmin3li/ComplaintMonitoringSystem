@@ -50,4 +50,6 @@ public interface AccountRepo extends JpaRepository<Account,Long> {
     );
 
     Account findByNationalNumberAndDeletedTrue(@NotEmpty(message = "nationalNumber  must not be empty") String s);
+
+    Account findByRole_Id(long l);
 }

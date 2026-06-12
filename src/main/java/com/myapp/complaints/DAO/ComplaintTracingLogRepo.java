@@ -1,6 +1,7 @@
 package com.myapp.complaints.DAO;
 
 import com.myapp.complaints.dto.ComplaintResponseProjection;
+import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.ComplaintTrackingLog;
 import com.myapp.complaints.enums.ComplaintState;
 import org.springframework.data.jpa.repository.Query;
@@ -151,4 +152,18 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
     long countResolvedComplaints(
             @Param("accountId") Long accountId
     );
+
+    @Query("""
+    SELECT l.actionBy
+    FROM ComplaintTrackingLog l
+    WHERE l.complaint.id = :complaintId
+    AND l.assignedTo.account.id = :accountId
+    AND l.actionType = com.myapp.complaints.enums.ActionType.ASSIGNED
+    ORDER BY l.actionDate DESC
+""")
+    Account findAssignedByForComplaint(
+            @Param("complaintId") Long complaintId,
+            @Param("accountId") Long accountId
+    );
+
 }
