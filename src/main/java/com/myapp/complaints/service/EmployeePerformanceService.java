@@ -140,8 +140,11 @@ public class EmployeePerformanceService {
         long incomingComplaintsCount;
         long completedComplaintsCount;
         double avgDays;
+        long assignedComplaints;
 
         if(employee.get().getAccount().getRole().getId() == 2L){
+
+            assignedComplaints = complaintRepo.countAssignedComplaints(accountId);
 
             //all coming complaints to the institution at specified period
             incomingComplaintsCount = complaintRepo.countCreatedComplaintsBetween(
@@ -157,8 +160,10 @@ public class EmployeePerformanceService {
         }
         else if (employee.get().getAccount().getRole().getId() == 4L || employee.get().getAccount().getRole().getId() == 3L){
 
+             assignedComplaints = complaintRepo.countAssignedComplaints(accountId);
+
             //all coming complaints to the institution at specified period
-            long assignedComplaints = complaintTracingLogRepo.countComplaintAssignedToAccountBetween(
+             incomingComplaintsCount = complaintTracingLogRepo.countDistinctComplaintAssignedToAccountBetween(
                     accountId,
                     start,
                     end
@@ -167,10 +172,22 @@ public class EmployeePerformanceService {
             completedComplaintsCount =
                     complaintTracingLogRepo.countResolvedComplaintsBetween(accountId, start, end);
 
-            incomingComplaintsCount = assignedComplaints;
         }
         else {
             throw new ApiException("not supported statistic yet",HttpStatus.NOT_FOUND);
+        }
+
+        if (incomingComplaintsCount <= 0) {
+            return new EmployeePerformanceDto(
+                    accountId,
+                    incomingComplaintsCount,
+                    assignedComplaints,
+                    completedComplaintsCount,
+                    0,
+                    0,
+                    Collections.emptyList()
+            );
+
         }
 
         avgDays =
@@ -182,9 +199,17 @@ public class EmployeePerformanceService {
 
         double achievementRate,responseRate;
 
-        if (incomingComplaintsCount <= 0) {
-            achievementRate = 0.0;
-            responseRate = 4.0;
+         if(avgDays == -1.0) {
+            return new EmployeePerformanceDto(
+                    accountId,
+                    incomingComplaintsCount,
+                    assignedComplaints,
+                    completedComplaintsCount,
+                    0,
+                    0,
+                    Collections.emptyList()
+            );
+
         }
         else {
             achievementRate = (double) completedComplaintsCount / incomingComplaintsCount * 100.0;
@@ -206,8 +231,9 @@ public class EmployeePerformanceService {
 //        }
 
         // score: combine completionEfficiency (0..1 → 50 pts) and achievementRate (0..100% → 50 pts) into a 0–100 score
-        double score = achievementRate * 2 + (responseRate / 100.0) * 5; // 50/50 weighting
-        score = Math.round(score * 100.0) / 100.0; // round to 2 decimals
+//        double score = achievementRate * 2 + (responseRate / 100.0) * 5; // 50/50 weighting
+
+        double score = getScore(responseRate, achievementRate);
 
         List<EmployeeBadgeDto> badges = List.of(
                 BadgeFactory.buildPerformanceBadge(score),
@@ -217,6 +243,7 @@ public class EmployeePerformanceService {
         return new EmployeePerformanceDto(
                 accountId,
                 incomingComplaintsCount,
+                assignedComplaints,
                 completedComplaintsCount,
                 Math.round(responseRate * 100.0) / 100.0,
                 score,
@@ -224,13 +251,35 @@ public class EmployeePerformanceService {
                 badges
         );    }
 
+    private static double getScore(
+            double responseRate,
+            double achievementRate
+    ) {
+
+        // تحويل response days → score
+        double responseScore =
+                Math.max(
+                        20,
+                        100 - (responseRate * 20)
+                );
+
+        // وزن الإنجاز والاستجابة
+        double score =
+                (achievementRate * 0.7)
+                        +
+                        (responseScore * 0.3);
+
+        return Math.round(score * 100.0) / 100.0;
+    }
     public double getTechnicalAvgResponseTime(Long accountId, LocalDateTime start, LocalDateTime end) {
 
         List<Long> complaintIds =
                 complaintTracingLogRepo.findDistinctComplaintIdsAssignedToAccountBetween(accountId, start, end);
 
+        int startedCount = 0;
+
         if (complaintIds == null || complaintIds.isEmpty()) {
-            return 4.0;
+            return -1.0;
         }
 
         double totalDays = 0.0;
@@ -239,22 +288,28 @@ public class EmployeePerformanceService {
             LocalDateTime assignedAt = complaintTracingLogRepo.findAssignedAt(complaintId, accountId);
             LocalDateTime startedAt = complaintTracingLogRepo.findStartedAt(complaintId, accountId);
 
-//            if (assignedAt == null || startedAt == null) continue;
-            if (assignedAt == null ) continue;
+            if (assignedAt == null || startedAt == null) continue;
 
-            if(startedAt == null){
-                startedAt = LocalDateTime.now().plusDays(30);
-            }
             long millis = Duration.between(assignedAt, startedAt).toMillis();
 
             totalDays += millis / (1000.0 * 60 * 60 * 24);
+            startedCount++;
+
         }
 
-        double average = totalDays / complaintIds.size();
+        if (startedCount == 0) {
+            return -1.0;
+        }
 
-        return Math.round(average * 100.0) / 100.0;
+        double average =
+                totalDays / startedCount;
+
+        return Math.round(
+                average * 100.0
+        ) / 100.0;
 
     }
+
     private double getReceptionistAvgResponseTime(Long accountId, LocalDateTime start, LocalDateTime end) {
 
         List<ComplaintResponseProjection> responses =
@@ -266,7 +321,7 @@ public class EmployeePerformanceService {
                 );
 
         if (responses.isEmpty()) {
-            return 4.0; // default average response time in days when no data is available
+            return 4; // default average response time in days when no data is available
         }
 
         double totalDays = 0;
