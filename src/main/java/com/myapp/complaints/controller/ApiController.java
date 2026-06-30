@@ -45,6 +45,7 @@ public class ApiController {
     private final EmployeePerformanceService employeePerformanceService;
     private final EmployeeComplaintWorkFlow employeeComplaintWorkFlow;
     private final EmployeeRepo employeeRepo;
+    private final RatingService ratingService;
 
     @PostMapping("/complaint")
     public ResponseEntity<?> createComplaint(
@@ -382,6 +383,16 @@ public class ApiController {
         return ResponseEntity.ok(
                 notificationService.sendManualNotification(dto)
         );
+    }
+
+    @PostMapping("/complaint/{complaintId}/rating/{starNumber}")
+    public ResponseEntity<ApiResponseDto<?>> rating(@PathVariable Integer starNumber,@PathVariable Long complaintId){
+        return ResponseEntity.ok(ratingService.rating(complaintId,starNumber));
+    }
+
+    @GetMapping("/complaint/{complaintId}/rate")
+    public ResponseEntity<RatingDto> getRate(@PathVariable Long complaintId){
+        return ResponseEntity.ok(ratingService.getRate(complaintId));
     }
 
 }
