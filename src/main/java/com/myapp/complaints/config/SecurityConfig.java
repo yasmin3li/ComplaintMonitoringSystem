@@ -144,8 +144,11 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                         .requestMatchers(HttpMethod.GET,"/api/verificationCodes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/institutions/complaints/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/institutions/**","/api/statistics/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
+                                .requestMatchers(HttpMethod.GET,"api/complaint/{complaintId}/rate/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,"api/homepage/complaint/{complaintId}/votes/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/complaints/**").authenticated() // must be logged in to add complaint
                         .requestMatchers(HttpMethod.GET,"api/complaints/**").authenticated()
+
 
 //                        TODO: later make others see profile for each other
                         .requestMatchers(HttpMethod.GET,"/api/citizen/**","/api/employee/profile/**").authenticated()
