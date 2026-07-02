@@ -461,11 +461,6 @@ public class ManagerComplaintWorkFlow {
                                 )
                         );
 
-        validator.validate(
-                complaint.getState(),
-                ComplaintState.ASSIGNED
-        );
-
         if (!authorizationService
                 .checkAccessibility(manager, complaint))
         {
