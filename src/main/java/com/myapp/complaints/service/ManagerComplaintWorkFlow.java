@@ -25,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -300,11 +301,11 @@ public class ManagerComplaintWorkFlow {
             ConfigFilterDto dto
     ) {
 
-        LocalDateTime end,start;
+        LocalDate end,start;
 
         if (dto.start() == null || dto.end() == null) {
 
-            end = LocalDateTime.now();
+            end = LocalDate.now();
             start = end.minusMonths(1);
 
         }else {
@@ -344,8 +345,8 @@ public class ManagerComplaintWorkFlow {
             long resolved =
                     logRepo.countResolvedComplaintsBetween(
                             employee.getAccount().getId(),
-                            start,
-                            end
+                            start.atStartOfDay(),
+                            end.atStartOfDay()
                     );
 
             List<DelayedComplaintDto> delayedComplaintDtoList = statisticsService.getDelayedComplaints(employee);
@@ -358,8 +359,8 @@ public class ManagerComplaintWorkFlow {
 
             long inComingComplaints =
                     tracingLogRepo.countIncomingComplaintsBetween(
-                            start,
-                            end,
+                            start.atStartOfDay(),
+                            end.atStartOfDay(),
                             employee.getGovernorate().getId(),
                             employee.getInstitution().getId()
                     );

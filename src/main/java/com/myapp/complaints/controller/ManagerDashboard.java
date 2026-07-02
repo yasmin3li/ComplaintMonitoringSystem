@@ -70,11 +70,11 @@ public Object getEmployeePerformance(
         @RequestParam(required = false) Long accountId,
         ConfigFilterDto dto) {
 
-    LocalDateTime end,start;
+    LocalDate end,start;
 
     if (dto.start() == null || dto.end() == null) {
 
-        end = LocalDateTime.now();
+        end = LocalDate.now();
         start = end.minusMonths(1);
 
     }else {
@@ -100,8 +100,8 @@ public Object getEmployeePerformance(
             EmployeePerformanceDto performanceDto =
                     employeePerformanceService.getEmployeePerformance(
                             employee.getAccount().getId(),
-                            start,
-                            end
+                            start.atStartOfDay(),
+                            end.atStartOfDay()
                     );
 
             List<DelayedComplaintDto> delayedComplaintDtoList =statisticsService.getDelayedComplaints(employee);
@@ -119,7 +119,7 @@ public Object getEmployeePerformance(
         return ResponseEntity.ok(employeePerformanceDtoList);
     }
     else {
-        return ResponseEntity.ok(employeePerformanceService.getEmployeePerformance(accountId,start,end));
+        return ResponseEntity.ok(employeePerformanceService.getEmployeePerformance(accountId,start.atStartOfDay(),end.atStartOfDay()));
     }
 
 }
