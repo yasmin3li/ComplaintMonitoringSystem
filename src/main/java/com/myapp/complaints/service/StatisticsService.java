@@ -118,7 +118,12 @@ public class StatisticsService {
                     getCountComplaintsByState(employee,ComplaintState.FORWARDED_TO_MANAGER),
                     getCountComplaintsByState(employee,ComplaintState.ASSIGNED),
                     getCountComplaintsByState(employee,ComplaintState.IN_PROGRESS),
-                    getCountComplaintsByState(employee,ComplaintState.RESOLVED)
+                    getCountComplaintsByState(employee,ComplaintState.RESOLVED),
+                    employeeRepo.findByInstitution_IdAndGovernorate_IdAndAccount_Role_Id(
+                            employee.getInstitution().getId(),
+                            employee.getGovernorate().getId(),
+                            4
+                    ).size()
             );
 
         }
@@ -162,6 +167,8 @@ public class StatisticsService {
 
                     return new DelayedComplaintDto(
                             employee.getId(),
+                            employee.getAccount().getEmail(),
+                            employee.getAccount().getUserName(),
                             dc.getComplaintId(),
                             dc.getTitle(),
                             dc.getPriority(),

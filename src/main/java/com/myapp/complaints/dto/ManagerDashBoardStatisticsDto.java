@@ -5,6 +5,7 @@ public record ManagerDashBoardStatisticsDto(
         long NotAssignedComplaints,
         long AssignedComplaints,
         long InProgressComplaints,
-        long Solved
+        long Solved,
+        long employeesCount
 ) {
 }
