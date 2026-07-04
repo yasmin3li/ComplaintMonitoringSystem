@@ -107,7 +107,11 @@ public class StatisticsService {
                     complaintRepo.countAssignedComplaints(employee.getId()),
                     complaintRepo.countInProgressComplaints(employee.getId()),
                     getDelayedComplaints(employee).size(),
-                    complaintTracingLogRepo.countResolvedComplaints(employee.getId())
+                    complaintTracingLogRepo.countResolvedComplaints(employee.getId()),
+                    complaintRepo.countAssignedComplaints(employee.getId())+
+                            complaintRepo.countInProgressComplaints(employee.getId())+
+                            getDelayedComplaints(employee).size()+
+                            complaintTracingLogRepo.countResolvedComplaints(employee.getId())
             );
 
         }

@@ -4,6 +4,7 @@ public record TechnicDashBoardStatisticsDto(
         long AssignedComplaints,
         long InProgressComplaints,
         long Delay,
-        long Solved
+        long Solved,
+        long complaintsCount
 ) {
 }
