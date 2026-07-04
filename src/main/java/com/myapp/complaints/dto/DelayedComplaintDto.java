@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 public record DelayedComplaintDto(
 
         Long employeeId,
+        String email,
+        String name,
         Long complaintId,
         String title,
         ComplaintPriority priority,

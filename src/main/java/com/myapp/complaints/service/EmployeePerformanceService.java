@@ -180,6 +180,8 @@ public class EmployeePerformanceService {
         if (incomingComplaintsCount <= 0) {
             return new EmployeePerformanceDto(
                     accountId,
+                    employee.get().getAccount().getEmail(),
+                    employee.get().getAccount().getUserName(),
                     incomingComplaintsCount,
                     assignedComplaints,
                     completedComplaintsCount,
@@ -202,6 +204,8 @@ public class EmployeePerformanceService {
          if(avgDays == -1.0) {
             return new EmployeePerformanceDto(
                     accountId,
+                    employee.get().getAccount().getEmail(),
+                    employee.get().getAccount().getUserName(),
                     incomingComplaintsCount,
                     assignedComplaints,
                     completedComplaintsCount,
@@ -242,6 +246,8 @@ public class EmployeePerformanceService {
 
         return new EmployeePerformanceDto(
                 accountId,
+                employee.get().getAccount().getEmail(),
+                employee.get().getAccount().getUserName(),
                 incomingComplaintsCount,
                 assignedComplaints,
                 completedComplaintsCount,

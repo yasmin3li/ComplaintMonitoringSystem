@@ -7,6 +7,8 @@ import java.util.List;
 public record EmployeePerformanceDto(
 
         long employeeAccountId,
+        String email,
+        String name,
 
         @JsonIgnore
         long comingCount,
