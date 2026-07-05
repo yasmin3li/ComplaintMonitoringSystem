@@ -16,6 +16,7 @@ public record EmployeePerformanceDto(
         long handledCount,
         double responseRate,
         double score,
+        Long inProgress,
 //        double normalizedHandled,
         List<EmployeeBadgeDto> badges
 

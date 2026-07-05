@@ -141,6 +141,7 @@ public class EmployeePerformanceService {
         long completedComplaintsCount;
         double avgDays;
         long assignedComplaints;
+        long inProgress;
 
         if(employee.get().getAccount().getRole().getId() == 2L){
 
@@ -157,6 +158,15 @@ public class EmployeePerformanceService {
             completedComplaintsCount =
                     complaintTracingLogRepo.countHandledComplaintsBetween(accountId, start, end);//rejected+forwarded
 
+            inProgress = complaintRepo.countComplaintsByStateForEmployee(
+                    ComplaintState.IN_REVIEW,
+                    employee.get().getAccount().getId(),
+                    employee.get().getGovernorate().getId(),
+                    employee.get().getInstitution().getId(),
+                    employee.get().getSector().getId()
+            );
+
+
         }
         else if (employee.get().getAccount().getRole().getId() == 4L || employee.get().getAccount().getRole().getId() == 3L){
 
@@ -171,6 +181,10 @@ public class EmployeePerformanceService {
 
             completedComplaintsCount =
                     complaintTracingLogRepo.countResolvedComplaintsBetween(accountId, start, end);
+
+            inProgress = complaintRepo.countInProgressComplaints(
+                    employee.get().getAccount().getId()
+            );
 
         }
         else {
@@ -187,6 +201,7 @@ public class EmployeePerformanceService {
                     completedComplaintsCount,
                     0,
                     0,
+                    inProgress,
                     Collections.emptyList()
             );
 
@@ -211,6 +226,7 @@ public class EmployeePerformanceService {
                     completedComplaintsCount,
                     0,
                     0,
+                    inProgress,
                     Collections.emptyList()
             );
 
@@ -253,6 +269,7 @@ public class EmployeePerformanceService {
                 completedComplaintsCount,
                 Math.round(responseRate * 100.0) / 100.0,
                 score,
+                inProgress,
 //                completionEfficiency,
                 badges
         );    }
