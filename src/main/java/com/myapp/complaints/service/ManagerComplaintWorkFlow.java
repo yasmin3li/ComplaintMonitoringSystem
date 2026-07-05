@@ -127,6 +127,15 @@ public class ManagerComplaintWorkFlow {
                         );
                     }
 
+                    // Keyword search
+                    if (filter.keyword() != null && !filter.keyword().isEmpty()) {
+                        String pattern = "%" + filter.keyword().toLowerCase() + "%";
+                        predicates.add(cb.or(
+                                cb.like(cb.lower(root.get("title")), pattern),
+                                cb.like(cb.lower(root.get("description")), pattern)
+                        ));
+                    }
+
                     query.orderBy(
                             cb.desc(
                                     root.get(

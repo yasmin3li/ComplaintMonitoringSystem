@@ -84,6 +84,15 @@ public class TechnicComplaintWorkFlow {
                 predicates.add(cb.equal(root.get("assignedTo"), employee));
             }
 
+            // Keyword search
+            if (filter.keyword() != null && !filter.keyword().isEmpty()) {
+                String pattern = "%" + filter.keyword().toLowerCase() + "%";
+                predicates.add(cb.or(
+                        cb.like(cb.lower(root.get("title")), pattern),
+                        cb.like(cb.lower(root.get("description")), pattern)
+                ));
+            }
+
             query.orderBy(cb.desc(root.get("dateTimeOfAdd")));
             return cb.and(predicates.toArray(new Predicate[0]));
         };
