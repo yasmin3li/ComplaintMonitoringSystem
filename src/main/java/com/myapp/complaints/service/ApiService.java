@@ -1,11 +1,9 @@
 package com.myapp.complaints.service;
 
-import com.myapp.complaints.BadgeFactory;
 import com.myapp.complaints.CommonUtils;
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.*;
-import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintState;
 import com.myapp.complaints.exceptionHandller.ApiException;
 import com.myapp.complaints.mapper.AccountInfoMapper;
@@ -21,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -361,5 +360,25 @@ public class ApiService {
         }
         else return statisticsService.getDelayedComplaints(currentEmployee);
 
+    }
+
+    public Long getForwarder(Long complaintId) {
+
+        Optional<Complaint> complaint = complaintRepo.findByIdAndDeletedFalse(complaintId);
+//        if(complaint.isPresent()){
+//            if(!complaint.get().getState().equals(ComplaintState.FORWARDED_TO_MANAGER)){
+//                throw  new ApiException("access denied",HttpStatus.FORBIDDEN);
+//            }
+//        }
+//        else {
+//            throw  new ApiException("complaint not found",HttpStatus.NOT_FOUND);
+//        }
+
+        Optional<ComplaintTrackingLog> receptionistId = complaintTracingLogRepo.
+                findTopByComplaint_IdAndNewStateOrderByActionDateDesc(complaintId,ComplaintState.FORWARDED_TO_MANAGER);
+        if(receptionistId.isPresent()){
+            return receptionistId.get().getActionBy().getId();
+        }
+        else throw new ApiException("employee not found",HttpStatus.NOT_FOUND);
     }
 }

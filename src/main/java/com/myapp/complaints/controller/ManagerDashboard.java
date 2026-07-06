@@ -137,4 +137,13 @@ public Object getEmployeePerformance(
         return ResponseEntity.ok(managerComplaintWorkFlow.getUrgentComplaints());
     }
 
+    @GetMapping("/receptionist/forwarder/complaint/{complaintId}")
+    public ResponseEntity<?> getForwarderOfAComplaint(@PathVariable Long complaintId){
+        return ResponseEntity.ok(new ApiResponseDto<>(
+                true,
+                "Receptionist's id: ",
+                apiService.getForwarder(complaintId)
+        ));
+    }
+
 }
