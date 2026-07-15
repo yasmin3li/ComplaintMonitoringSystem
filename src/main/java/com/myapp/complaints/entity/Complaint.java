@@ -49,6 +49,8 @@ public class Complaint {
     @JoinColumn(name = "assigned_to")
     private Employee assignedTo;
 
+    private LocalDateTime assignedAt;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "service_id", nullable = false)
     private ServiceAvailable service;

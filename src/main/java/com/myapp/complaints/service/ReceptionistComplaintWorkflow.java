@@ -181,6 +181,7 @@ public class ReceptionistComplaintWorkflow {
                         );
                     }
 
+                    complaint.setAssignedAt(LocalDateTime.now());
                     workflowEngine.changeState(complaint, ComplaintState.IN_REVIEW, employee.getAccount(), employee, null, ActionType.IN_REVIEW);
 
 

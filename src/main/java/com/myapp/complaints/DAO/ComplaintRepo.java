@@ -112,7 +112,7 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
             c.id as complaintId,
             c.title as title,
             c.priority as priority,
-            MAX(l.actionDate) as lastUpdate,
+            c.assignedAt as assignedAt,
             c.state as state
         FROM Complaint c
         JOIN c.logs l

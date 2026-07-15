@@ -9,6 +9,6 @@ public interface DelayedComplaintsProjection {
         Long getComplaintId();
         String getTitle();
         ComplaintPriority getPriority();
-        LocalDateTime getLastUpdate();
+        LocalDateTime getAssignedAt();
         ComplaintState getState();
 }

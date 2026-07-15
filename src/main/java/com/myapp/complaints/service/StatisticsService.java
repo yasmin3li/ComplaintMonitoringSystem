@@ -149,9 +149,11 @@ public class StatisticsService {
 
                     int slaDays = dc.getPriority().getSlaDays();
 
-                    LocalDateTime deadline =
-                            dc.getLastUpdate().plusDays(slaDays);
+                    LocalDateTime assignmentDate = dc.getAssignedAt();
 
+                    LocalDateTime deadline = assignmentDate.plusDays(slaDays);
+
+//                    boolean delayed = LocalDateTime.now().isAfter(deadline);
                     return LocalDateTime.now().isAfter(deadline);
                 })
                 .map(dc -> {
@@ -159,7 +161,7 @@ public class StatisticsService {
                     int slaDays = dc.getPriority().getSlaDays();
 
                     LocalDateTime deadline =
-                            dc.getLastUpdate().plusDays(slaDays);
+                            dc.getAssignedAt().plusDays(slaDays);
 
                     double delayedDays =
                             Math.max(0,
@@ -176,7 +178,7 @@ public class StatisticsService {
                             dc.getComplaintId(),
                             dc.getTitle(),
                             dc.getPriority(),
-                            dc.getLastUpdate(),
+                            dc.getAssignedAt(),
                             dc.getState(),
                             delayedDays
                     );

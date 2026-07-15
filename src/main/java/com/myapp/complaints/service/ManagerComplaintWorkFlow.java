@@ -254,6 +254,8 @@ public class ManagerComplaintWorkFlow {
             );
         }
 
+        complaint.setAssignedAt(LocalDateTime.now());
+
         workflowEngine.changeState(
                 complaint,
                 ComplaintState.ASSIGNED,
@@ -289,6 +291,8 @@ public class ManagerComplaintWorkFlow {
                     HttpStatus.FORBIDDEN
             );
         }
+
+        complaint.setAssignedAt(LocalDateTime.now());
 
         workflowEngine.changeState(
                 complaint,
@@ -508,6 +512,8 @@ public class ManagerComplaintWorkFlow {
         }
 
         complaint.setAssignedTo(assignedEmployee);
+        complaint.setAssignedAt(LocalDateTime.now());
+
         complaint.setDateTimeOfUpdate(LocalDateTime.now());
         complaintRepo.save(complaint);
 
