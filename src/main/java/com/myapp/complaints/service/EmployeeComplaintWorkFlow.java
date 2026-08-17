@@ -6,6 +6,7 @@ import com.myapp.complaints.complaintStateHandler.ComplaintStateValidator;
 import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import com.myapp.complaints.dto.ApiResponseDto;
 import com.myapp.complaints.dto.ComplaintRejectDto;
+import com.myapp.complaints.dto.ComplaintSolveDto;
 import com.myapp.complaints.dto.UpdateComplaintDto;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.ComplaintImage;
@@ -123,7 +124,7 @@ public class EmployeeComplaintWorkFlow {
     }
 
     @Transactional
-    public ApiResponseDto<?> solveComplaint(ComplaintRejectDto dto){
+    public ApiResponseDto<?> solveComplaint(ComplaintSolveDto dto){
 
         Employee employee = employeeRepo.findByAccount_Email(
                 SecurityContextHolder.getContext().getAuthentication().getName()
@@ -155,7 +156,27 @@ public class EmployeeComplaintWorkFlow {
                 ActionType.FINISHED
         );
 
-         notificationService.notifyUsers(complaint,dto.reason(), List.of(complaint.getAddedBy()));
+        if (dto.images() != null) {
+
+            for (String img : dto.images()) {
+
+                ComplaintImage complaintImage = new ComplaintImage();
+                complaintImage.setImageUrl(img);
+                complaintImage.setType(ImageType.AFTER_SOLVE);
+                complaintImage.setComplaint(complaint);
+                complaintImage.setAddedBy(employee.getAccount());
+
+                complaint.getImages().add(complaintImage);
+            }
+        }
+
+        complaintRepo.save(complaint);
+        complaint.setDateTimeOfUpdate(LocalDateTime.now());
+
+        workflowEngine.createActionLog(complaint,employee.getAccount(), ActionType.UPLOAD_IMAGE);
+
+
+        notificationService.notifyUsers(complaint,dto.reason(), List.of(complaint.getAddedBy()));
 
         return new ApiResponseDto<>(
                 true,

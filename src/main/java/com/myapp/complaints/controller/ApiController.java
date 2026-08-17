@@ -343,7 +343,7 @@ public class ApiController {
     }
 
     @PostMapping("/complaint/finishSolve")
-    public ResponseEntity<?> finishSolveComplaint(@RequestBody ComplaintRejectDto dto){
+    public ResponseEntity<?> finishSolveComplaint(@RequestBody ComplaintSolveDto dto){
         return ResponseEntity.ok(employeeComplaintWorkFlow.solveComplaint(dto));
     }
 
