@@ -22,6 +22,11 @@ public class Employee {
     private Account account;
 
     @ManyToOne(optional = false)
+    @JoinColumn(name ="created_by")
+    private Account createdBy;
+
+
+    @ManyToOne(optional = false)
     @JoinColumn(name ="institution_id")
     private Institution institution;
 

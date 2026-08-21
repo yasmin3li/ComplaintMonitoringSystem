@@ -21,10 +21,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AccountInfoMapper {
 
-    private final PasswordEncoder passwordEncoder;
     private final RoleRepo roleRepo;
-    private final AccountRepo accountRepo;
-    private final CitizenRepo citizenRepo;
 
     public Account fromCitizenDto(CitizenRegistrationDto dto) {
         Account account = new Account();
@@ -71,6 +68,11 @@ public class AccountInfoMapper {
 //            account.setEmail(dto.email());
 //            account.setEmailTemporary(false);
 //        }
+
+        account.setDeleted(false);
+        account.setEmailTemporary(false);
+        account.setEmailVerified(true);
+        account.setPhoneNumberVerified(true);
 
         return account;
     }

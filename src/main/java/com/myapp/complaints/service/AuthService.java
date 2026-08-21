@@ -20,6 +20,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -283,7 +285,7 @@ public class AuthService {
                 account.setPassword(passwordEncoder.encode(password));
         }
 
-        account.setStatus(AccountStatus.SUSPENDED);
+        account.setStatus(AccountStatus.ACTIVATED);
         account = accountRepo.save(account);
 
         Employee employee = new Employee();
@@ -300,6 +302,12 @@ public class AuthService {
         Governorate gov = governorateRepo.findById(dto.governorateId())
                 .orElseThrow(() -> new ApiException("Governorate with id "+dto.governorateId()+" not found",HttpStatus.NOT_FOUND));
         employee.setGovernorate(gov);
+
+        Optional<Account> addedBy = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
+        if(addedBy.isEmpty()){
+            throw new ApiException("no account",HttpStatus.NOT_FOUND);
+        }
+        employee.setCreatedBy(addedBy.get());
 
         employeeRepo.save(employee);
 
