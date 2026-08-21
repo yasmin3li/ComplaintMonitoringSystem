@@ -97,7 +97,7 @@ public class ApiController {
             return ResponseEntity.ok(apiService.getCitizenInfo());
         }
 
-    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+//    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
     @GetMapping("/employee/profile")
     public ResponseEntity<?> employeeProfile(
     ){
