@@ -262,7 +262,7 @@ public class ApiController {
         return ResponseEntity.ok(notificationService.displayNotifications(email));
     }
 
-    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
+//    @PreAuthorize("hasAnyRole('RECEPTIONIST', 'MANAGER')")
     @GetMapping("/employee/notifications/{notificationId}")
     public ResponseEntity<?> openEmployeeNotification(Authentication auth, @PathVariable Long notificationId){
         String email = auth.getName();
