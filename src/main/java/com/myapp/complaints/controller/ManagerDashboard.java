@@ -6,8 +6,11 @@ import com.myapp.complaints.DAO.EmployeeRepo;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Account;
 import com.myapp.complaints.entity.Employee;
+import com.myapp.complaints.enums.AccountStatus;
+import com.myapp.complaints.enums.VotingType;
 import com.myapp.complaints.service.*;
 import lombok.RequiredArgsConstructor;
+import org.apache.ibatis.javassist.NotFoundException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +37,7 @@ public class ManagerDashboard {
     private final EmployeePerformanceService employeePerformanceService;
     private final StatisticsService statisticsService;
     private final EmployeeRepo employeeRepo;
+    private final AccountService accountService;
 
     @GetMapping("/institution/employees")
     public ResponseEntity<?> getEmployees(){
@@ -144,6 +148,24 @@ public Object getEmployeePerformance(
                 "Receptionist's id: ",
                 apiService.getForwarder(complaintId)
         ));
+    }
+
+    @PreAuthorize("hasRole('MANAGER')")
+    @PostMapping("/accounts/{accountId}/enable")
+    public ResponseEntity<?> accountEnable(@PathVariable Long accountId){
+        return ResponseEntity.ok(accountService.enable(accountId));
+    }
+
+    @PreAuthorize("hasRole('MANAGER')")
+    @PostMapping("/accounts/{accountId}/disable")
+    public ResponseEntity<?> accountDisable(@PathVariable Long accountId) {
+        return ResponseEntity.ok(accountService.disable(accountId));
+    }
+
+    @PreAuthorize("hasRole('MANAGER')")
+    @GetMapping("/accounts/{accountId}/status")
+    public ResponseEntity<?> accountStatus(@PathVariable Long accountId) {
+        return ResponseEntity.ok(accountService.accountStatus(accountId));
     }
 
 }
