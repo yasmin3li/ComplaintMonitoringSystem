@@ -44,7 +44,7 @@ public class AccountService {
         if(employeeAccount.isEmpty()){
             throw new ApiException("no account", HttpStatus.NOT_FOUND);
         }
-        employeeAccount.get().setStatus(AccountStatus.BANNED);
+        employeeAccount.get().setStatus(AccountStatus.DEACTIVATED);
         return new ApiResponseDto<>(
                 true,
                 "account for employee "+employeeAccount.get().getUserName()+" disabled successfully",
