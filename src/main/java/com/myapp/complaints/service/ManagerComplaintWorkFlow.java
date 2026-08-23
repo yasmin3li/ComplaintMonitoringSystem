@@ -10,6 +10,7 @@ import com.myapp.complaints.complaintStateHandler.ComplaintWorkflowEngine;
 import com.myapp.complaints.dto.*;
 import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.Employee;
+import com.myapp.complaints.enums.AccountStatus;
 import com.myapp.complaints.enums.ActionType;
 import com.myapp.complaints.enums.ComplaintPriority;
 import com.myapp.complaints.enums.ComplaintState;
@@ -345,6 +346,9 @@ public class ManagerComplaintWorkFlow {
 
         for (Employee employee : employees) {
 
+            if(employee.getAccount().getStatus().equals(AccountStatus.DEACTIVATED)) {
+                continue;
+            }
             long assignedTasks =
                     complaintRepo.countAssignedComplaints(
                             employee.getAccount().getId()
