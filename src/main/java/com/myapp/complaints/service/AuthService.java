@@ -305,7 +305,7 @@ public class AuthService {
 
         Optional<Account> addedBy = accountRepo.findByEmailAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
         if(addedBy.isEmpty()){
-            throw new ApiException("no account",HttpStatus.NOT_FOUND);
+            throw new ApiException("access token is required",HttpStatus.NOT_FOUND);
         }
         employee.setCreatedBy(addedBy.get());
 
