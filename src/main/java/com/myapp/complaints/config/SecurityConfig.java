@@ -67,7 +67,7 @@ public class SecurityConfig {
 //                .addFilterBefore(frontendFilter, JwtAccessTokenFilter.class)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .securityMatcher("/auth/sign-in/**",
-                        "/auth/sign-up/**",
+                        "/auth/sign-up/citizen/**",
                         "/auth/verify/**",
                         "/auth/forgot-password/**",
                         "/auth/reset-password/**",
@@ -109,6 +109,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .securityMatcher("/api/**")
+                .securityMatcher("/auth/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
 
@@ -118,6 +119,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
                         .requestMatchers(HttpMethod.GET, "/api/homepage/dashboard/statistics/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/homepage/complaint/*/votes").permitAll() //+vote
                         .requestMatchers(HttpMethod.GET, "/api/homepage/complaint/*/disLike").authenticated()
+                                .requestMatchers(HttpMethod.POST, "/auth/sign-up/employee/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/homepage/complaint/*/Like").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/homepage/complaints/**").permitAll() //+vote
 
