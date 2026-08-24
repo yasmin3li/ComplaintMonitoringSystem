@@ -108,8 +108,7 @@ public SecurityFilterChain refreshTokenChain(HttpSecurity http,
 
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .securityMatcher("/api/**")
-                .securityMatcher("/auth/**")
+                .securityMatcher("/api/**", "/auth/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
 
