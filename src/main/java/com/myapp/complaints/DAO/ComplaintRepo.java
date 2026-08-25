@@ -97,6 +97,20 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
     );
 
     @Query("""
+    SELECT COUNT(DISTINCT l.complaint.id)
+    FROM ComplaintTrackingLog l
+    WHERE l.assignedTo.account.id = :accountId
+      AND l.actionType = com.myapp.complaints.enums.ActionType.ASSIGNED
+      AND l.actionDate >= :start
+      AND l.actionDate < :end
+""")
+    long countAssignedComplaintsBetween(
+            @Param("accountId") Long accountId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+    @Query("""
     SELECT COUNT(c)
     FROM Complaint c
     WHERE c.deleted = false
