@@ -360,10 +360,8 @@ public class ManagerComplaintWorkFlow {
                     );
 
             long resolved =
-                    logRepo.countResolvedComplaintsBetween(
-                            employee.getAccount().getId(),
-                            start.atStartOfDay(),
-                            end.atStartOfDay()
+                    logRepo.countResolvedComplaints(
+                            employee.getAccount().getId()
                     );
 
             List<DelayedComplaintDto> delayedComplaintDtoList = statisticsService.getDelayedComplaints(employee);
