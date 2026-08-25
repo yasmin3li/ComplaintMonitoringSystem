@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -165,5 +166,34 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
             @Param("complaintId") Long complaintId,
             @Param("accountId") Long accountId
     );
+
+    @Query("""
+    SELECT COUNT(DISTINCT l.complaint.id)
+    FROM ComplaintTrackingLog l
+    WHERE l.assignedTo.account.id = :accountId
+      AND l.actionType = com.myapp.complaints.enums.ActionType.ASSIGNED
+      AND l.actionDate >= :start
+      AND l.actionDate < :end
+""")
+    long countAssignedComplaintsBetween(
+            @Param("accountId") Long accountId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end
+    );
+
+//    @Query("""
+//    SELECT COUNT(DISTINCT l.complaint.id)
+//    FROM ComplaintTrackingLog l
+//    WHERE l.assignedTo.account.id = :accountId
+//      AND l.actionType = com.myapp.complaints.enums.ActionType.ASSIGNED
+//      AND l.actionDate >= :start
+//      AND l.actionDate < :end
+//""")
+//    long countInProgressComplaintsBetween(
+//            @Param("accountId") Long accountId,
+//            @Param("start") LocalDateTime start,
+//            @Param("end") LocalDateTime end
+//    );
+
 
 }

@@ -180,7 +180,10 @@ public class EmployeePerformanceService {
             );
 
             completedComplaintsCount =
-                    complaintTracingLogRepo.countResolvedComplaintsBetween(accountId, start, end);
+                    complaintTracingLogRepo.countResolvedComplaintsBetween(
+                            accountId,
+                            start.toLocalDate().atStartOfDay(),
+                            end.toLocalDate().plusDays(1).atStartOfDay());
 
             inProgress = complaintRepo.countInProgressComplaints(
                     employee.get().getAccount().getId()

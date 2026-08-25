@@ -350,8 +350,10 @@ public class ManagerComplaintWorkFlow {
                 continue;
             }
             long assignedTasks =
-                    complaintRepo.countAssignedComplaints(
-                            employee.getAccount().getId()
+                    logRepo.countAssignedComplaintsBetween(
+                            employee.getAccount().getId(),
+                            start.atStartOfDay(),
+                            end.plusDays(1).atStartOfDay()
                     );
 
             long inProgressTasks =
@@ -360,8 +362,10 @@ public class ManagerComplaintWorkFlow {
                     );
 
             long resolved =
-                    logRepo.countResolvedComplaints(
-                            employee.getAccount().getId()
+                    logRepo.countResolvedComplaintsBetween(
+                            employee.getAccount().getId(),
+                            start.atStartOfDay(),
+                            end.plusDays(1).atStartOfDay()
                     );
 
             List<DelayedComplaintDto> delayedComplaintDtoList = statisticsService.getDelayedComplaints(employee);
@@ -375,7 +379,7 @@ public class ManagerComplaintWorkFlow {
             long inComingComplaints =
                     tracingLogRepo.countIncomingComplaintsBetween(
                             start.atStartOfDay(),
-                            end.atStartOfDay(),
+                            end.plusDays(1).atStartOfDay(),
                             employee.getGovernorate().getId(),
                             employee.getInstitution().getId()
                     );
