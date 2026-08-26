@@ -174,10 +174,8 @@ public class EmployeePerformanceService {
         }
         else if (employee.get().getAccount().getRole().getId() == 4L || employee.get().getAccount().getRole().getId() == 3L){
 
-             assignedComplaints = complaintRepo.countAssignedComplaintsBetween(
-                    accountId,
-                    start,
-                    end
+             assignedComplaints = complaintRepo.countAssignedComplaints(
+                    accountId
             );
 
             //all coming complaints to the institution at specified period

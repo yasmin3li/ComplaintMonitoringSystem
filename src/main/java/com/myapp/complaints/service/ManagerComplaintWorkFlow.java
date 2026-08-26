@@ -350,10 +350,8 @@ public class ManagerComplaintWorkFlow {
                 continue;
             }
             long assignedTasks =
-                    logRepo.countAssignedComplaintsBetween(
-                            employee.getAccount().getId(),
-                            start.atStartOfDay(),
-                            end.plusDays(1).atStartOfDay()
+                    complaintRepo.countAssignedComplaints(
+                            employee.getAccount().getId()
                     );
 
             long inProgressTasks =
