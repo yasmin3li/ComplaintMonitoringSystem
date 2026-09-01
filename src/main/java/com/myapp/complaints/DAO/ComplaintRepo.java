@@ -189,4 +189,5 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
             @Param("governorateId") Long governorateId
     );
 
+    long countByStateAndGovernorate_IdAndInstitution_IdAndSector_IdAndDeletedFalse(ComplaintState state, Long id, Long id1, Long id2);
 }

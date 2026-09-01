@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -226,7 +225,7 @@ public class StatisticsService {
     }
 
     private long getCountComplaintsByState(Employee employee, ComplaintState state) {
-        return complaintRepo.countByStateAndGovernorate_IdAndInstitution_IdAndSector_Id(
+        return complaintRepo.countByStateAndGovernorate_IdAndInstitution_IdAndSector_IdAndDeletedFalse(
                 state,
                 employee.getGovernorate().getId(),
                 employee.getInstitution().getId(),
