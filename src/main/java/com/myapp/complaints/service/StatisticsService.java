@@ -120,7 +120,7 @@ public class StatisticsService {
         else if (authorizationService.isManager()) {
 
             return new ManagerDashBoardStatisticsDto(
-                    getDelayedComplaints(employee).size(),
+                    countDelayedComplaintsForInstitution(employee),
                     getCountComplaintsByState(employee,ComplaintState.FORWARDED_TO_MANAGER),
                     getCountComplaintsByState(employee,ComplaintState.ASSIGNED),
                     getCountComplaintsByState(employee,ComplaintState.IN_PROGRESS),
@@ -204,6 +204,26 @@ public class StatisticsService {
                 .toList();
     }
 
+    public long countDelayedComplaintsForInstitution(Employee manager) {
+
+        List<Complaint> complaints =
+                complaintRepo.findActiveComplaintsForInstitution(
+                        manager.getInstitution().getId(),
+                        manager.getGovernorate().getId()
+                );
+
+        LocalDateTime now = LocalDateTime.now();
+
+        return complaints.stream()
+                .filter(c -> {
+                    LocalDateTime deadline =
+                            c.getAssignedAt()
+                                    .plusDays(c.getPriority().getSlaDays());
+
+                    return now.isAfter(deadline);
+                })
+                .count();
+    }
 
     private long getCountComplaintsByState(Employee employee, ComplaintState state) {
         return complaintRepo.countByStateAndGovernorate_IdAndInstitution_IdAndSector_Id(

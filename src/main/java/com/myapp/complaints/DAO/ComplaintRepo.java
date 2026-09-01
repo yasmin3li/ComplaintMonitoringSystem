@@ -172,4 +172,21 @@ public interface ComplaintRepo extends JpaRepository<Complaint,Long> , JpaSpecif
 //            Pageable pageable
 //    );
 
+    @Query("""
+    SELECT c
+    FROM Complaint c
+    WHERE c.deleted = false
+      AND c.institution.id = :institutionId
+      AND c.governorate.id = :governorateId
+      AND c.state IN (
+          com.myapp.complaints.enums.ComplaintState.ASSIGNED,
+          com.myapp.complaints.enums.ComplaintState.IN_PROGRESS
+      )
+      AND c.assignedAt IS NOT NULL
+""")
+    List<Complaint> findActiveComplaintsForInstitution(
+            @Param("institutionId") Long institutionId,
+            @Param("governorateId") Long governorateId
+    );
+
 }
