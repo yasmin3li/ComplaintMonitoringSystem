@@ -15,6 +15,7 @@ public record DelayedComplaintDto(
         ComplaintPriority priority,
         LocalDateTime lastUpdate,
         ComplaintState state,
-        Double daysNumber
+        Double daysNumber,
+        LocationDto location
 
 ) {}

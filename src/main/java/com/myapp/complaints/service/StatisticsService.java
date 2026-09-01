@@ -2,6 +2,7 @@ package com.myapp.complaints.service;
 
 import com.myapp.complaints.DAO.*;
 import com.myapp.complaints.dto.*;
+import com.myapp.complaints.entity.Complaint;
 import com.myapp.complaints.entity.Employee;
 import com.myapp.complaints.enums.ComplaintState;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -171,6 +173,8 @@ public class StatisticsService {
                                     ) / 100.0
                             );
 
+                    Optional<Complaint> complaint = complaintRepo.findByIdAndDeletedFalse(dc.getComplaintId());
+
                     return new DelayedComplaintDto(
                             employee.getId(),
                             employee.getAccount().getEmail(),
@@ -180,7 +184,21 @@ public class StatisticsService {
                             dc.getPriority(),
                             dc.getAssignedAt(),
                             dc.getState(),
-                            delayedDays
+                            delayedDays,
+                            new LocationDto(
+                                    complaint.get().getGovernorate().getId(),
+                                    complaint.get().getGovernorate().getName(),
+
+                                    complaint.get().getSector().getId(),
+                                    complaint.get().getSector().getName(),
+
+                                    new AddressDto(
+                                            complaint.get().getAddress().getId(),
+                                            complaint.get().getAddress().getFullAddressText(),
+                                            complaint.get().getAddress().getLongitude(),
+                                            complaint.get().getAddress().getLatitude()
+                                    )
+                            )
                     );
                 })
                 .toList();
