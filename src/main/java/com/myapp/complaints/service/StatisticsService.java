@@ -253,8 +253,12 @@ public class StatisticsService {
     }
 
     private long getForwardedComplaints(Employee employee) {
-        return complaintTracingLogRepo.countComplaintsByStateForEmployee(
-                employee.getAccount().getId()
+        return complaintRepo.countComplaintsByStateForEmployee(
+                ComplaintState.FORWARDED_TO_MANAGER,
+                employee.getAccount().getId(),
+                employee.getGovernorate().getId(),
+                employee.getInstitution().getId(),
+                employee.getSector().getId()
         );
     }
 
