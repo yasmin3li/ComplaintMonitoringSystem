@@ -195,5 +195,13 @@ public interface ComplaintTracingLogRepo extends JpaRepository<ComplaintTracking
 //            @Param("end") LocalDateTime end
 //    );
 
-
+    @Query("""
+            SELECT COUNT(c)
+            FROM ComplaintTrackingLog c
+            WHERE c.newState = com.myapp.complaints.enums.ComplaintState.FORWARDED_TO_MANAGER
+                AND c.actionBy.id = :employeeId
+            """)
+    long countComplaintsByStateForEmployee(
+            @Param("employeeId") Long employeeId
+    );
 }
